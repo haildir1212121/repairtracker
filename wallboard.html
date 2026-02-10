@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fleet Command</title>
+    <style>
+        :root {
+            /* HIGH CONTRAST DARK MODE */
+            --bg-body: #000000;       
+            --bg-column: #111111;       
+            --bg-card: #222222;
+            --text-main: #ffffff;
+            --text-muted: #a0a0a0;
+            --border: #333333;
+            
+            /* NEON PALETTE */
+            --accent: #2563eb; 
+            
+            /* Status Colors (High Visibility) */
+            --c-intake: #d946ef; /* Neon Fuchsia (Reported) */
+            --c-shop: #3b82f6;   /* Electric Blue (Working) */
+            --c-parts: #ff3d00;  /* Safety Orange (Blocked) */
+            --c-done: #00e676;   /* Neon Green (Ready) */
+            
+            --shadow: 0 4px 15px rgba(0,0,0,0.5);
+            --modal-bg: rgba(0, 0, 0, 0.9);
+        }
+
+        body.light-mode {
+            /* HIGH CONTRAST LIGHT MODE */
+            --bg-body: #f0f2f5;       
+            --bg-column: #ffffff;       
+            --bg-card: #ffffff;
+            --text-main: #000000;     
+            --text-muted: #555555;
+            --border: #cccccc;
+            --shadow: 0 2px 8px rgba(0,0,0,0.1);
+            --modal-bg: rgba(255, 255, 255, 0.9);
+            
+            /* Darker accents for white background readability */
+            --c-intake: #9333ea; 
+            --c-shop: #0056b3;   
+            --c-parts: #d32f2f;  
+            --c-done: #00701a;   
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* HEADER */
+        header {
+            background-color: var(--bg-column);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        h1 { 
+            font-size: 1.8rem; 
+            font-weight: 900; 
+            letter-spacing: 1px; 
+            text-transform: uppercase;
+            background: linear-gradient(90deg, #fff, #aaa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .controls button {
+            padding: 0.6rem 1.2rem; border: none; border-radius: 4px; cursor: pointer; font-weight: 700; font-size: 0.9rem; margin-left: 0.5rem; text-transform: uppercase;
+        }
+        .btn-primary { background-color: var(--c-shop); color: white; }
+        .btn-outline { background: #333; border: 1px solid #555; color: white; }
+        .btn-outline:hover { background: #444; }
+
+        /* KPI BAR */
+        .kpi-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            padding: 1.5rem 2rem;
+            flex-shrink: 0;
+        }
+
+        .kpi-card {
+            background: var(--bg-column);
+            padding: 1rem;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border);
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Colored Top Borders for KPIs */
+        .kpi-intake { border-top: 5px solid var(--c-intake); }
+        .kpi-parts { border-top: 5px solid var(--c-parts); }
+        .kpi-done { border-top: 5px solid var(--c-done); }
+        .kpi-ready { border-top: 5px solid #00bcd4; }
+
+        .kpi-value { font-size: 2.5rem; font-weight: 900; line-height: 1; margin-bottom: 0.2rem; }
+        .kpi-label { font-size: 0.85rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; letter-spacing: 0.5px; }
+
+        /* KANBAN BOARD */
+        .kanban-board {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            padding: 0 2rem 2rem 2rem;
+            overflow-x: auto;
+            overflow-y: hidden;
+        }
+
+        .kanban-column {
+            background-color: var(--bg-column);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            border: 1px solid var(--border);
+        }
+
+        .column-header {
+            padding: 1.2rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            font-size: 1rem;
+            border-bottom: 2px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            letter-spacing: 1px;
+        }
+
+        .column-count { 
+            background: #333; color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.9rem; font-weight: bold;
+        }
+
+        .column-content {
+            padding: 1rem;
+            overflow-y: auto;
+            flex: 1;
+            background: rgba(0,0,0,0.1);
+        }
+
+        /* VEHICLE CARD */
+        .vehicle-card {
+            background-color: var(--bg-card);
+            border-radius: 6px;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            border-left: 6px solid transparent; /* Thicker border */
+            transition: transform 0.1s;
+        }
+        .vehicle-card:hover { transform: scale(1.02); background-color: #2a2a2a; }
+
+        /* High Contrast Borders */
+        .border-intake { border-left-color: var(--c-intake); }
+        .border-shop { border-left-color: var(--c-shop); }
+        .border-parts { border-left-color: var(--c-parts); }
+        .border-done { border-left-color: var(--c-done); }
+
+        .card-header { display: flex; justify-content: space-between; margin-bottom: 0.5rem; align-items: center; }
+        .card-id { font-weight: 500; font-size: 1.6rem; color: var(--text-main); letter-spacing: 0.1rem; }
+        .card-date { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; }
+        
+        .card-issue { 
+            font-size: 1rem; margin-bottom: 1rem; color: #ddd; font-weight: 500;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+        }
+        
+        .card-pill {
+            display: inline-block; padding: 0.3rem 0.8rem; border-radius: 4px; 
+            font-size: 0.75rem; font-weight: 800; text-transform: uppercase;
+            color: #000; /* Black text on colored pills for max contrast */
+        }
+        
+        /* Pill specific colors */
+        .pill-intake { background: var(--c-intake); color: white; }
+        .pill-shop { background: var(--c-shop); color: white;}
+        .pill-parts { background: var(--c-parts); color: black;}
+        .pill-done { background: var(--c-done); color: black; }
+
+        /* MODAL */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--modal-bg); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(5px); }
+        .modal-content { background: var(--bg-column); padding: 2rem; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 0 30px rgba(0,0,0,0.8); border: 1px solid var(--border); }
+        .form-group { margin-bottom: 1.2rem; }
+        label { display: block; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.5rem; text-transform: uppercase; font-weight: bold; }
+        input, select { width: 100%; padding: 1rem; background-color: #000; border: 1px solid #444; color: white; border-radius: 4px; font-size: 1.1rem; font-weight: 500;}
+        input:focus, select:focus { border-color: var(--c-shop); outline: none; }
+        
+        .modal-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem; }
+        .btn-danger { background-color: var(--c-parts); color: black; font-weight: bold; }
+
+        /* Wallboard Mode Hides */
+        body.wallboard-mode .controls { display: none; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>DLX/DMT Maintenence Tracker</h1>
+        <div class="controls">
+            <button class="btn-primary" onclick="openModal('add')">+ Add Unit</button>
+            <button class="btn-outline" onclick="toggleTheme()">Contrast</button>
+            <button class="btn-outline" onclick="toggleWallboardMode()">Wallboard</button>
+        </div>
+    </header>
+
+    <div class="kpi-container">
+        <div class="kpi-card kpi-intake">
+            <span class="kpi-value" id="kpi-total" style="color: var(--c-intake)">0</span>
+            <span class="kpi-label">Reported</span>
+        </div>
+
+
+
+        <div class="kpi-card kpi-ready">
+            <span class="kpi-value" id="kpi-ready" style="color: #00bcd4">0</span>
+            <span class="kpi-label">To Deliver</span>
+        </div>
+        <div class="kpi-card kpi-parts">
+            <span class="kpi-value" id="kpi-parts" style="color: var(--c-parts)">0</span>
+            <span class="kpi-label">Parts Hold</span>
+        </div>
+
+        <div class="kpi-card kpi-done">
+            <span class="kpi-value" id="kpi-complete" style="color: var(--c-done)">0</span>
+            <span class="kpi-label">Complete</span>
+        </div>
+    </div>
+
+    <div class="kanban-board">
+        
+        <div class="kanban-column" style="border-top: 4px solid var(--c-intake)">
+            <div class="column-header">
+                <span style="color: var(--c-intake)">Intake / Pickup</span>
+                <span class="column-count" id="count-col-1">0</span>
+            </div>
+            <div class="column-content" id="col-intake"></div>
+        </div>
+
+        <div class="kanban-column" style="border-top: 4px solid var(--c-shop)">
+            <div class="column-header">
+                <span style="color: var(--c-shop)">In Progress</span>
+                <span class="column-count" id="count-col-2">0</span>
+            </div>
+            <div class="column-content" id="col-shop"></div>
+        </div>
+
+        <div class="kanban-column" style="border-top: 4px solid var(--c-parts)">
+            <div class="column-header">
+                <span style="color: var(--c-parts)">Parts Hold</span>
+                <span class="column-count" id="count-col-3">0</span>
+            </div>
+            <div class="column-content" id="col-parts"></div>
+        </div>
+
+        <div class="kanban-column" style="border-top: 4px solid var(--c-done)">
+            <div class="column-header">
+                <span style="color: var(--c-done)">Complete</span>
+                <span class="column-count" id="count-col-4">0</span>
+            </div>
+            <div class="column-content" id="col-done"></div>
+        </div>
+
+    </div>
+
+    <div id="entryModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 style="margin-bottom:1.5rem; text-transform:uppercase;" id="modalTitle">Edit Vehicle</h2>
+            <form id="vehicleForm" onsubmit="saveVehicle(event)">
+                <input type="hidden" id="mode" value="add"> 
+                <input type="hidden" id="targetRowIndex" value="">
+                
+                <div class="form-group">
+                    <label>Vehicle ID</label>
+                    <input type="text" id="vID" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Condition</label>
+                    <select id="vStatus">
+                        <option value="Operational">Operational</option>
+                        <option value="Warning">Warning</option>
+                        <option value="Down">Down</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Issue</label>
+                    <input type="text" id="vIssue" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Date In</label>
+                    <input type="date" id="vDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Shop Status</label>
+                    <select id="vShopStatus">
+                        <option value="Reported">Reported</option>
+                        <option value="Awaiting Pickup">Awaiting Pickup</option>
+                        <option value="Received">Received</option>
+                        <option value="Assessment">Assessment</option>
+                        <option value="Awaiting part order">Awaiting part order</option>
+                        <option value="Complete">Complete</option>
+                        <option value="Ready for Delivery">Ready for Delivery</option>
+                    </select>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" id="deleteBtn" class="btn-danger" style="display:none;" onclick="deleteCurrent()">DELETE</button>
+                    <button type="button" class="btn-outline" onclick="closeModal()">CANCEL</button>
+                    <button type="submit" class="btn-primary" id="saveBtn">SAVE CHANGES</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // --- PASTE YOUR URL HERE ---
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwmawn-Sep9TJbsRWsiNg2Hj3TwiqPy8HSIwZ58aB7gkwVPiGaDiylXf7AOYmhoH-atuA/exec";
+        // ---------------------------
+
+        let fleetData = [];
+
+        async function fetchSheetData() {
+            if(SCRIPT_URL.includes("PASTE_YOUR")) {
+                document.querySelector('.kanban-board').innerHTML = `<h2 style="color:red; padding:2rem;">⚠️ Paste your Apps Script URL in the code</h2>`;
+                return;
+            }
+            try {
+                const response = await fetch(SCRIPT_URL);
+                const data = await response.json();
+
+                if (Array.isArray(data) && data.length > 0 && Array.isArray(data[0])) {
+                    alert("⚠️ SCRIPT VERSION MISMATCH ⚠️\nPlease Deploy 'New Version' in Apps Script.");
+                    return;
+                }
+                
+                fleetData = data;
+                renderBoard();
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        function renderBoard() {
+            const cols = {
+                intake: document.getElementById('col-intake'),
+                shop: document.getElementById('col-shop'),
+                parts: document.getElementById('col-parts'),
+                done: document.getElementById('col-done')
+            };
+            
+            Object.values(cols).forEach(col => col.innerHTML = '');
+            let counts = { intake: 0, shop: 0, parts: 0, done: 0, ready: 0 };
+
+            [...fleetData].reverse().forEach(v => {
+                let status = v.shopStatus || "";
+                let targetCol = cols.intake; 
+                let borderClass = "border-intake";
+                let pillClass = "pill-intake";
+
+                if (status === "Awaiting part order") {
+                    targetCol = cols.parts;
+                    borderClass = "border-parts";
+                    pillClass = "pill-parts";
+                    counts.parts++;
+                } 
+                else if (status === "Received" || status === "Assessment") {
+                    targetCol = cols.shop;
+                    borderClass = "border-shop";
+                    pillClass = "pill-shop";
+                    counts.shop++;
+                }
+                else if (status === "Complete" || status === "Ready for Delivery") {
+                    targetCol = cols.done;
+                    borderClass = "border-done";
+                    pillClass = "pill-done";
+                    counts.done++;
+                    if(status === "Ready for Delivery") counts.ready++;
+                }
+                else {
+                    counts.intake++;
+                }
+
+                const card = document.createElement('div');
+                card.className = `vehicle-card ${borderClass}`;
+                card.onclick = () => openModal('edit', v.rowIndex);
+                card.innerHTML = `
+                    <div class="card-header">
+                        <span class="card-id">${v.id}</span>
+                        <span class="card-date">${v.date}</span>
+                    </div>
+                    <div class="card-issue">${v.issue}</div>
+                    <span class="card-pill ${pillClass}">${status}</span>
+                    <div style="font-size:0.7rem; color:var(--text-muted); margin-top:0.8rem; text-align:right; font-weight:bold;">
+                        ${v.lastUpdated || ''}
+                    </div>
+                `;
+                targetCol.appendChild(card);
+            });
+
+            document.getElementById('count-col-1').innerText = counts.intake;
+            document.getElementById('count-col-2').innerText = counts.shop;
+            document.getElementById('count-col-3').innerText = counts.parts;
+            document.getElementById('count-col-4').innerText = counts.done;
+
+            document.getElementById('kpi-total').innerText = fleetData.length;
+            document.getElementById('kpi-parts').innerText = counts.parts;
+            document.getElementById('kpi-complete').innerText = counts.done; 
+            document.getElementById('kpi-ready').innerText = counts.ready;
+        }
+
+        // --- FORM LOGIC ---
+        function openModal(mode, rowIndex = null) {
+            document.getElementById('entryModal').style.display = 'flex';
+            document.getElementById('mode').value = mode;
+            const delBtn = document.getElementById('deleteBtn');
+
+            if (mode === 'add') {
+                document.getElementById('modalTitle').innerText = "ADD NEW UNIT";
+                document.getElementById('vehicleForm').reset();
+                document.getElementById('vID').readOnly = false;
+                document.getElementById('vDate').valueAsDate = new Date();
+                delBtn.style.display = 'none';
+            } else {
+                document.getElementById('modalTitle').innerText = "EDIT UNIT";
+                delBtn.style.display = 'block';
+                const vehicle = fleetData.find(v => v.rowIndex === rowIndex);
+                if (vehicle) {
+                    document.getElementById('targetRowIndex').value = vehicle.rowIndex;
+                    document.getElementById('vID').value = vehicle.id;
+                    document.getElementById('vStatus').value = vehicle.status;
+                    document.getElementById('vIssue').value = vehicle.issue;
+                    document.getElementById('vDate').value = vehicle.date; 
+                    document.getElementById('vShopStatus').value = vehicle.shopStatus;
+                }
+            }
+        }
+
+        function closeModal() { document.getElementById('entryModal').style.display = 'none'; }
+
+        function saveVehicle(e) {
+            e.preventDefault();
+            const btn = document.getElementById('saveBtn');
+            const mode = document.getElementById('mode').value;
+            const action = mode === 'edit' ? 'update' : 'add';
+
+            const payload = {
+                action: action,
+                rowIndex: document.getElementById('targetRowIndex').value,
+                id: document.getElementById('vID').value,
+                status: document.getElementById('vStatus').value,
+                issue: document.getElementById('vIssue').value,
+                date: document.getElementById('vDate').value,
+                shopStatus: document.getElementById('vShopStatus').value
+            };
+
+            btn.innerText = "SAVING...";
+            btn.disabled = true;
+
+            fetch(SCRIPT_URL, {
+                method: "POST", mode: "no-cors", body: JSON.stringify(payload)
+            }).then(() => {
+                closeModal();
+                btn.innerText = "SAVE CHANGES";
+                btn.disabled = false;
+                setTimeout(fetchSheetData, 1000);
+            });
+        }
+
+        function deleteCurrent() {
+            if (confirm("Delete this vehicle?")) {
+                const rowIndex = document.getElementById('targetRowIndex').value;
+                const btn = document.getElementById('deleteBtn');
+                btn.innerText = "DELETING...";
+                fetch(SCRIPT_URL, {
+                    method: "POST", mode: "no-cors", body: JSON.stringify({ action: "delete", rowIndex: rowIndex })
+                }).then(() => {
+                    closeModal();
+                    btn.innerText = "DELETE";
+                    setTimeout(fetchSheetData, 1000);
+                });
+            }
+        }
+
+        function toggleTheme() { document.body.classList.toggle('light-mode'); }
+        function toggleWallboardMode() { document.body.classList.toggle('wallboard-mode'); }
+
+        fetchSheetData();
+        setInterval(fetchSheetData, 30000); 
+    </script>
+</body>
+</html>
