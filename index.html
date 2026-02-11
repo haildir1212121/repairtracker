@@ -167,6 +167,8 @@
         .parts-val { font-family: 'JetBrains Mono', monospace; color: var(--text-main); font-weight: 700; font-size: 0.75rem; } .parts-val.eta { color: var(--c-parts); }
         .days-badge { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; font-weight: 700; padding: 1px 5px; border-radius: 3px; background: rgba(255,255,255,0.05); color: var(--text-muted); }
         .days-badge.warn { background: rgba(251,146,60,0.15); color: var(--c-parts); } .days-badge.crit { background: rgba(248,113,113,0.15); color: #f87171; }
+        .card-notes { margin-top: 0.6rem; padding: 0.5rem; background: rgba(255,255,255,0.04); border-radius: 4px; font-size: 0.75rem; color: #a1a1aa; font-style: italic; border-left: 2px solid var(--text-muted); }
+        body.light-mode .card-notes { background: rgba(0,0,0,0.04); color: #555; }
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--modal-bg); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(12px); animation: fadeIn 0.2s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -278,7 +280,7 @@
             <div class="column-header">
                 <div class="col-header-left">
                     <div class="col-dot" style="background:var(--c-ready)"></div>
-                    <span style="color:var(--c-ready)">Ready for delivery</span>
+                    <span style="color:var(--c-ready)">Ready for Pick Up</span>
                 </div>
                 <div class="column-actions">
                     <button class="collapse-all-btn" onclick="toggleCollapseAll('col-ready')">⊟</button>
@@ -361,9 +363,23 @@
                     <div class="form-group"><label>Home Location</label><input type="text" id="vHomeLocation" placeholder="e.g. Bend, Salem…"></div>
                 </div>
                 <div class="form-group"><label>Issue</label><input type="text" id="vIssue" required></div>
+                
+                <div class="form-group"><label>Notes / Updates</label><textarea id="vNotes" rows="3" placeholder="Enter updates here…"></textarea></div>
+
                 <div class="form-row">
                     <div class="form-group"><label>Current Location</label><select id="vLocation"><option value="Dispatch Lot">Dispatch Lot</option><option value="On the road">On the road</option><option value="Pam (Ridesource, DMV)">Pam (Ridesource, DMV)</option><option value="Shop">Shop</option><option value="Paint">Paint</option><option value="Glass">Glass</option></select></div>
-                    <div class="form-group"><label>Shop Status</label><select id="vShopStatus" onchange="togglePartsFields()"><option value="Reported">Reported</option><option value="Awaiting Pickup">Awaiting Pickup</option><option value="Received">Received</option><option value="Assessment">Assessment</option><option value="Awaiting part order">Awaiting part order</option><option value="Complete">Complete</option><option value="Ready for Delivery">Ready for Delivery</option></select></div>
+                    <div class="form-group"><label>Shop Status</label>
+                        <select id="vShopStatus" onchange="togglePartsFields()">
+                            <option value="Reported">Reported</option>
+                            <option value="Awaiting Pickup">Awaiting Pickup</option>
+                            <option value="Received">Received</option>
+                            <option value="Assessment">Assessment</option>
+                            <option value="Awaiting part order">Awaiting part order</option>
+                            <option value="Parts Received - Waiting for Technician">Parts Received - Waiting for Technician</option>
+                            <option value="Complete">Complete</option>
+                            <option value="Ready for Pickup">Ready for Pickup</option>
+                        </select>
+                    </div>
                 </div>
                 <div id="partsSection"><div class="form-group"><label>Date Parts Ordered</label><input type="date" id="vPartsOrdered"></div><div class="form-group" style="margin-bottom:0;"><label>Estimated Delivery (ETA)</label><input type="date" id="vPartsEta"></div></div>
                 <div class="form-group"><label>Date In</label><input type="date" id="vDate" required></div>
@@ -377,15 +393,15 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxVv34BESHIyT_-HohJ-gUc4a2QdQdwHOzEmxFtr1WFxjwV620spd3KnjyHd8If5HSfYQ/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxVv34BESHIyT_-HohJ-gUc4a2QdQdwHOzEmxFtr1WFxjwV620spd3KnjyHd8If5HSfYQ/exec"; // <--- PASTE NEW URL HERE
         let fleetData = [], collapsedCards = new Set();
         
         // 5 Explicit Columns
         const COLUMN_STATUSES = { 
             complaints: ["Reported", "Awaiting Pickup"], 
-            ready:      ["Ready for Delivery"],
+            ready:      ["Ready for Pickup"],
             parts:      ["Awaiting part order"], 
-            progress:   ["Received", "Assessment"], 
+            progress:   ["Received", "Assessment", "Parts Received - Waiting for Technician"], 
             returned:   ["Complete"] 
         };
 
@@ -406,7 +422,7 @@
         function onDrop(e) { e.preventDefault(); const cc = e.target.closest('.column-content'); if (!cc || draggedRowIndex === null) { clearIndicators(); return; } const tk = cc.dataset.col, v = fleetData.find(v => v.rowIndex == draggedRowIndex); if (!v) { clearIndicators(); return; } const sc = statusToCol(v.shopStatus || "Reported"); if (sc === tk) { if (draggedEl && currentIndicator) cc.insertBefore(draggedEl, currentIndicator); else if (draggedEl) cc.appendChild(draggedEl); if (draggedEl) { draggedEl.classList.remove('dragging'); draggedEl.style.opacity = ''; } clearIndicators(); persistColumnOrder(cc); } else { clearIndicators(); const ts = COLUMN_STATUSES[tk]; if (ts.length === 1) updateVehicleStatus(v, ts[0]); else showStatusPicker(v, ts); } }
         function persistColumnOrder(cc) { const cards = cc.querySelectorAll('.vehicle-card'), items = []; cards.forEach((c, i) => { const ri = parseInt(c.dataset.rowIndex); if (!ri) return; items.push({ rowIndex: ri, sortOrder: i + 1 }); const veh = fleetData.find(v => v.rowIndex === ri); if (veh) veh.sortOrder = i + 1; }); if (!items.length) return; showToast("↕ Saving order…"); fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ action: "reorder", items }) }).then(() => showToast("✓ Order saved")); }
         function showStatusPicker(v, statuses) { document.querySelectorAll('.status-picker-overlay').forEach(e => e.remove()); const ol = document.createElement('div'); ol.className = 'status-picker-overlay'; ol.onclick = e => { if (e.target === ol) ol.remove(); }; const pk = document.createElement('div'); pk.className = 'status-picker'; pk.innerHTML = `<h3>Set status for ${v.id}</h3>`; statuses.forEach(s => { const b = document.createElement('button'); b.className = 'status-picker-btn'; b.textContent = s; b.onclick = () => { ol.remove(); updateVehicleStatus(v, s); }; pk.appendChild(b); }); const c = document.createElement('button'); c.className = 'status-picker-cancel'; c.textContent = 'Cancel'; c.onclick = () => ol.remove(); pk.appendChild(c); ol.appendChild(pk); document.body.appendChild(ol); }
-        function updateVehicleStatus(v, ns) { v.shopStatus = ns; const p = { action: 'update', rowIndex: v.rowIndex, id: v.id, status: v.status, issue: v.issue, date: v.date, shopStatus: ns, location: v.location, partsOrdered: v.partsOrdered || '', partsEta: v.partsEta || '', priority: v.priority || 'Normal', homeLocation: v.homeLocation || '' }; showToast(`⟳ ${v.id} → ${ns}`); fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(p) }).then(() => { showToast(`✓ ${v.id} updated`); setTimeout(fetchSheetData, 800); }); renderBoard(); }
+        function updateVehicleStatus(v, ns) { v.shopStatus = ns; const p = { action: 'update', rowIndex: v.rowIndex, id: v.id, status: v.status, issue: v.issue, date: v.date, shopStatus: ns, location: v.location, partsOrdered: v.partsOrdered || '', partsEta: v.partsEta || '', priority: v.priority || 'Normal', homeLocation: v.homeLocation || '', notes: v.notes || '' }; showToast(`⟳ ${v.id} → ${ns}`); fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(p) }).then(() => { showToast(`✓ ${v.id} updated`); setTimeout(fetchSheetData, 800); }); renderBoard(); }
         document.querySelectorAll('.column-content').forEach(col => { col.addEventListener('dragover', onDragOver); col.addEventListener('dragleave', e => { if (!col.contains(e.relatedTarget)) { col.closest('.kanban-column').classList.remove('drag-over-column'); if (currentIndicator && col.contains(currentIndicator)) { currentIndicator.remove(); currentIndicator = null; } } }); col.addEventListener('drop', onDrop); });
 
         // ==================== DATA ====================
@@ -464,7 +480,7 @@
 
                     const cc = v.status === 'Down' ? 'cond-down' : v.status === 'Warning' ? 'cond-warning' : 'cond-operational';
                     const days = daysElapsed(v.date); let db = '';
-                    if (days !== null && status !== "Complete" && status !== "Ready for Delivery") db = `<span class="days-badge ${days > 14 ? 'crit' : days > 7 ? 'warn' : ''}">${days}d</span>`;
+                    if (days !== null && status !== "Complete" && status !== "Ready for Pickup") db = `<span class="days-badge ${days > 14 ? 'crit' : days > 7 ? 'warn' : ''}">${days}d</span>`;
 
                     const prio = v.priority || 'Normal';
                     let prioBadge = '';
@@ -485,7 +501,10 @@
                     card.addEventListener('dragstart', e => onDragStart(e, v.rowIndex));
                     card.addEventListener('dragend', onDragEnd);
                     
-                    card.innerHTML = `<div class="card-top-bar"><div class="card-id-group"><div class="drag-handle" title="Drag">${GRIP}</div><span class="card-id">${v.id}</span><span class="card-condition ${cc}">${v.status || ''}</span>${prioBadge}${db}</div><div class="card-right"><span class="card-date">${formatDate(v.date)}</span><button class="collapse-toggle" onclick="event.stopPropagation();toggleCard('${ck}',this);">${CHEV}</button></div></div><div class="card-body" onclick="openModal('edit',${v.rowIndex})"><div class="card-issue">${v.issue}</div><div class="card-meta"><span class="card-pill ${pc}">${status}</span><div class="card-location">📍 ${v.location || 'Dispatch Lot'}</div></div><div class="card-location-row">${homeLoc}</div>${ph}</div>`;
+                    // Added Notes Display here
+                    const notesHtml = v.notes ? `<div class="card-notes">📝 ${v.notes}</div>` : '';
+
+                    card.innerHTML = `<div class="card-top-bar"><div class="card-id-group"><div class="drag-handle" title="Drag">${GRIP}</div><span class="card-id">${v.id}</span><span class="card-condition ${cc}">${v.status || ''}</span>${prioBadge}${db}</div><div class="card-right"><span class="card-date">${formatDate(v.date)}</span><button class="collapse-toggle" onclick="event.stopPropagation();toggleCard('${ck}',this);">${CHEV}</button></div></div><div class="card-body" onclick="openModal('edit',${v.rowIndex})"><div class="card-issue">${v.issue}</div><div class="card-meta"><span class="card-pill ${pc}">${status}</span><div class="card-location">📍 ${v.location || 'Dispatch Lot'}</div></div><div class="card-location-row">${homeLoc}</div>${ph}${notesHtml}</div>`;
                     tc.appendChild(card);
                     animIdx++;
                 });
@@ -519,6 +538,7 @@
                 document.getElementById('modalTitle').innerText = "ADD NEW UNIT"; document.getElementById('vehicleForm').reset();
                 document.getElementById('vID').readOnly = false; document.getElementById('vDate').valueAsDate = new Date();
                 document.getElementById('vPriority').value = 'Normal'; document.getElementById('vHomeLocation').value = '';
+                document.getElementById('vNotes').value = ''; // Reset notes
                 d.style.display = 'none'; togglePartsFields();
             } else {
                 document.getElementById('modalTitle').innerText = "EDIT UNIT"; d.style.display = 'block';
@@ -533,12 +553,31 @@
                     document.getElementById('vPartsEta').value = v.partsEta || "";
                     document.getElementById('vPriority').value = v.priority || "Normal";
                     document.getElementById('vHomeLocation').value = v.homeLocation || "";
+                    document.getElementById('vNotes').value = v.notes || ""; // Load notes
                     togglePartsFields();
                 }
             }
         }
         function closeModal() { document.getElementById('entryModal').style.display = 'none'; }
-        function saveVehicle(e) { e.preventDefault(); const b = document.getElementById('saveBtn'), m = document.getElementById('mode').value; const p = { action: m === 'edit' ? 'update' : 'add', rowIndex: document.getElementById('targetRowIndex').value, id: document.getElementById('vID').value, status: document.getElementById('vStatus').value, issue: document.getElementById('vIssue').value, date: document.getElementById('vDate').value, shopStatus: document.getElementById('vShopStatus').value, location: document.getElementById('vLocation').value, partsOrdered: document.getElementById('vPartsOrdered').value, partsEta: document.getElementById('vPartsEta').value, priority: document.getElementById('vPriority').value, homeLocation: document.getElementById('vHomeLocation').value }; b.innerText = "SAVING…"; b.disabled = true; fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(p) }).then(() => { closeModal(); b.innerText = "SAVE"; b.disabled = false; showToast("✓ Saved"); setTimeout(fetchSheetData, 1000); }); }
+        function saveVehicle(e) { e.preventDefault(); const b = document.getElementById('saveBtn'), m = document.getElementById('mode').value; 
+            const p = { 
+                action: m === 'edit' ? 'update' : 'add', 
+                rowIndex: document.getElementById('targetRowIndex').value, 
+                id: document.getElementById('vID').value, 
+                status: document.getElementById('vStatus').value, 
+                issue: document.getElementById('vIssue').value, 
+                date: document.getElementById('vDate').value, 
+                shopStatus: document.getElementById('vShopStatus').value, 
+                location: document.getElementById('vLocation').value, 
+                partsOrdered: document.getElementById('vPartsOrdered').value, 
+                partsEta: document.getElementById('vPartsEta').value, 
+                priority: document.getElementById('vPriority').value, 
+                homeLocation: document.getElementById('vHomeLocation').value,
+                notes: document.getElementById('vNotes').value // Save notes
+            }; 
+            b.innerText = "SAVING…"; b.disabled = true; 
+            fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(p) }).then(() => { closeModal(); b.innerText = "SAVE"; b.disabled = false; showToast("✓ Saved"); setTimeout(fetchSheetData, 1000); }); 
+        }
         function deleteCurrent() { if (!confirm("Delete this vehicle?")) return; const ri = document.getElementById('targetRowIndex').value, b = document.getElementById('deleteBtn'); b.innerText = "DELETING…"; fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ action: "delete", rowIndex: ri }) }).then(() => { closeModal(); b.innerText = "DELETE"; showToast("🗑 Deleted"); setTimeout(fetchSheetData, 1000); }); }
 
         // ==================== BULLETIN ====================
@@ -565,5 +604,3 @@
     </script>
 </body>
 </html>
-
-
