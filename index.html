@@ -241,7 +241,70 @@
         /* ===== MOBILE SWIPER ===== */
         .swiper-nav { display: none; }
         .swiper-dots { display: none; }
-
+.priority-badge.pb-maint { 
+    background: rgba(34, 211, 238, 0.15); 
+    color: #22d3ee; /* Cyan/Blue for maintenance */
+}
+.multi-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 0.55rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    background: #3f3f46;
+    color: #e4e4e7;
+    padding: 1px 5px;
+    border-radius: 3px;
+    margin-left: 6px;
+    border: 1px solid #52525b;
+}
+.ticket-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 0.5rem;
+}
+.ticket-row {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    padding: 6px 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-left: 2px solid transparent;
+}
+.ticket-row:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+.ticket-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2px;
+}
+.ticket-issue {
+    font-size: 0.8rem;
+    color: var(--text-main);
+    font-weight: 500;
+    line-height: 1.3;
+}
+.ticket-meta {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    display: flex;
+    gap: 8px;
+}
+/* Visual cues for priority inside the list */
+.tr-urgent { border-left-color: var(--c-urgent); }
+.tr-high { border-left-color: var(--c-high); }
+.tr-maint { border-left-color: var(--c-ready); }
+/* Update Urgent to be red text for visibility in dropdown */
+#vPriority option[value="Urgent"] { color: #ef4444; font-weight: bold; }
+#vPriority option[value="High"] { color: #f59e0b; font-weight: bold; }
+#vPriority option[value="Oil Change / Bulb Replacement"] { color: #22d3ee; }
         @media (max-width: 1200px) {
             header { padding: 0.6rem 0.8rem; flex-wrap: wrap; gap: 0.5rem; }
             h1 { font-size: 1rem; letter-spacing: 1px; }
@@ -500,13 +563,14 @@
                 <input type="hidden" id="mode" value="add"><input type="hidden" id="targetRowIndex" value="">
                 <div class="form-row">
                     <div class="form-group"><label>Vehicle ID</label><input type="text" id="vID" required></div>
-                    <div class="form-group"><label>Priority</label>
-                        <select id="vPriority">
-                            <option value="Normal">Normal</option>
-                            <option value="High">⚠ High</option>
-                            <option value="Urgent">🔴 Urgent</option>
-                        </select>
-                    </div>
+<div class="form-group"><label>Priority</label>
+    <select id="vPriority">
+        <option value="Urgent">🔴 Urgent</option>
+        <option value="High">⚠ High</option>
+        <option value="Oil Change / Bulb Replacement">🔧 Oil Change / Bulb</option>
+        <option value="Normal" selected>Normal Priority</option>
+    </select>
+</div>
                 </div>
                 <div class="form-row">
                     <div class="form-group"><label>Condition</label><select id="vStatus"><option value="Operational">Operational</option><option value="Warning">Warning</option><option value="Down">Down</option></select></div>
@@ -716,13 +780,137 @@
         // ==================== DRAG & DROP ====================
         let draggedRowIndex = null, draggedEl = null, currentIndicator = null;
         function clearIndicators() { document.querySelectorAll('.drop-indicator').forEach(e=>e.remove()); document.querySelectorAll('.drag-over-column').forEach(e=>e.classList.remove('drag-over-column')); currentIndicator = null; }
-        function onDragStart(e, ri) { if (isMobile()) { e.preventDefault(); return; } draggedRowIndex = ri; draggedEl = e.target.closest('.vehicle-card'); draggedEl.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(ri)); const g = document.createElement('div'); g.style.cssText = 'position:absolute;top:-1000px;'; document.body.appendChild(g); e.dataTransfer.setDragImage(g, 0, 0); setTimeout(() => g.remove(), 0); }
+        function onDragStart(e, rowIndexes) {
+    if (isMobile()) { e.preventDefault(); return; }
+    // Store array of indexes as JSON string
+    const indexes = Array.isArray(rowIndexes) ? rowIndexes : [rowIndexes];
+    e.dataTransfer.setData('text/plain', JSON.stringify(indexes));
+    
+    draggedEl = e.target.closest('.vehicle-card');
+    draggedEl.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    
+    // Ghost image
+    const g = document.createElement('div');
+    g.style.cssText = 'position:absolute;top:-1000px;';
+    document.body.appendChild(g);
+    e.dataTransfer.setDragImage(g, 0, 0);
+    setTimeout(() => g.remove(), 0);
+}
         function onDragEnd() { if (draggedEl) { draggedEl.classList.remove('dragging'); draggedEl.style.opacity = ''; } draggedRowIndex = null; draggedEl = null; clearIndicators(); }
         function getClosestCard(col, y) { const cards = [...col.querySelectorAll('.vehicle-card:not(.dragging)')]; let closest = null, co = Number.NEGATIVE_INFINITY; for (const c of cards) { const b = c.getBoundingClientRect(), o = y - b.top - b.height / 2; if (o < 0 && o > co) { co = o; closest = c; } } return closest; }
         function onDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; const cc = e.target.closest('.column-content'); if (!cc) return; document.querySelectorAll('.drag-over-column').forEach(e => e.classList.remove('drag-over-column')); cc.closest('.kanban-column').classList.add('drag-over-column'); const cl = getClosestCard(cc, e.clientY); if (currentIndicator) currentIndicator.remove(); const ind = document.createElement('div'); ind.className = 'drop-indicator'; currentIndicator = ind; if (cl) cc.insertBefore(ind, cl); else cc.appendChild(ind); }
-        function onDrop(e) { e.preventDefault(); const cc = e.target.closest('.column-content'); if (!cc || draggedRowIndex === null) { clearIndicators(); return; } const tk = cc.dataset.col, v = fleetData.find(v => v.rowIndex == draggedRowIndex); if (!v) { clearIndicators(); return; } const sc = statusToCol(v.shopStatus || "Reported"); if (sc === tk) { if (draggedEl && currentIndicator) cc.insertBefore(draggedEl, currentIndicator); else if (draggedEl) cc.appendChild(draggedEl); if (draggedEl) { draggedEl.classList.remove('dragging'); draggedEl.style.opacity = ''; } clearIndicators(); persistColumnOrder(cc); } else { clearIndicators(); const ts = COLUMN_STATUSES[tk]; if (ts.length === 1) updateVehicleStatus(v, ts[0]); else showStatusPicker(v, ts); } }
+        function onDrop(e) {
+    e.preventDefault();
+    const cc = e.target.closest('.column-content');
+    
+    // Parse the list of indexes
+    let draggedIndexes;
+    try {
+        draggedIndexes = JSON.parse(e.dataTransfer.getData('text/plain'));
+    } catch (err) {
+        clearIndicators(); return;
+    }
+
+    if (!cc || !draggedIndexes || draggedIndexes.length === 0) {
+        clearIndicators(); return;
+    }
+
+    const targetColType = cc.dataset.col;
+    // We use the first vehicle in the group to determine current validity
+    const firstVeh = fleetData.find(v => v.rowIndex == draggedIndexes[0]);
+    
+    if (!firstVeh) { clearIndicators(); return; }
+
+    const sc = statusToCol(firstVeh.shopStatus || "Reported");
+
+    // 1. If dropping in the SAME column (Reordering)
+    if (sc === targetColType) {
+        if (draggedEl && currentIndicator) cc.insertBefore(draggedEl, currentIndicator);
+        else if (draggedEl) cc.appendChild(draggedEl);
+        
+        if (draggedEl) {
+            draggedEl.classList.remove('dragging');
+            draggedEl.style.opacity = '';
+        }
+        clearIndicators();
+        // Save order (implementation relies on first index usually)
+        persistColumnOrder(cc);
+        
+    } else {
+        // 2. If dropping in a NEW column (Status Change)
+        clearIndicators();
+        const possibleStatuses = COLUMN_STATUSES[targetColType];
+        
+        // Helper to update ALL merged tickets
+        const applyStatusToAll = (newStatus) => {
+            showToast(`⟳ Moving ${draggedIndexes.length} tickets to ${newStatus}...`);
+            
+            // Create array of fetch promises
+            const updates = draggedIndexes.map(idx => {
+                const v = fleetData.find(f => f.rowIndex === idx);
+                if (!v) return Promise.resolve();
+                
+                v.shopStatus = newStatus; // Optimistic update
+                
+                const payload = {
+                    action: 'update',
+                    rowIndex: v.rowIndex,
+                    id: v.id,
+                    status: v.status,
+                    issue: v.issue,
+                    date: v.date,
+                    shopStatus: newStatus,
+                    location: v.location,
+                    partsOrdered: v.partsOrdered || '',
+                    partsEta: v.partsEta || '',
+                    priority: v.priority || 'Normal',
+                    homeLocation: v.homeLocation || '',
+                    notes: v.notes || ''
+                };
+                return fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
+            });
+
+            Promise.all(updates).then(() => {
+                showToast(`✓ All tickets updated`);
+                setTimeout(fetchSheetData, 800);
+            });
+            renderBoard(); // Re-render immediately for UI feedback
+        };
+
+        if (possibleStatuses.length === 1) {
+            applyStatusToAll(possibleStatuses[0]);
+        } else {
+            // Show picker, but pass the bulk update function
+            showStatusPickerMulti(firstVeh.id, possibleStatuses, applyStatusToAll);
+        }
+    }
+}
         function persistColumnOrder(cc) { const cards = cc.querySelectorAll('.vehicle-card'), items = []; cards.forEach((c, i) => { const ri = parseInt(c.dataset.rowIndex); if (!ri) return; items.push({ rowIndex: ri, sortOrder: i + 1 }); const veh = fleetData.find(v => v.rowIndex === ri); if (veh) veh.sortOrder = i + 1; }); if (!items.length) return; showToast("↕ Saving order…"); fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ action: "reorder", items }) }).then(() => showToast("✓ Order saved")); }
         function showStatusPicker(v, statuses) { document.querySelectorAll('.status-picker-overlay').forEach(e => e.remove()); const ol = document.createElement('div'); ol.className = 'status-picker-overlay'; ol.onclick = e => { if (e.target === ol) ol.remove(); }; const pk = document.createElement('div'); pk.className = 'status-picker'; pk.innerHTML = `<h3>Set status for ${v.id}</h3>`; statuses.forEach(s => { const b = document.createElement('button'); b.className = 'status-picker-btn'; b.textContent = s; b.onclick = () => { ol.remove(); updateVehicleStatus(v, s); }; pk.appendChild(b); }); const c = document.createElement('button'); c.className = 'status-picker-cancel'; c.textContent = 'Cancel'; c.onclick = () => ol.remove(); pk.appendChild(c); ol.appendChild(pk); document.body.appendChild(ol); }
+function showStatusPickerMulti(vehId, statuses, callback) {
+    document.querySelectorAll('.status-picker-overlay').forEach(e => e.remove());
+    const ol = document.createElement('div');
+    ol.className = 'status-picker-overlay';
+    ol.onclick = e => { if (e.target === ol) ol.remove(); };
+    const pk = document.createElement('div');
+    pk.className = 'status-picker';
+    pk.innerHTML = `<h3>Set status for ${vehId}</h3>`;
+    statuses.forEach(s => {
+        const b = document.createElement('button');
+        b.className = 'status-picker-btn';
+        b.textContent = s;
+        b.onclick = () => { ol.remove(); callback(s); };
+        pk.appendChild(b);
+    });
+    const c = document.createElement('button');
+    c.className = 'status-picker-cancel';
+    c.textContent = 'Cancel';
+    c.onclick = () => ol.remove();
+    pk.appendChild(c);
+    ol.appendChild(pk);
+    document.body.appendChild(ol);
+}
         function updateVehicleStatus(v, ns) { v.shopStatus = ns; const p = { action: 'update', rowIndex: v.rowIndex, id: v.id, status: v.status, issue: v.issue, date: v.date, shopStatus: ns, location: v.location, partsOrdered: v.partsOrdered || '', partsEta: v.partsEta || '', priority: v.priority || 'Normal', homeLocation: v.homeLocation || '', notes: v.notes || '' }; showToast(`⟳ ${v.id} → ${ns}`); fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(p) }).then(() => { showToast(`✓ ${v.id} updated`); setTimeout(fetchSheetData, 800); }); renderBoard(); }
         document.querySelectorAll('.column-content').forEach(col => { col.addEventListener('dragover', onDragOver); col.addEventListener('dragleave', e => { if (!col.contains(e.relatedTarget)) { col.closest('.kanban-column').classList.remove('drag-over-column'); if (currentIndicator && col.contains(currentIndicator)) { currentIndicator.remove(); currentIndicator = null; } } }); col.addEventListener('drop', onDrop); });
 
@@ -736,97 +924,227 @@
         const CHEV = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
 
         function renderBoard() {
-            const st = document.getElementById('searchInput').value.toLowerCase();
-            
-            const cols = {
-                complaints: document.getElementById('col-complaints'),
-                ready:      document.getElementById('col-ready'),
-                parts:      document.getElementById('col-parts'),
-                progress:   document.getElementById('col-progress'),
-                returned:   document.getElementById('col-returned')
+    const st = document.getElementById('searchInput').value.toLowerCase();
+    
+    const cols = {
+        complaints: document.getElementById('col-complaints'),
+        ready:      document.getElementById('col-ready'),
+        parts:      document.getElementById('col-parts'),
+        progress:   document.getElementById('col-progress'),
+        returned:   document.getElementById('col-returned')
+    };
+
+    Object.values(cols).forEach(c => c.innerHTML = '');
+
+    // 1. Grouping Logic
+    const groups = { complaints: [], ready: [], parts: [], progress: [], returned: [] };
+    
+    // Helper to calculate numeric priority
+    const getPrioVal = (p) => {
+        if (p === 'Urgent') return 0;
+        if (p === 'High') return 1;
+        if (p === 'Oil Change / Bulb Replacement') return 2;
+        return 3;
+    };
+
+    // Helper to calculate numeric condition (Down is worst)
+    const getCondVal = (c) => {
+        if (c === 'Down') return 0;
+        if (c === 'Warning') return 1;
+        return 2;
+    };
+
+    // MERGE STEP: Group by ID within each column category
+    const mergedData = {}; // structure: { 'complaints': { 'VAN101': { ...masterObj, tickets: [] } } }
+
+    fleetData.forEach(v => {
+        if (!v.id) return;
+        
+        // Filter by search term strictly on ID or Issue
+        if (st && !v.id.toLowerCase().includes(st) && !(v.issue || '').toLowerCase().includes(st)) return;
+
+        const colKey = statusToCol(v.shopStatus || "Reported");
+        const idKey = v.id.trim().toUpperCase();
+
+        if (!mergedData[colKey]) mergedData[colKey] = {};
+
+        if (!mergedData[colKey][idKey]) {
+            // Initialize Master Card
+            mergedData[colKey][idKey] = {
+                ...v, // Copy first ticket properties as default
+                tickets: [v] // Start ticket list
             };
+        } else {
+            // Merge into existing Master Card
+            const master = mergedData[colKey][idKey];
+            master.tickets.push(v);
 
-            Object.values(cols).forEach(c => c.innerHTML = '');
-            const groups = { complaints: [], ready: [], parts: [], progress: [], returned: [] };
-            
-            fleetData.forEach(v => {
-                const key = statusToCol(v.shopStatus || "Reported");
-                if (groups[key]) groups[key].push(v);
-            });
-
-            for (const col of Object.keys(groups)) {
-                groups[col].sort((a, b) => {
-                    const prioRank = { Urgent: 0, High: 1, Normal: 2 };
-                    const pa = prioRank[a.priority] ?? 2, pb = prioRank[b.priority] ?? 2;
-                    if (pa !== pb) return pa - pb;
-                    const aHas = a.sortOrder && a.sortOrder > 0, bHas = b.sortOrder && b.sortOrder > 0;
-                    if (aHas && bHas) return a.sortOrder - b.sortOrder;
-                    if (aHas && !bHas) return -1;
-                    if (!aHas && bHas) return 1;
-                    return (b.rowIndex || 0) - (a.rowIndex || 0);
-                });
+            // Escalation Logic: Master card takes the HIGHEST priority and WORST condition
+            if (getPrioVal(v.priority) < getPrioVal(master.priority)) {
+                master.priority = v.priority;
             }
-
-            let animIdx = 0;
-            for (const [colKey, vehicles] of Object.entries(groups)) {
-                vehicles.forEach(v => {
-                    if (st && !v.id.toLowerCase().includes(st) && !(v.issue || '').toLowerCase().includes(st)) return;
-                    
-                    let status = v.shopStatus || "";
-                    const tc = cols[colKey];
-                    let bc = 'border-' + colKey;
-                    let pc = 'pill-' + colKey;
-                    let sp = (colKey === 'parts');
-
-                    const cc = v.status === 'Down' ? 'cond-down' : v.status === 'Warning' ? 'cond-warning' : 'cond-operational';
-                    const days = daysElapsed(v.date); let db = '';
-                    if (days !== null && status !== "Complete" && status !== "Ready for Delivery") db = `<span class="days-badge ${days > 14 ? 'crit' : days > 7 ? 'warn' : ''}">${days}d</span>`;
-
-                    const prio = v.priority || 'Normal';
-                    let prioBadge = '';
-                    if (prio === 'High') prioBadge = '<span class="priority-badge pb-high">⚠ HIGH</span>';
-                    else if (prio === 'Urgent') prioBadge = '<span class="priority-badge pb-urgent">🔴 URGENT</span>';
-                    let prioClass = prio === 'High' ? ' priority-high' : prio === 'Urgent' ? ' priority-urgent' : '';
-
-                    const homeLoc = v.homeLocation ? `<span class="card-location">🏠 ${v.homeLocation}</span>` : '';
-                    let ph = '';
-                    if (sp) { ph = `<div class="parts-info-block"><div class="parts-row"><span class="parts-label">Ordered</span><span class="parts-val">${formatDate(v.partsOrdered) || '—'}</span></div><div class="parts-row"><span class="parts-label">ETA</span><span class="parts-val eta">${formatDate(v.partsEta) || '—'}</span></div></div>`; }
-                    
-                    const ck = String(v.rowIndex || v.id + '-' + animIdx), ic = collapsedCards.has(ck);
-                    const card = document.createElement('div');
-                    card.className = `vehicle-card ${bc}${prioClass} ${ic ? 'collapsed' : ''}`;
-                    card.style.animationDelay = `${Math.min(animIdx * 0.025, 0.3)}s`;
-                    card.dataset.cardKey = ck; card.dataset.rowIndex = v.rowIndex; card.draggable = !isMobile();
-                    
-                    card.addEventListener('dragstart', e => onDragStart(e, v.rowIndex));
-                    card.addEventListener('dragend', onDragEnd);
-                    
-                    const notesHtml = v.notes ? `<div class="card-notes">📝 ${v.notes}</div>` : '';
-
-                    card.innerHTML = `<div class="card-top-bar"><div class="card-id-group"><div class="drag-handle" title="Drag">${GRIP}</div><span class="card-id">${v.id}</span><span class="card-condition ${cc}">${v.status || ''}</span>${prioBadge}${db}</div><div class="card-right"><span class="card-date">${formatDate(v.date)}</span><button class="collapse-toggle" onclick="event.stopPropagation();toggleCard('${ck}',this);">${CHEV}</button></div></div><div class="card-body" onclick="openModal('edit',${v.rowIndex})"><div class="card-issue">${v.issue}</div><div class="card-meta"><span class="card-pill ${pc}">${status}</span><div class="card-location">📍 ${v.location || 'Dispatch Lot'}</div></div><div class="card-location-row">${homeLoc}</div>${ph}${notesHtml}</div>`;
-                    tc.appendChild(card);
-                    animIdx++;
-                });
+            if (getCondVal(v.status) < getCondVal(master.status)) {
+                master.status = v.status;
             }
-
-            Object.entries(cols).forEach(([key, el]) => {
-                 if (!el.children.length) el.innerHTML = `<div class="empty-state"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg><span>No units</span></div>`; 
-            });
-
-            document.getElementById('count-col-1').innerText = groups.complaints.length; 
-            document.getElementById('count-col-2').innerText = groups.ready.length;
-            document.getElementById('count-col-3').innerText = groups.parts.length; 
-            document.getElementById('count-col-4').innerText = groups.progress.length;
-            document.getElementById('count-col-5').innerText = groups.returned.length;
-            
-            document.getElementById('kpi-total').innerText = fleetData.length;
-            document.getElementById('kpi-parts').innerText = groups.parts.length;
-            document.getElementById('kpi-complete').innerText = groups.returned.length;
-            document.getElementById('kpi-ready').innerText = groups.ready.length;
-
-            // Update swiper after render
-            if (isMobile()) updateSwiperUI();
+            // Use the earliest date
+            if (v.date < master.date) master.date = v.date;
         }
+    });
+
+    // Flatten back to arrays for sorting and rendering
+    for (const [colKey, vehicleMap] of Object.entries(mergedData)) {
+        groups[colKey] = Object.values(vehicleMap);
+    }
+
+    // 2. Sorting Logic
+    for (const col of Object.keys(groups)) {
+        groups[col].sort((a, b) => {
+            const pa = getPrioVal(a.priority);
+            const pb = getPrioVal(b.priority);
+            if (pa !== pb) return pa - pb; // Priority first
+            
+            // Then Sort Order (using the master card's sort order)
+            const aHas = a.sortOrder && a.sortOrder > 0;
+            const bHas = b.sortOrder && b.sortOrder > 0;
+            if (aHas && bHas) return a.sortOrder - b.sortOrder;
+            if (aHas && !bHas) return -1;
+            if (!aHas && bHas) return 1;
+            
+            return (b.rowIndex || 0) - (a.rowIndex || 0); // Fallback to newest
+        });
+    }
+
+    // 3. Render
+    let animIdx = 0;
+    for (const [colKey, vehicles] of Object.entries(groups)) {
+        vehicles.forEach(v => {
+            const tc = cols[colKey];
+            let bc = 'border-' + colKey;
+            let pc = 'pill-' + colKey;
+            let sp = (colKey === 'parts');
+
+            // Badge Logic (Master)
+            const prio = v.priority || 'Normal';
+            let prioBadge = '';
+            let prioClass = '';
+            if (prio === 'Urgent') {
+                prioBadge = '<span class="priority-badge pb-urgent">🔴 URGENT</span>';
+                prioClass = ' priority-urgent';
+            } else if (prio === 'High') {
+                prioBadge = '<span class="priority-badge pb-high">⚠ HIGH</span>';
+                prioClass = ' priority-high';
+            } else if (prio === 'Oil Change / Bulb Replacement') {
+                prioBadge = '<span class="priority-badge pb-maint">🔧 MAINT</span>';
+            }
+
+            // Condition Logic (Master)
+            const cc = v.status === 'Down' ? 'cond-down' : v.status === 'Warning' ? 'cond-warning' : 'cond-operational';
+            
+            // Date Logic
+            const days = daysElapsed(v.date); 
+            let db = '';
+            if (days !== null && v.shopStatus !== "Complete") db = `<span class="days-badge ${days > 14 ? 'crit' : days > 7 ? 'warn' : ''}">${days}d</span>`;
+
+            // Home Location
+            const homeLoc = v.homeLocation ? `<span class="card-location">🏠 ${v.homeLocation}</span>` : '';
+
+            // GENERATE TICKET LIST HTML
+            let ticketsHtml = '<div class="ticket-list">';
+            v.tickets.forEach(t => {
+                // Determine styling for this specific ticket row
+                let trClass = '';
+                if(t.priority === 'Urgent') trClass = 'tr-urgent';
+                else if(t.priority === 'High') trClass = 'tr-high';
+                else if(t.priority === 'Oil Change / Bulb Replacement') trClass = 'tr-maint';
+
+                ticketsHtml += `
+                    <div class="ticket-row ${trClass}" onclick="event.stopPropagation(); openModal('edit', ${t.rowIndex})">
+                        <div class="ticket-header">
+                            <span class="ticket-issue">${t.issue}</span>
+                        </div>
+                        <div class="ticket-meta">
+                            <span>📅 ${formatDate(t.date)}</span>
+                            ${t.notes ? '<span>📝 Note</span>' : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            ticketsHtml += '</div>';
+
+            // Parts info (only if master is in parts, or if any ticket has parts info)
+            // For simplicity, we show the master card's parts info if valid
+            let ph = '';
+            if (sp) { 
+                ph = `<div class="parts-info-block"><div class="parts-row"><span class="parts-label">Ordered</span><span class="parts-val">${formatDate(v.partsOrdered) || '—'}</span></div><div class="parts-row"><span class="parts-label">ETA</span><span class="parts-val eta">${formatDate(v.partsEta) || '—'}</span></div></div>`; 
+            }
+            
+            // Row Indexes array for Drag and Drop
+            const allRowIndexes = v.tickets.map(t => t.rowIndex);
+
+            const ck = String(v.id + '-' + colKey + '-' + animIdx), ic = collapsedCards.has(ck);
+            const card = document.createElement('div');
+            card.className = `vehicle-card ${bc}${prioClass} ${ic ? 'collapsed' : ''}`;
+            card.style.animationDelay = `${Math.min(animIdx * 0.025, 0.3)}s`;
+            card.dataset.cardKey = ck; 
+            
+            // IMPORTANT: Drag logic needs all indexes
+            card.draggable = !isMobile();
+            card.addEventListener('dragstart', e => onDragStart(e, allRowIndexes));
+            card.addEventListener('dragend', onDragEnd);
+            
+            // Multi-ticket count badge
+            let countBadge = v.tickets.length > 1 ? `<span class="multi-tag">${v.tickets.length} Tickets</span>` : '';
+
+            // Card HTML
+            // Note: The main card click no longer opens modal directly, 
+            // you must click a specific ticket inside the list.
+            card.innerHTML = `
+                <div class="card-top-bar" onclick="toggleCard('${ck}',this.querySelector('.collapse-toggle'))">
+                    <div class="card-id-group">
+                        <div class="drag-handle" title="Drag">${GRIP}</div>
+                        <span class="card-id">${v.id}</span>
+                        ${countBadge}
+                        <span class="card-condition ${cc}">${v.status || ''}</span>
+                        ${prioBadge}
+                        ${db}
+                    </div>
+                    <div class="card-right">
+                        <button class="collapse-toggle" onclick="event.stopPropagation();toggleCard('${ck}',this);">${CHEV}</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="card-meta">
+                        <span class="card-pill ${pc}">${v.shopStatus || ''}</span>
+                        <div class="card-location">📍 ${v.location || 'Dispatch Lot'}</div>
+                    </div>
+                    <div class="card-location-row">${homeLoc}</div>
+                    ${ticketsHtml}
+                    ${ph}
+                </div>`;
+            
+            tc.appendChild(card);
+            animIdx++;
+        });
+    }
+    
+    // Empty states and Counters
+    Object.entries(cols).forEach(([key, el]) => {
+        if (!el.children.length) el.innerHTML = `<div class="empty-state"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg><span>No units</span></div>`; 
+    });
+
+    document.getElementById('count-col-1').innerText = groups.complaints.length; 
+    document.getElementById('count-col-2').innerText = groups.ready.length;
+    document.getElementById('count-col-3').innerText = groups.parts.length; 
+    document.getElementById('count-col-4').innerText = groups.progress.length;
+    document.getElementById('count-col-5').innerText = groups.returned.length;
+    
+    document.getElementById('kpi-total').innerText = fleetData.length;
+    document.getElementById('kpi-parts').innerText = groups.parts.length;
+    document.getElementById('kpi-complete').innerText = groups.returned.length;
+    document.getElementById('kpi-ready').innerText = groups.ready.length;
+
+    if (isMobile()) updateSwiperUI();
+}
 
         // ==================== COLLAPSE ====================
         function toggleCard(k, b) { const c = b.closest('.vehicle-card'); if (collapsedCards.has(k)) { collapsedCards.delete(k); c.classList.remove('collapsed'); } else { collapsedCards.add(k); c.classList.add('collapsed'); } }
