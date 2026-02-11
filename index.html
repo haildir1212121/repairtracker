@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DLX/DMT Repair Tracker</title>
+    <title>DLX / DMT Repair Tracker</title>
     <style>
         :root {
             /* HIGH CONTRAST DARK MODE */
@@ -51,7 +51,7 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            overflow: hidden; /* Prevents whole page scroll */
         }
 
         /* HEADER */
@@ -62,7 +62,7 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 2px solid var(--border);
-            flex-shrink: 0;
+            flex-shrink: 0; /* Prevents header shrinking */
         }
 
         h1 { 
@@ -73,10 +73,28 @@
             background: linear-gradient(90deg, #fff, #aaa);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            margin-right: 2rem;
         }
         
+        .controls { display: flex; align-items: center; gap: 0.5rem; }
+
+        /* SEARCH BAR */
+        .search-container { position: relative; margin-right: 1rem; }
+        .search-input {
+            padding: 0.6rem 1rem;
+            border-radius: 4px;
+            background: #000;
+            border: 1px solid var(--border);
+            color: white;
+            font-weight: bold;
+            width: 200px;
+            transition: width 0.3s;
+        }
+        .search-input:focus { width: 300px; outline: none; border-color: var(--accent); }
+        .search-input::placeholder { color: #555; text-transform: uppercase; font-size: 0.8rem; }
+
         .controls button {
-            padding: 0.6rem 1.2rem; border: none; border-radius: 4px; cursor: pointer; font-weight: 700; font-size: 0.9rem; margin-left: 0.5rem; text-transform: uppercase;
+            padding: 0.6rem 1.2rem; border: none; border-radius: 4px; cursor: pointer; font-weight: 700; font-size: 0.9rem; text-transform: uppercase;
         }
         .btn-primary { background-color: var(--c-shop); color: white; }
         .btn-outline { background: #333; border: 1px solid #555; color: white; }
@@ -88,7 +106,7 @@
             grid-template-columns: repeat(4, 1fr);
             gap: 1.5rem;
             padding: 1.5rem 2rem;
-            flex-shrink: 0;
+            flex-shrink: 0; /* Prevents squishing */
         }
 
         .kpi-card {
@@ -113,13 +131,14 @@
 
         /* KANBAN BOARD */
         .kanban-board {
-            flex: 1;
+            flex: 1; /* Takes remaining height */
+            min-height: 0; /* Critical for scrolling flex children */
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 1.5rem;
             padding: 0 2rem 2rem 2rem;
-            overflow-x: auto;
-            overflow-y: hidden;
+            overflow-x: auto; /* Allows side scroll if screen is narrow */
+            overflow-y: auto; /* Hides scroll on main container */
         }
 
         .kanban-column {
@@ -127,8 +146,11 @@
             border-radius: 8px;
             display: flex;
             flex-direction: column;
-            height: 100%;
+            height: 100%; /* Fills the grid cell */
             border: 1px solid var(--border);
+            min-width: 250px;
+            overflow-x: auto; /* Allows side scroll if screen is narrow */
+            overflow-y: hidden; /* Hides scroll on main container */
         }
 
         .column-header {
@@ -141,6 +163,7 @@
             justify-content: space-between;
             align-items: center;
             letter-spacing: 1px;
+            flex-shrink: 0; /* Header stays fixed */
         }
 
         .column-count { 
@@ -149,10 +172,19 @@
 
         .column-content {
             padding: 1rem;
-            overflow-y: auto;
+            overflow-y: auto; /* SCROLL HERE */
             flex: 1;
             background: rgba(0,0,0,0.1);
+            /* Custom Scrollbar for columns */
+            scrollbar-width: thin;
+            scrollbar-color: #444 #111;
         }
+        
+        /* Chrome Scrollbar styling */
+        .column-content::-webkit-scrollbar { width: 8px; }
+        .column-content::-webkit-scrollbar-track { background: #111; }
+        .column-content::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+        .column-content::-webkit-scrollbar-thumb:hover { background: #666; }
 
         /* VEHICLE CARD */
         .vehicle-card {
@@ -173,7 +205,7 @@
         .border-done { border-left-color: var(--c-done); }
 
         .card-header { display: flex; justify-content: space-between; margin-bottom: 0.5rem; align-items: center; }
-        .card-id { font-weight: 900; font-size: 1.3rem; color: var(--text-main); }
+        .card-id { font-weight: 600; font-size: 1.3rem; color: var(--text-main); }
         .card-date { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; }
         
         .card-issue { 
@@ -196,7 +228,7 @@
 
         .card-location {
             font-size: 0.8rem; font-weight: 700; color: var(--text-muted);
-            text-transform: uppercase; display: flex; align-items: center; gap: 4px; margin-top: 15px;
+            text-transform: uppercase; display: flex; align-items: center; gap: 4px;
         }
 
         /* Parts Info Block on Card */
@@ -217,10 +249,27 @@
         .pill-done { background: var(--c-done); color: black; }
 
         /* MODAL */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--modal-bg); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(5px);  }
-        .modal-content { background: var(--bg-column); padding: 2rem; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 0 30px rgba(0,0,0,0.8); border: 1px solid var(--border); max-height: 95vh; overflow-y: auto; }
+        .modal-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: var(--modal-bg); display: none; 
+            justify-content: center; align-items: center; z-index: 100; 
+            backdrop-filter: blur(5px); 
+        }
+
+        .modal-content { 
+            background: var(--bg-column); 
+            padding: 2rem; 
+            border-radius: 8px; 
+            width: 90%; 
+            max-width: 500px; 
+            max-height: 85vh; 
+            overflow-y: auto;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8); 
+            border: 1px solid var(--border); 
+        }
+
         .form-group { margin-bottom: 1.2rem; }
-        label { display: block; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.5rem; text-transform: uppercase; font-weight: bold;  }
+        label { display: block; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.5rem; text-transform: uppercase; font-weight: bold; }
         input, select { width: 100%; padding: 1rem; background-color: #000; border: 1px solid #444; color: white; border-radius: 4px; font-size: 1.1rem; font-weight: 500;}
         input:focus, select:focus { border-color: var(--c-shop); outline: none; }
         
@@ -233,8 +282,13 @@
             display: none; 
         }
 
-        .modal-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem; padding-bottom: 1rem; }
         .btn-danger { background-color: var(--c-parts); color: black; font-weight: bold; }
+
+        .modal-content::-webkit-scrollbar { width: 8px; }
+        .modal-content::-webkit-scrollbar-track { background: #111; }
+        .modal-content::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+        .modal-content::-webkit-scrollbar-thumb:hover { background: #666; }
 
         body.wallboard-mode .controls { display: none; }
     </style>
@@ -242,8 +296,11 @@
 <body>
 
     <header>
-        <h1>DLX/DMT Repair Tracker</h1>
+        <h1>DLX / DMT Repair Tracker</h1>
         <div class="controls">
+            <div class="search-container">
+                <input type="text" id="searchInput" class="search-input" placeholder="Search Vehicle..." onkeyup="renderBoard()">
+            </div>
             <button class="btn-primary" onclick="openModal('add')">+ Add Unit</button>
             <button class="btn-outline" onclick="toggleTheme()">Contrast</button>
             <button class="btn-outline" onclick="toggleWallboardMode()">Wallboard</button>
@@ -333,6 +390,7 @@
                     <label>Current Location</label>
                     <select id="vLocation">
                         <option value="Dispatch Lot">Dispatch Lot</option>
+                        <option value="On the road">On the road</option>
                         <option value="Pam (Ridesource, DMV)">Pam (Ridesource, DMV)</option>
                         <option value="Shop">Shop</option>
                         <option value="Paint">Paint</option>
@@ -417,6 +475,8 @@
         }
 
         function renderBoard() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+
             const cols = {
                 intake: document.getElementById('col-intake'),
                 shop: document.getElementById('col-shop'),
@@ -428,6 +488,11 @@
             let counts = { intake: 0, shop: 0, parts: 0, done: 0, ready: 0 };
 
             [...fleetData].reverse().forEach(v => {
+                // Search Logic: Skip if ID doesn't match
+                if (searchTerm && !v.id.toLowerCase().includes(searchTerm)) {
+                    return; // Skip this vehicle
+                }
+
                 let status = v.shopStatus || "";
                 let targetCol = cols.intake; 
                 let borderClass = "border-intake";
@@ -458,10 +523,8 @@
                     counts.intake++;
                 }
 
-                // Logic for the card footer
+                // Card Footer Logic
                 let footerContent = `<div class="card-location">📍 ${v.location || 'Dispatch Lot'}</div>`;
-                
-                // If it is awaiting parts, show the detailed dates block instead of location
                 if (showPartsInfo) {
                     const ord = formatDate(v.partsOrdered);
                     const eta = formatDate(v.partsEta);
@@ -502,10 +565,12 @@
             document.getElementById('count-col-3').innerText = counts.parts;
             document.getElementById('count-col-4').innerText = counts.done;
 
+            // KPIs always show TOTALS (ignoring filter for overview) or you can filter them too.
+            // Currently showing total database counts:
             document.getElementById('kpi-total').innerText = fleetData.length;
-            document.getElementById('kpi-parts').innerText = counts.parts;
-            document.getElementById('kpi-complete').innerText = counts.done; 
-            document.getElementById('kpi-ready').innerText = counts.ready;
+            document.getElementById('kpi-parts').innerText = fleetData.filter(v => v.shopStatus === "Awaiting part order").length;
+            document.getElementById('kpi-complete').innerText = fleetData.filter(v => v.shopStatus === "Complete" || v.shopStatus === "Ready for Delivery").length;
+            document.getElementById('kpi-ready').innerText = fleetData.filter(v => v.shopStatus === "Ready for Delivery").length;
         }
 
         // --- FORM LOGIC ---
