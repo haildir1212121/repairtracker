@@ -58,22 +58,12 @@
             --c-done-dim: rgba(22, 163, 74, 0.08);
         }
 
-        body.light-mode h1 {
-            background: linear-gradient(135deg, #111, #555);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        body.light-mode .search-input {
-            background: #f1f3f5;
-            color: #111;
-            border-color: #d1d5db;
-        }
+        body.light-mode h1 { background: linear-gradient(135deg, #111, #555); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        body.light-mode .search-input { background: #f1f3f5; color: #111; border-color: #d1d5db; }
         body.light-mode .search-input::placeholder { color: #999; }
         body.light-mode .btn-outline { background: #e5e7eb; color: #111; border-color: #d1d5db; }
         body.light-mode .btn-outline:hover { background: #d1d5db; }
-        body.light-mode input, body.light-mode select {
-            background: #f1f3f5; color: #111; border-color: #d1d5db;
-        }
+        body.light-mode input, body.light-mode select { background: #f1f3f5; color: #111; border-color: #d1d5db; }
         body.light-mode .column-count { background: #e5e7eb; color: #111; }
         body.light-mode .vehicle-card:hover { background-color: var(--bg-card-hover); }
         body.light-mode .card-issue { color: #374151; }
@@ -81,6 +71,7 @@
         body.light-mode .parts-val { color: #111; }
         body.light-mode .collapse-toggle { color: #6b7280; }
         body.light-mode .collapse-toggle:hover { color: #111; background: #e5e7eb; }
+        body.light-mode .drop-indicator { background: #3b82f6; box-shadow: 0 0 8px rgba(59,130,246,0.4); }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -94,7 +85,6 @@
             overflow: hidden;
         }
 
-        /* ===== HEADER ===== */
         header {
             background-color: var(--bg-column);
             padding: 0.8rem 1.5rem;
@@ -104,484 +94,229 @@
             border-bottom: 1px solid var(--border);
             flex-shrink: 0;
         }
-
         h1 {
-     
-            font-size: 1.25rem;
-            font-weight: 800;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            background: white;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            white-space: nowrap;
+            font-size: 1.25rem; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
+            background: white; -webkit-background-clip: text; -webkit-text-fill-color: transparent; white-space: nowrap;
         }
-
         .controls { display: flex; align-items: center; gap: 0.5rem; }
-
         .search-input {
-            padding: 0.5rem 0.8rem;
-            border-radius: var(--radius-sm);
-            background: #0d0e10;
-            border: 1px solid var(--border);
-            color: var(--text-main);
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.8rem;
-            font-weight: 600;
-            width: 180px;
-            transition: all var(--transition);
+            padding: 0.5rem 0.8rem; border-radius: var(--radius-sm); background: #0d0e10;
+            border: 1px solid var(--border); color: var(--text-main); font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem; font-weight: 600; width: 180px; transition: all var(--transition);
         }
         .search-input:focus { width: 260px; outline: none; border-color: var(--c-shop); box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15); }
         .search-input::placeholder { color: #444; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; }
-
         .controls button {
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            font-family: 'Outfit', sans-serif;
-            font-weight: 700;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            transition: all var(--transition);
+            padding: 0.5rem 1rem; border: none; border-radius: var(--radius-sm); cursor: pointer;
+            font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.8rem;
+            text-transform: uppercase; letter-spacing: 0.5px; transition: all var(--transition);
         }
         .btn-primary { background: var(--c-shop); color: white; }
         .btn-primary:hover { filter: brightness(1.15); transform: translateY(-1px); }
         .btn-outline { background: #1a1d21; border: 1px solid #2a2f38; color: #9ca3af; }
         .btn-outline:hover { background: #22262c; color: white; }
 
-        /* ===== KPI BAR ===== */
-        .kpi-container {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 0.8rem;
-            padding: 0.8rem 1.5rem;
-            flex-shrink: 0;
-        }
-
+        .kpi-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8rem; padding: 0.8rem 1.5rem; flex-shrink: 0; }
         .kpi-card {
-            background: var(--bg-column);
-            padding: 0.8rem 1rem;
-            border-radius: var(--radius);
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            border: 1px solid var(--border);
-            position: relative;
-            overflow: hidden;
-            transition: all var(--transition);
+            background: var(--bg-column); padding: 0.8rem 1rem; border-radius: var(--radius);
+            display: flex; align-items: center; gap: 0.8rem; border: 1px solid var(--border);
+            position: relative; overflow: hidden; transition: all var(--transition);
         }
         .kpi-card:hover { border-color: var(--border-hover); }
-
-        .kpi-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 3px;
-        }
+        .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
         .kpi-intake::before { background: var(--c-intake); }
         .kpi-parts::before { background: var(--c-parts); }
         .kpi-done::before { background: var(--c-done); }
         .kpi-ready::before { background: var(--c-ready); }
-
-        .kpi-icon {
-            width: 40px; height: 40px;
-            border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.1rem;
-            flex-shrink: 0;
-        }
-        .kpi-intake .kpi-icon { background: var(--c-intake-dim); }
-        .kpi-parts .kpi-icon { background: var(--c-parts-dim); }
-        .kpi-done .kpi-icon { background: var(--c-done-dim); }
-        .kpi-ready .kpi-icon { background: rgba(34, 211, 238, 0.12); }
-
         .kpi-text { display: flex; flex-direction: column; }
-        .kpi-value {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 1.6rem;
-            font-weight: 800;
-            line-height: 1;
-        }
-        .kpi-label {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            color: var(--text-muted);
-            font-weight: 700;
-            letter-spacing: 1px;
-            margin-top: 2px;
-        }
+        .kpi-value { font-family: 'JetBrains Mono', monospace; font-size: 1.6rem; font-weight: 800; line-height: 1; }
+        .kpi-label { font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; letter-spacing: 1px; margin-top: 2px; }
 
-        /* ===== KANBAN BOARD ===== */
-        .kanban-board {
-            flex: 1;
-            min-height: 0;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 0.8rem;
-            padding: 0 1.5rem 1rem 1.5rem;
-            overflow-x: auto;
-        }
-
+        .kanban-board { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8rem; padding: 0 1.5rem 1rem 1.5rem; overflow-x: auto; }
         .kanban-column {
-            background-color: var(--bg-column);
-            border-radius: var(--radius);
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            border: 1px solid var(--border);
-            min-width: 240px;
-            overflow: hidden;
+            background-color: var(--bg-column); border-radius: var(--radius); display: flex; flex-direction: column;
+            height: 100%; border: 1px solid var(--border); min-width: 240px; overflow: hidden;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
-
+        .kanban-column.drag-over-column { border-color: var(--c-shop); box-shadow: inset 0 0 20px rgba(96, 165, 250, 0.06); }
         .column-header {
-            padding: 0.8rem 1rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            font-size: 0.8rem;
-            letter-spacing: 1.5px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-shrink: 0;
+            padding: 0.8rem 1rem; font-weight: 800; text-transform: uppercase; font-size: 0.8rem;
+            letter-spacing: 1.5px; border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
         }
-
         .col-header-left { display: flex; align-items: center; gap: 0.5rem; }
         .col-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-
         .column-count {
-            font-family: 'JetBrains Mono', monospace;
-            background: rgba(255,255,255,0.06);
-            color: var(--text-muted);
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: 800;
+            font-family: 'JetBrains Mono', monospace; background: rgba(255,255,255,0.06);
+            color: var(--text-muted); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 800;
         }
-
-        .column-actions {
-            display: flex; align-items: center; gap: 0.3rem;
-        }
-
+        .column-actions { display: flex; align-items: center; gap: 0.3rem; }
         .collapse-all-btn {
-            background: none; border: none; cursor: pointer;
-            color: var(--text-muted); font-size: 0.7rem; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 0.5px;
-            padding: 2px 6px; border-radius: 3px;
-            transition: all var(--transition);
+            background: none; border: none; cursor: pointer; color: var(--text-muted);
+            font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+            padding: 2px 6px; border-radius: 3px; transition: all var(--transition);
         }
         .collapse-all-btn:hover { color: var(--text-main); background: rgba(255,255,255,0.06); }
-
         .column-content {
-            padding: 0.6rem;
-            overflow-y: auto;
-            flex: 1;
-            scrollbar-width: thin;
-            scrollbar-color: #2a2f38 transparent;
+            padding: 0.6rem; overflow-y: auto; flex: 1; min-height: 60px;
+            scrollbar-width: thin; scrollbar-color: #2a2f38 transparent;
         }
         .column-content::-webkit-scrollbar { width: 6px; }
         .column-content::-webkit-scrollbar-track { background: transparent; }
         .column-content::-webkit-scrollbar-thumb { background: #2a2f38; border-radius: 3px; }
-        .column-content::-webkit-scrollbar-thumb:hover { background: #3a3f48; }
 
-        /* ===== VEHICLE CARD ===== */
         .vehicle-card {
-            background-color: var(--bg-card);
-            border-radius: var(--radius-sm);
-            margin-bottom: 0.5rem;
-            border: 1px solid var(--border);
-            border-left: 4px solid transparent;
-            transition: all var(--transition);
-            overflow: hidden;
-            animation: cardIn 0.3s ease both;
+            background-color: var(--bg-card); border-radius: var(--radius-sm); margin-bottom: 0.5rem;
+            border: 1px solid var(--border); border-left: 4px solid transparent;
+            transition: all var(--transition); overflow: hidden; animation: cardIn 0.3s ease both; position: relative;
         }
-        @keyframes cardIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes cardIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         .vehicle-card:hover { border-color: var(--border-hover); background-color: var(--bg-card-hover); }
-
         .border-intake { border-left-color: var(--c-intake); }
         .border-shop { border-left-color: var(--c-shop); }
         .border-parts { border-left-color: var(--c-parts); }
         .border-done { border-left-color: var(--c-done); }
+        .vehicle-card.dragging { opacity: 0.3; transform: scale(0.97); border-style: dashed; }
+
+        .drag-handle {
+            cursor: grab; display: flex; align-items: center; justify-content: center;
+            padding: 0 4px; color: #333; transition: color var(--transition); flex-shrink: 0;
+        }
+        .vehicle-card:hover .drag-handle { color: #666; }
+        .drag-handle:active { cursor: grabbing; }
+        .drag-handle svg { width: 14px; height: 14px; pointer-events: none; }
+
+        .drop-indicator {
+            height: 3px; background: var(--c-shop); border-radius: 2px; margin: -1px 0;
+            pointer-events: none; box-shadow: 0 0 10px rgba(96, 165, 250, 0.5);
+            animation: dropPulse 1s ease infinite; position: relative; z-index: 10;
+        }
+        @keyframes dropPulse { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
 
         .card-top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.6rem 0.8rem;
-            cursor: pointer;
-            user-select: none;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0.6rem 0.8rem; cursor: pointer; user-select: none;
         }
         .card-top-bar:hover .collapse-toggle { opacity: 1; }
-
         .card-id-group { display: flex; align-items: center; gap: 0.5rem; }
-        .card-id {
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 800;
-            font-size: 1rem;
-            color: var(--text-main);
-        }
-        .card-condition {
-            font-size: 0.6rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            padding: 1px 6px;
-            border-radius: 3px;
-        }
+        .card-id { font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 1rem; color: var(--text-main); }
+        .card-condition { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 1px 6px; border-radius: 3px; }
         .cond-operational { background: rgba(74,222,128,0.15); color: var(--c-done); }
         .cond-warning { background: rgba(251,146,60,0.15); color: var(--c-parts); }
         .cond-down { background: rgba(248,113,113,0.15); color: #f87171; }
-
         .card-right { display: flex; align-items: center; gap: 0.5rem; }
-        .card-date {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            font-weight: 600;
-        }
+        .card-date { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-muted); font-weight: 600; }
         .collapse-toggle {
-            background: none; border: none; cursor: pointer;
-            color: #555; font-size: 1rem;
-            padding: 2px;
-            transition: all var(--transition);
-            opacity: 0.5;
-            display: flex; align-items: center; justify-content: center;
-            border-radius: 3px;
-            width: 22px; height: 22px;
+            background: none; border: none; cursor: pointer; color: #555; font-size: 1rem; padding: 2px;
+            transition: all var(--transition); opacity: 0.5; display: flex; align-items: center;
+            justify-content: center; border-radius: 3px; width: 22px; height: 22px;
         }
         .collapse-toggle:hover { color: var(--text-main); opacity: 1; background: rgba(255,255,255,0.06); }
         .collapse-toggle svg { width: 14px; height: 14px; transition: transform var(--transition); }
         .vehicle-card.collapsed .collapse-toggle svg { transform: rotate(-90deg); }
-
         .card-body {
-            padding: 0 0.8rem 0.6rem;
-            overflow: hidden;
-            max-height: 300px;
-            transition: max-height 0.3s ease, padding 0.3s ease, opacity 0.2s ease;
-            opacity: 1;
+            padding: 0 0.8rem 0.6rem; overflow: hidden; max-height: 300px;
+            transition: max-height 0.3s ease, padding 0.3s ease, opacity 0.2s ease; opacity: 1;
         }
-        .vehicle-card.collapsed .card-body {
-            max-height: 0;
-            padding: 0 0.8rem;
-            opacity: 0;
-        }
-
+        .vehicle-card.collapsed .card-body { max-height: 0; padding: 0 0.8rem; opacity: 0; }
         .card-issue {
-            font-size: 0.85rem;
-            color: #9ca3af;
-            font-weight: 500;
-            line-height: 1.4;
-            margin-bottom: 0.5rem;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
+            font-size: 0.85rem; color: #9ca3af; font-weight: 500; line-height: 1.4; margin-bottom: 0.5rem;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
         }
-
-        .card-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
+        .card-meta { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; }
         .card-pill {
-            font-family: 'JetBrains Mono', monospace;
-            display: inline-block;
-            padding: 0.2rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.65rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            font-family: 'JetBrains Mono', monospace; display: inline-block; padding: 0.2rem 0.5rem;
+            border-radius: 4px; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;
         }
         .pill-intake { background: var(--c-intake-dim); color: var(--c-intake); }
         .pill-shop { background: var(--c-shop-dim); color: var(--c-shop); }
         .pill-parts { background: var(--c-parts-dim); color: var(--c-parts); }
         .pill-done { background: var(--c-done-dim); color: var(--c-done); }
-
-        .card-location {
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            display: flex;
-            align-items: center;
-            gap: 3px;
-            letter-spacing: 0.3px;
-        }
-
-        .parts-info-block {
-            margin-top: 0.5rem;
-            padding: 0.4rem 0.6rem;
-            background: var(--c-parts-dim);
-            border-radius: 4px;
-            font-size: 0.75rem;
-        }
+        .card-location { font-size: 0.7rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; display: flex; align-items: center; gap: 3px; letter-spacing: 0.3px; }
+        .parts-info-block { margin-top: 0.5rem; padding: 0.4rem 0.6rem; background: var(--c-parts-dim); border-radius: 4px; font-size: 0.75rem; }
         .parts-row { display: flex; justify-content: space-between; align-items: center; }
         .parts-row + .parts-row { margin-top: 2px; }
-        .parts-label {
-            font-family: 'JetBrains Mono', monospace;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            font-size: 0.6rem;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
-        .parts-val {
-            font-family: 'JetBrains Mono', monospace;
-            color: var(--text-main);
-            font-weight: 700;
-            font-size: 0.75rem;
-        }
+        .parts-label { font-family: 'JetBrains Mono', monospace; color: var(--text-muted); text-transform: uppercase; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.5px; }
+        .parts-val { font-family: 'JetBrains Mono', monospace; color: var(--text-main); font-weight: 700; font-size: 0.75rem; }
         .parts-val.eta { color: var(--c-parts); }
-
-        /* Days counter */
-        .days-badge {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.6rem;
-            font-weight: 700;
-            padding: 1px 5px;
-            border-radius: 3px;
-            background: rgba(255,255,255,0.05);
-            color: var(--text-muted);
-        }
+        .days-badge { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; font-weight: 700; padding: 1px 5px; border-radius: 3px; background: rgba(255,255,255,0.05); color: var(--text-muted); }
         .days-badge.warn { background: rgba(251,146,60,0.15); color: var(--c-parts); }
         .days-badge.crit { background: rgba(248,113,113,0.15); color: #f87171; }
 
-        /* ===== MODAL ===== */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--modal-bg);
-            display: none;
-            justify-content: center; align-items: center;
-            z-index: 100;
-            backdrop-filter: blur(12px);
-            animation: fadeIn 0.2s ease;
+            background: var(--modal-bg); display: none; justify-content: center; align-items: center;
+            z-index: 100; backdrop-filter: blur(12px); animation: fadeIn 0.2s ease;
         }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
         .modal-content {
-            background: var(--bg-column);
-            padding: 1.5rem;
-            border-radius: var(--radius);
-            width: 90%;
-            max-width: 460px;
-            max-height: 85vh;
-            overflow-y: auto;
-            box-shadow: var(--shadow-lg);
-            border: 1px solid var(--border);
+            background: var(--bg-column); padding: 1.5rem; border-radius: var(--radius);
+            width: 90%; max-width: 460px; max-height: 85vh; overflow-y: auto;
+            box-shadow: var(--shadow-lg); border: 1px solid var(--border);
             animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-        .modal-content h2 {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 1rem;
-            letter-spacing: 2px;
-            margin-bottom: 1.2rem;
-            color: var(--text-main);
-        }
-
+        .modal-content h2 { font-family: 'JetBrains Mono', monospace; font-size: 1rem; letter-spacing: 2px; margin-bottom: 1.2rem; color: var(--text-main); }
         .form-group { margin-bottom: 1rem; }
-        label {
-            display: block;
-            color: var(--text-muted);
-            font-size: 0.7rem;
-            margin-bottom: 0.3rem;
-            text-transform: uppercase;
-            font-weight: 700;
-            letter-spacing: 1px;
-        }
+        label { display: block; color: var(--text-muted); font-size: 0.7rem; margin-bottom: 0.3rem; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; }
         input, select {
-            width: 100%;
-            padding: 0.7rem 0.8rem;
-            background-color: #0d0e10;
-            border: 1px solid var(--border);
-            color: var(--text-main);
-            border-radius: var(--radius-sm);
-            font-family: 'Outfit', sans-serif;
-            font-size: 0.95rem;
-            font-weight: 500;
-            transition: all var(--transition);
+            width: 100%; padding: 0.7rem 0.8rem; background-color: #0d0e10; border: 1px solid var(--border);
+            color: var(--text-main); border-radius: var(--radius-sm); font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem; font-weight: 500; transition: all var(--transition);
         }
         input:focus, select:focus { border-color: var(--c-shop); outline: none; box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15); }
-
         #partsSection {
-            background: var(--c-parts-dim);
-            border: 1px solid rgba(251, 146, 60, 0.25);
-            padding: 0.8rem;
-            border-radius: var(--radius-sm);
-            margin-bottom: 1rem;
-            display: none;
+            background: var(--c-parts-dim); border: 1px solid rgba(251, 146, 60, 0.25);
+            padding: 0.8rem; border-radius: var(--radius-sm); margin-bottom: 1rem; display: none;
         }
-
-        .modal-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 0.5rem;
-            margin-top: 1.5rem;
-        }
-        .btn-danger {
-            background: rgba(248, 113, 113, 0.15);
-            color: #f87171;
-            border: 1px solid rgba(248, 113, 113, 0.3);
-            font-weight: 700;
-        }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.5rem; }
+        .btn-danger { background: rgba(248, 113, 113, 0.15); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.3); font-weight: 700; }
         .btn-danger:hover { background: rgba(248, 113, 113, 0.25); }
-
         .modal-content::-webkit-scrollbar { width: 6px; }
         .modal-content::-webkit-scrollbar-track { background: transparent; }
         .modal-content::-webkit-scrollbar-thumb { background: #2a2f38; border-radius: 3px; }
 
         body.wallboard-mode .controls { display: none; }
-
-        /* Empty state */
-        .empty-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem 1rem;
-            color: var(--text-muted);
-            font-size: 0.8rem;
-            text-align: center;
-        }
+        .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem 1rem; color: var(--text-muted); font-size: 0.8rem; text-align: center; }
         .empty-state svg { opacity: 0.3; margin-bottom: 0.5rem; }
 
-        /* Loading pulse */
-        @keyframes pulse {
-            0%, 100% { opacity: 0.4; }
-            50% { opacity: 1; }
-        }
-        .loading-dot { animation: pulse 1.5s infinite; }
-
-        /* Toast notification */
         .toast {
-            position: fixed; bottom: 1.5rem; right: 1.5rem;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            padding: 0.7rem 1.2rem;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--text-main);
-            box-shadow: var(--shadow-lg);
-            z-index: 200;
-            animation: toastIn 0.3s ease, toastOut 0.3s ease 2.5s forwards;
+            position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--bg-card);
+            border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.7rem 1.2rem;
+            font-size: 0.85rem; font-weight: 600; color: var(--text-main); box-shadow: var(--shadow-lg);
+            z-index: 200; animation: toastIn 0.3s ease, toastOut 0.3s ease 2.5s forwards;
             display: flex; align-items: center; gap: 0.5rem;
         }
         @keyframes toastIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes toastOut { from { opacity: 1; } to { opacity: 0; pointer-events: none; } }
+
+        .status-picker-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center;
+            z-index: 150; backdrop-filter: blur(6px); animation: fadeIn 0.15s ease;
+        }
+        .status-picker {
+            background: var(--bg-column); border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 1.2rem; min-width: 260px; box-shadow: var(--shadow-lg);
+            animation: slideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .status-picker h3 { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); margin-bottom: 0.8rem; }
+        .status-picker-btn {
+            display: block; width: 100%; text-align: left; padding: 0.6rem 0.8rem; margin-bottom: 0.3rem;
+            border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-card);
+            color: var(--text-main); font-family: 'Outfit', sans-serif; font-size: 0.85rem; font-weight: 600;
+            cursor: pointer; transition: all var(--transition);
+        }
+        .status-picker-btn:hover { background: var(--bg-card-hover); border-color: var(--c-shop); }
+        .status-picker-cancel {
+            display: block; width: 100%; text-align: center; padding: 0.5rem; margin-top: 0.5rem;
+            border: none; background: none; color: var(--text-muted); font-size: 0.75rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: color var(--transition);
+        }
+        .status-picker-cancel:hover { color: var(--text-main); }
     </style>
 </head>
 <body>
-
     <header>
         <h1>DLX / DMT Repair Tracker</h1>
         <div class="controls">
@@ -593,162 +328,59 @@
     </header>
 
     <div class="kpi-container">
-        <div class="kpi-card kpi-intake">
-   
-            <div class="kpi-text">
-                <span class="kpi-value" id="kpi-total" style="color: var(--c-intake)">0</span>
-                <span class="kpi-label">Reported</span>
-            </div>
-        </div>
-        <div class="kpi-card kpi-ready">
-
-            <div class="kpi-text">
-                <span class="kpi-value" id="kpi-ready" style="color: var(--c-ready)">0</span>
-                <span class="kpi-label">To Deliver</span>
-            </div>
-        </div>
-        <div class="kpi-card kpi-parts">
-
-            <div class="kpi-text">
-                <span class="kpi-value" id="kpi-parts" style="color: var(--c-parts)">0</span>
-                <span class="kpi-label">Parts Hold</span>
-            </div>
-        </div>
-        <div class="kpi-card kpi-done">
-
-            <div class="kpi-text">
-                <span class="kpi-value" id="kpi-complete" style="color: var(--c-done)">0</span>
-                <span class="kpi-label">Complete</span>
-            </div>
-        </div>
+        <div class="kpi-card kpi-intake"><div class="kpi-text"><span class="kpi-value" id="kpi-total" style="color: var(--c-intake)">0</span><span class="kpi-label">Reported</span></div></div>
+        <div class="kpi-card kpi-ready"><div class="kpi-text"><span class="kpi-value" id="kpi-ready" style="color: var(--c-ready)">0</span><span class="kpi-label">To Deliver</span></div></div>
+        <div class="kpi-card kpi-parts"><div class="kpi-text"><span class="kpi-value" id="kpi-parts" style="color: var(--c-parts)">0</span><span class="kpi-label">Parts Hold</span></div></div>
+        <div class="kpi-card kpi-done"><div class="kpi-text"><span class="kpi-value" id="kpi-complete" style="color: var(--c-done)">0</span><span class="kpi-label">Complete</span></div></div>
     </div>
 
     <div class="kanban-board">
         <div class="kanban-column" id="column-intake">
             <div class="column-header">
-                <div class="col-header-left">
-                    <div class="col-dot" style="background: var(--c-intake)"></div>
-                    <span style="color: var(--c-intake)">Intake / Pickup</span>
-                </div>
-                <div class="column-actions">
-                    <button class="collapse-all-btn" onclick="toggleCollapseAll('col-intake')">⊟</button>
-                    <span class="column-count" id="count-col-1">0</span>
-                </div>
+                <div class="col-header-left"><div class="col-dot" style="background: var(--c-intake)"></div><span style="color: var(--c-intake)">Intake / Pickup</span></div>
+                <div class="column-actions"><button class="collapse-all-btn" onclick="toggleCollapseAll('col-intake')">⊟</button><span class="column-count" id="count-col-1">0</span></div>
             </div>
-            <div class="column-content" id="col-intake"></div>
+            <div class="column-content" id="col-intake" data-col="intake"></div>
         </div>
-
         <div class="kanban-column" id="column-shop">
             <div class="column-header">
-                <div class="col-header-left">
-                    <div class="col-dot" style="background: var(--c-shop)"></div>
-                    <span style="color: var(--c-shop)">In Progress</span>
-                </div>
-                <div class="column-actions">
-                    <button class="collapse-all-btn" onclick="toggleCollapseAll('col-shop')">⊟</button>
-                    <span class="column-count" id="count-col-2">0</span>
-                </div>
+                <div class="col-header-left"><div class="col-dot" style="background: var(--c-shop)"></div><span style="color: var(--c-shop)">In Progress</span></div>
+                <div class="column-actions"><button class="collapse-all-btn" onclick="toggleCollapseAll('col-shop')">⊟</button><span class="column-count" id="count-col-2">0</span></div>
             </div>
-            <div class="column-content" id="col-shop"></div>
+            <div class="column-content" id="col-shop" data-col="shop"></div>
         </div>
-
         <div class="kanban-column" id="column-parts">
             <div class="column-header">
-                <div class="col-header-left">
-                    <div class="col-dot" style="background: var(--c-parts)"></div>
-                    <span style="color: var(--c-parts)">Parts Hold</span>
-                </div>
-                <div class="column-actions">
-                    <button class="collapse-all-btn" onclick="toggleCollapseAll('col-parts')">⊟</button>
-                    <span class="column-count" id="count-col-3">0</span>
-                </div>
+                <div class="col-header-left"><div class="col-dot" style="background: var(--c-parts)"></div><span style="color: var(--c-parts)">Parts Hold</span></div>
+                <div class="column-actions"><button class="collapse-all-btn" onclick="toggleCollapseAll('col-parts')">⊟</button><span class="column-count" id="count-col-3">0</span></div>
             </div>
-            <div class="column-content" id="col-parts"></div>
+            <div class="column-content" id="col-parts" data-col="parts"></div>
         </div>
-
         <div class="kanban-column" id="column-done">
             <div class="column-header">
-                <div class="col-header-left">
-                    <div class="col-dot" style="background: var(--c-done)"></div>
-                    <span style="color: var(--c-done)">Complete</span>
-                </div>
-                <div class="column-actions">
-                    <button class="collapse-all-btn" onclick="toggleCollapseAll('col-done')">⊟</button>
-                    <span class="column-count" id="count-col-4">0</span>
-                </div>
+                <div class="col-header-left"><div class="col-dot" style="background: var(--c-done)"></div><span style="color: var(--c-done)">Complete</span></div>
+                <div class="column-actions"><button class="collapse-all-btn" onclick="toggleCollapseAll('col-done')">⊟</button><span class="column-count" id="count-col-4">0</span></div>
             </div>
-            <div class="column-content" id="col-done"></div>
+            <div class="column-content" id="col-done" data-col="done"></div>
         </div>
     </div>
 
-    <!-- MODAL -->
     <div id="entryModal" class="modal-overlay" onclick="if(event.target===this)closeModal()">
         <div class="modal-content">
             <h2 id="modalTitle">EDIT UNIT</h2>
             <form id="vehicleForm" onsubmit="saveVehicle(event)">
                 <input type="hidden" id="mode" value="add">
                 <input type="hidden" id="targetRowIndex" value="">
-
-                <div class="form-group">
-                    <label>Vehicle ID</label>
-                    <input type="text" id="vID" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Condition</label>
-                    <select id="vStatus">
-                        <option value="Operational">Operational</option>
-                        <option value="Warning">Warning</option>
-                        <option value="Down">Down</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Issue</label>
-                    <input type="text" id="vIssue" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Current Location</label>
-                    <select id="vLocation">
-                        <option value="Dispatch Lot">Dispatch Lot</option>
-                        <option value="On the road">On the road</option>
-                        <option value="Pam (Ridesource, DMV)">Pam (Ridesource, DMV)</option>
-                        <option value="Shop">Shop</option>
-                        <option value="Paint">Paint</option>
-                        <option value="Glass">Glass</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Shop Status</label>
-                    <select id="vShopStatus" onchange="togglePartsFields()">
-                        <option value="Reported">Reported</option>
-                        <option value="Awaiting Pickup">Awaiting Pickup</option>
-                        <option value="Received">Received</option>
-                        <option value="Assessment">Assessment</option>
-                        <option value="Awaiting part order">Awaiting part order</option>
-                        <option value="Complete">Complete</option>
-                        <option value="Ready for Delivery">Ready for Delivery</option>
-                    </select>
-                </div>
-
+                <div class="form-group"><label>Vehicle ID</label><input type="text" id="vID" required></div>
+                <div class="form-group"><label>Condition</label><select id="vStatus"><option value="Operational">Operational</option><option value="Warning">Warning</option><option value="Down">Down</option></select></div>
+                <div class="form-group"><label>Issue</label><input type="text" id="vIssue" required></div>
+                <div class="form-group"><label>Current Location</label><select id="vLocation"><option value="Dispatch Lot">Dispatch Lot</option><option value="On the road">On the road</option><option value="Pam (Ridesource, DMV)">Pam (Ridesource, DMV)</option><option value="Shop">Shop</option><option value="Paint">Paint</option><option value="Glass">Glass</option></select></div>
+                <div class="form-group"><label>Shop Status</label><select id="vShopStatus" onchange="togglePartsFields()"><option value="Reported">Reported</option><option value="Awaiting Pickup">Awaiting Pickup</option><option value="Received">Received</option><option value="Assessment">Assessment</option><option value="Awaiting part order">Awaiting part order</option><option value="Complete">Complete</option><option value="Ready for Delivery">Ready for Delivery</option></select></div>
                 <div id="partsSection">
-                    <div class="form-group">
-                        <label>Date Parts Ordered</label>
-                        <input type="date" id="vPartsOrdered">
-                    </div>
-                    <div class="form-group" style="margin-bottom:0;">
-                        <label>Estimated Delivery (ETA)</label>
-                        <input type="date" id="vPartsEta">
-                    </div>
+                    <div class="form-group"><label>Date Parts Ordered</label><input type="date" id="vPartsOrdered"></div>
+                    <div class="form-group" style="margin-bottom:0;"><label>Estimated Delivery (ETA)</label><input type="date" id="vPartsEta"></div>
                 </div>
-
-                <div class="form-group">
-                    <label>Date In</label>
-                    <input type="date" id="vDate" required>
-                </div>
-
+                <div class="form-group"><label>Date In</label><input type="date" id="vDate" required></div>
                 <div class="modal-actions">
                     <button type="button" id="deleteBtn" class="controls btn-danger" style="display:none;" onclick="deleteCurrent()">DELETE</button>
                     <button type="button" class="btn-outline" onclick="closeModal()">CANCEL</button>
@@ -759,300 +391,351 @@
     </div>
 
     <script>
-        // --- PASTE YOUR URL HERE ---
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxVv34BESHIyT_-HohJ-gUc4a2QdQdwHOzEmxFtr1WFxjwV620spd3KnjyHd8If5HSfYQ/exec";
-        // ---------------------------
 
         let fleetData = [];
-        let collapsedCards = new Set(); // Track collapsed card IDs
-        let columnCollapseState = {}; // Track per-column collapse-all state
+        let collapsedCards = new Set();
 
+        // Column ↔ status mapping
+        const COLUMN_STATUSES = {
+            intake: ["Reported", "Awaiting Pickup"],
+            shop:   ["Received", "Assessment"],
+            parts:  ["Awaiting part order"],
+            done:   ["Complete", "Ready for Delivery"]
+        };
+        function statusToCol(status) {
+            for (const [col, sts] of Object.entries(COLUMN_STATUSES)) { if (sts.includes(status)) return col; }
+            return 'intake';
+        }
+
+        // ==================== DRAG & DROP ====================
+        let draggedRowIndex = null;
+        let draggedEl = null;
+        let currentIndicator = null;
+
+        function clearIndicators() {
+            document.querySelectorAll('.drop-indicator').forEach(el => el.remove());
+            document.querySelectorAll('.drag-over-column').forEach(el => el.classList.remove('drag-over-column'));
+            currentIndicator = null;
+        }
+
+        function onDragStart(e, rowIndex) {
+            draggedRowIndex = rowIndex;
+            draggedEl = e.target.closest('.vehicle-card');
+            draggedEl.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', String(rowIndex));
+            // Transparent drag image — the in-place ghost is cleaner
+            const ghost = document.createElement('div');
+            ghost.style.cssText = 'position:absolute;top:-1000px;width:1px;height:1px;';
+            document.body.appendChild(ghost);
+            e.dataTransfer.setDragImage(ghost, 0, 0);
+            setTimeout(() => ghost.remove(), 0);
+        }
+
+        function onDragEnd() {
+            if (draggedEl) { draggedEl.classList.remove('dragging'); draggedEl.style.opacity = ''; }
+            draggedRowIndex = null;
+            draggedEl = null;
+            clearIndicators();
+        }
+
+        function getClosestCard(colContent, y) {
+            const cards = [...colContent.querySelectorAll('.vehicle-card:not(.dragging)')];
+            let closest = null;
+            let closestOffset = Number.NEGATIVE_INFINITY;
+            for (const card of cards) {
+                const box = card.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                if (offset < 0 && offset > closestOffset) { closestOffset = offset; closest = card; }
+            }
+            return closest;
+        }
+
+        function onDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            const colContent = e.target.closest('.column-content');
+            if (!colContent) return;
+
+            const col = colContent.closest('.kanban-column');
+            document.querySelectorAll('.drag-over-column').forEach(el => el.classList.remove('drag-over-column'));
+            col.classList.add('drag-over-column');
+
+            const closestCard = getClosestCard(colContent, e.clientY);
+            if (currentIndicator) currentIndicator.remove();
+            const indicator = document.createElement('div');
+            indicator.className = 'drop-indicator';
+            currentIndicator = indicator;
+            if (closestCard) colContent.insertBefore(indicator, closestCard);
+            else colContent.appendChild(indicator);
+        }
+
+        function onDrop(e) {
+            e.preventDefault();
+            const colContent = e.target.closest('.column-content');
+            if (!colContent || draggedRowIndex === null) { clearIndicators(); return; }
+
+            const targetColKey = colContent.dataset.col;
+            const vehicle = fleetData.find(v => v.rowIndex == draggedRowIndex);
+            if (!vehicle) { clearIndicators(); return; }
+
+            const sourceCol = statusToCol(vehicle.shopStatus || "Reported");
+
+            if (sourceCol === targetColKey) {
+                // Same column — visual reorder only
+                if (draggedEl && currentIndicator) colContent.insertBefore(draggedEl, currentIndicator);
+                else if (draggedEl) colContent.appendChild(draggedEl);
+                if (draggedEl) { draggedEl.classList.remove('dragging'); draggedEl.style.opacity = ''; }
+                clearIndicators();
+                showToast("↕ Reordered");
+            } else {
+                clearIndicators();
+                const targetStatuses = COLUMN_STATUSES[targetColKey];
+                if (targetStatuses.length === 1) updateVehicleStatus(vehicle, targetStatuses[0]);
+                else showStatusPicker(vehicle, targetStatuses);
+            }
+        }
+
+        function showStatusPicker(vehicle, statuses) {
+            document.querySelectorAll('.status-picker-overlay').forEach(el => el.remove());
+            const overlay = document.createElement('div');
+            overlay.className = 'status-picker-overlay';
+            overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+
+            const picker = document.createElement('div');
+            picker.className = 'status-picker';
+            picker.innerHTML = `<h3>Set status for ${vehicle.id}</h3>`;
+            statuses.forEach(status => {
+                const btn = document.createElement('button');
+                btn.className = 'status-picker-btn';
+                btn.textContent = status;
+                btn.onclick = () => { overlay.remove(); updateVehicleStatus(vehicle, status); };
+                picker.appendChild(btn);
+            });
+            const cancel = document.createElement('button');
+            cancel.className = 'status-picker-cancel';
+            cancel.textContent = 'Cancel';
+            cancel.onclick = () => overlay.remove();
+            picker.appendChild(cancel);
+            overlay.appendChild(picker);
+            document.body.appendChild(overlay);
+        }
+
+        function updateVehicleStatus(vehicle, newStatus) {
+            vehicle.shopStatus = newStatus;
+            const payload = {
+                action: 'update', rowIndex: vehicle.rowIndex, id: vehicle.id, status: vehicle.status,
+                issue: vehicle.issue, date: vehicle.date, shopStatus: newStatus, location: vehicle.location,
+                partsOrdered: vehicle.partsOrdered || '', partsEta: vehicle.partsEta || ''
+            };
+            showToast(`⟳ ${vehicle.id} → ${newStatus}`);
+            fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) }).then(() => {
+                showToast(`✓ ${vehicle.id} updated`);
+                setTimeout(fetchSheetData, 800);
+            });
+            renderBoard();
+        }
+
+        // Wire up drop zones
+        document.querySelectorAll('.column-content').forEach(col => {
+            col.addEventListener('dragover', onDragOver);
+            col.addEventListener('dragleave', (e) => {
+                if (!col.contains(e.relatedTarget)) {
+                    col.closest('.kanban-column').classList.remove('drag-over-column');
+                    if (currentIndicator && col.contains(currentIndicator)) { currentIndicator.remove(); currentIndicator = null; }
+                }
+            });
+            col.addEventListener('drop', onDrop);
+        });
+
+        // ==================== DATA ====================
         async function fetchSheetData() {
             if (SCRIPT_URL.includes("PASTE_YOUR")) {
-                document.querySelector('.kanban-board').innerHTML = `<div style="grid-column:1/-1;display:flex;align-items:center;justify-content:center;color:#f87171;font-size:1.1rem;font-weight:700;">⚠️ Paste your Apps Script URL in the code</div>`;
+                document.querySelector('.kanban-board').innerHTML = `<div style="grid-column:1/-1;display:flex;align-items:center;justify-content:center;color:#f87171;font-size:1.1rem;font-weight:700;">⚠️ Paste your Apps Script URL</div>`;
                 return;
             }
             try {
-                const response = await fetch(SCRIPT_URL);
-                const data = await response.json();
-                if (Array.isArray(data) && data.length > 0 && Array.isArray(data[0])) {
-                    showToast("⚠️ Script version mismatch — redeploy Apps Script");
-                    return;
-                }
+                const res = await fetch(SCRIPT_URL);
+                const data = await res.json();
+                if (Array.isArray(data) && data.length > 0 && Array.isArray(data[0])) { showToast("⚠️ Script mismatch — redeploy"); return; }
                 fleetData = data;
                 renderBoard();
-            } catch (error) {
-                console.error(error);
-            }
+            } catch (err) { console.error(err); }
         }
 
-        function formatDate(dateString) {
-            if (!dateString) return '';
-            const parts = dateString.split('-');
-            if (parts.length === 3) return `${parts[1]}/${parts[2]}/${parts[0]}`;
-            return dateString;
-        }
+        function formatDate(s) { if (!s) return ''; const p = s.split('-'); return p.length === 3 ? `${p[1]}/${p[2]}/${p[0]}` : s; }
+        function daysElapsed(s) { if (!s) return null; const d = new Date(s+'T00:00:00'), n = new Date(); n.setHours(0,0,0,0); return Math.floor((n-d)/(864e5)); }
 
-        function daysElapsed(dateString) {
-            if (!dateString) return null;
-            const d = new Date(dateString + 'T00:00:00');
-            const now = new Date();
-            now.setHours(0, 0, 0, 0);
-            return Math.floor((now - d) / (1000 * 60 * 60 * 24));
-        }
+        // ==================== RENDER ====================
+        const GRIP_SVG = `<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg>`;
+        const CHEVRON_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
 
         function renderBoard() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const cols = {
-                intake: document.getElementById('col-intake'),
-                shop: document.getElementById('col-shop'),
-                parts: document.getElementById('col-parts'),
-                done: document.getElementById('col-done')
-            };
-            Object.values(cols).forEach(col => col.innerHTML = '');
+            const cols = { intake: document.getElementById('col-intake'), shop: document.getElementById('col-shop'), parts: document.getElementById('col-parts'), done: document.getElementById('col-done') };
+            Object.values(cols).forEach(c => c.innerHTML = '');
             let counts = { intake: 0, shop: 0, parts: 0, done: 0, ready: 0 };
 
             [...fleetData].reverse().forEach((v, i) => {
-                if (searchTerm && !v.id.toLowerCase().includes(searchTerm) && !(v.issue || '').toLowerCase().includes(searchTerm)) return;
+                if (searchTerm && !v.id.toLowerCase().includes(searchTerm) && !(v.issue||'').toLowerCase().includes(searchTerm)) return;
 
                 let status = v.shopStatus || "";
-                let targetCol = cols.intake;
-                let borderClass = "border-intake";
-                let pillClass = "pill-intake";
-                let showPartsInfo = false;
+                let targetCol = cols.intake, borderClass = "border-intake", pillClass = "pill-intake", showParts = false;
 
-                if (status === "Awaiting part order") {
-                    targetCol = cols.parts; borderClass = "border-parts"; pillClass = "pill-parts"; counts.parts++; showPartsInfo = true;
-                } else if (status === "Received" || status === "Assessment") {
-                    targetCol = cols.shop; borderClass = "border-shop"; pillClass = "pill-shop"; counts.shop++;
-                } else if (status === "Complete" || status === "Ready for Delivery") {
-                    targetCol = cols.done; borderClass = "border-done"; pillClass = "pill-done"; counts.done++;
-                    if (status === "Ready for Delivery") counts.ready++;
-                } else {
-                    counts.intake++;
-                }
+                if (status === "Awaiting part order") { targetCol = cols.parts; borderClass = "border-parts"; pillClass = "pill-parts"; counts.parts++; showParts = true; }
+                else if (status === "Received" || status === "Assessment") { targetCol = cols.shop; borderClass = "border-shop"; pillClass = "pill-shop"; counts.shop++; }
+                else if (status === "Complete" || status === "Ready for Delivery") { targetCol = cols.done; borderClass = "border-done"; pillClass = "pill-done"; counts.done++; if (status === "Ready for Delivery") counts.ready++; }
+                else { counts.intake++; }
 
-                // Condition badge
                 const condClass = v.status === 'Down' ? 'cond-down' : v.status === 'Warning' ? 'cond-warning' : 'cond-operational';
-
-                // Days elapsed badge
                 const days = daysElapsed(v.date);
                 let daysBadge = '';
                 if (days !== null && status !== "Complete" && status !== "Ready for Delivery") {
-                    const cls = days > 14 ? 'crit' : days > 7 ? 'warn' : '';
-                    daysBadge = `<span class="days-badge ${cls}">${days}d</span>`;
+                    daysBadge = `<span class="days-badge ${days > 14 ? 'crit' : days > 7 ? 'warn' : ''}">${days}d</span>`;
                 }
 
-                // Location display
-                let locationHtml = `<div class="card-location">📍 ${v.location || 'Dispatch Lot'}</div>`;
-
-                // Parts info
                 let partsHtml = '';
-                if (showPartsInfo) {
-                    const ord = formatDate(v.partsOrdered);
-                    const eta = formatDate(v.partsEta);
-                    partsHtml = `
-                        <div class="parts-info-block">
-                            <div class="parts-row">
-                                <span class="parts-label">Ordered</span>
-                                <span class="parts-val">${ord || '—'}</span>
-                            </div>
-                            <div class="parts-row">
-                                <span class="parts-label">ETA</span>
-                                <span class="parts-val eta">${eta || '—'}</span>
-                            </div>
-                        </div>`;
+                if (showParts) {
+                    partsHtml = `<div class="parts-info-block"><div class="parts-row"><span class="parts-label">Ordered</span><span class="parts-val">${formatDate(v.partsOrdered)||'—'}</span></div><div class="parts-row"><span class="parts-label">ETA</span><span class="parts-val eta">${formatDate(v.partsEta)||'—'}</span></div></div>`;
                 }
 
-                const cardKey = v.rowIndex || v.id + '-' + i;
+                const cardKey = String(v.rowIndex || v.id + '-' + i);
                 const isCollapsed = collapsedCards.has(cardKey);
 
                 const card = document.createElement('div');
                 card.className = `vehicle-card ${borderClass} ${isCollapsed ? 'collapsed' : ''}`;
-                card.style.animationDelay = `${Math.min(i * 0.03, 0.3)}s`;
+                card.style.animationDelay = `${Math.min(i * 0.025, 0.3)}s`;
                 card.dataset.cardKey = cardKey;
+                card.dataset.rowIndex = v.rowIndex;
+                card.draggable = true;
+                card.addEventListener('dragstart', (e) => onDragStart(e, v.rowIndex));
+                card.addEventListener('dragend', onDragEnd);
 
                 card.innerHTML = `
-                    <div class="card-top-bar" onclick="event.stopPropagation();">
+                    <div class="card-top-bar">
                         <div class="card-id-group">
+                            <div class="drag-handle" title="Drag to reorder">${GRIP_SVG}</div>
                             <span class="card-id">${v.id}</span>
                             <span class="card-condition ${condClass}">${v.status || ''}</span>
                             ${daysBadge}
                         </div>
                         <div class="card-right">
                             <span class="card-date">${formatDate(v.date)}</span>
-                            <button class="collapse-toggle" onclick="event.stopPropagation(); toggleCard('${cardKey}', this);" title="Collapse/Expand">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                            </button>
+                            <button class="collapse-toggle" onclick="event.stopPropagation(); toggleCard('${cardKey}', this);" title="Collapse">${CHEVRON_SVG}</button>
                         </div>
                     </div>
                     <div class="card-body" onclick="openModal('edit', ${v.rowIndex})">
                         <div class="card-issue">${v.issue}</div>
                         <div class="card-meta">
                             <span class="card-pill ${pillClass}">${status}</span>
-                            ${locationHtml}
+                            <div class="card-location">📍 ${v.location || 'Dispatch Lot'}</div>
                         </div>
                         ${partsHtml}
-                    </div>
-                `;
+                    </div>`;
                 targetCol.appendChild(card);
             });
 
-            // Empty states
-            Object.entries(cols).forEach(([key, col]) => {
-                if (col.children.length === 0) {
-                    col.innerHTML = `<div class="empty-state"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg><span>No units</span></div>`;
-                }
+            Object.values(cols).forEach(col => {
+                if (!col.children.length) col.innerHTML = `<div class="empty-state"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg><span>No units</span></div>`;
             });
 
             document.getElementById('count-col-1').innerText = counts.intake;
             document.getElementById('count-col-2').innerText = counts.shop;
             document.getElementById('count-col-3').innerText = counts.parts;
             document.getElementById('count-col-4').innerText = counts.done;
-
             document.getElementById('kpi-total').innerText = fleetData.length;
             document.getElementById('kpi-parts').innerText = fleetData.filter(v => v.shopStatus === "Awaiting part order").length;
             document.getElementById('kpi-complete').innerText = fleetData.filter(v => v.shopStatus === "Complete" || v.shopStatus === "Ready for Delivery").length;
             document.getElementById('kpi-ready').innerText = fleetData.filter(v => v.shopStatus === "Ready for Delivery").length;
         }
 
-        // --- COLLAPSE LOGIC ---
+        // ==================== COLLAPSE ====================
         function toggleCard(cardKey, btnEl) {
             const card = btnEl.closest('.vehicle-card');
-            if (collapsedCards.has(cardKey)) {
-                collapsedCards.delete(cardKey);
-                card.classList.remove('collapsed');
-            } else {
-                collapsedCards.add(cardKey);
-                card.classList.add('collapsed');
-            }
+            if (collapsedCards.has(cardKey)) { collapsedCards.delete(cardKey); card.classList.remove('collapsed'); }
+            else { collapsedCards.add(cardKey); card.classList.add('collapsed'); }
         }
-
         function toggleCollapseAll(colId) {
             const col = document.getElementById(colId);
             const cards = col.querySelectorAll('.vehicle-card');
-            const allCollapsed = [...cards].every(c => c.classList.contains('collapsed'));
-
+            const allC = [...cards].every(c => c.classList.contains('collapsed'));
             cards.forEach(card => {
-                const key = card.dataset.cardKey;
-                if (allCollapsed) {
-                    collapsedCards.delete(key);
-                    card.classList.remove('collapsed');
-                } else {
-                    collapsedCards.add(key);
-                    card.classList.add('collapsed');
-                }
+                const k = card.dataset.cardKey;
+                if (allC) { collapsedCards.delete(k); card.classList.remove('collapsed'); }
+                else { collapsedCards.add(k); card.classList.add('collapsed'); }
             });
         }
 
-        // --- FORM LOGIC ---
+        // ==================== FORM ====================
         function togglePartsFields() {
-            const status = document.getElementById('vShopStatus').value;
-            const partsSection = document.getElementById('partsSection');
-            const orderedInput = document.getElementById('vPartsOrdered');
-            const etaInput = document.getElementById('vPartsEta');
-            if (status === "Awaiting part order") {
-                partsSection.style.display = "block";
-                orderedInput.required = true;
-                etaInput.required = true;
-            } else {
-                partsSection.style.display = "none";
-                orderedInput.required = false;
-                etaInput.required = false;
-            }
+            const s = document.getElementById('vShopStatus').value, sec = document.getElementById('partsSection');
+            const o = document.getElementById('vPartsOrdered'), e = document.getElementById('vPartsEta');
+            if (s === "Awaiting part order") { sec.style.display = "block"; o.required = e.required = true; }
+            else { sec.style.display = "none"; o.required = e.required = false; }
         }
-
         function openModal(mode, rowIndex = null) {
             document.getElementById('entryModal').style.display = 'flex';
             document.getElementById('mode').value = mode;
-            const delBtn = document.getElementById('deleteBtn');
+            const del = document.getElementById('deleteBtn');
             if (mode === 'add') {
                 document.getElementById('modalTitle').innerText = "ADD NEW UNIT";
                 document.getElementById('vehicleForm').reset();
                 document.getElementById('vID').readOnly = false;
                 document.getElementById('vDate').valueAsDate = new Date();
-                delBtn.style.display = 'none';
-                togglePartsFields();
+                del.style.display = 'none'; togglePartsFields();
             } else {
                 document.getElementById('modalTitle').innerText = "EDIT UNIT";
-                delBtn.style.display = 'block';
-                const vehicle = fleetData.find(v => v.rowIndex === rowIndex);
-                if (vehicle) {
-                    document.getElementById('targetRowIndex').value = vehicle.rowIndex;
-                    document.getElementById('vID').value = vehicle.id;
-                    document.getElementById('vStatus').value = vehicle.status;
-                    document.getElementById('vIssue').value = vehicle.issue;
-                    document.getElementById('vDate').value = vehicle.date;
-                    document.getElementById('vShopStatus').value = vehicle.shopStatus;
-                    document.getElementById('vLocation').value = vehicle.location || "Dispatch Lot";
-                    document.getElementById('vPartsOrdered').value = vehicle.partsOrdered || "";
-                    document.getElementById('vPartsEta').value = vehicle.partsEta || "";
+                del.style.display = 'block';
+                const v = fleetData.find(v => v.rowIndex === rowIndex);
+                if (v) {
+                    document.getElementById('targetRowIndex').value = v.rowIndex;
+                    document.getElementById('vID').value = v.id;
+                    document.getElementById('vStatus').value = v.status;
+                    document.getElementById('vIssue').value = v.issue;
+                    document.getElementById('vDate').value = v.date;
+                    document.getElementById('vShopStatus').value = v.shopStatus;
+                    document.getElementById('vLocation').value = v.location || "Dispatch Lot";
+                    document.getElementById('vPartsOrdered').value = v.partsOrdered || "";
+                    document.getElementById('vPartsEta').value = v.partsEta || "";
                     togglePartsFields();
                 }
             }
         }
-
         function closeModal() { document.getElementById('entryModal').style.display = 'none'; }
-
         function saveVehicle(e) {
             e.preventDefault();
-            const btn = document.getElementById('saveBtn');
-            const mode = document.getElementById('mode').value;
-            const action = mode === 'edit' ? 'update' : 'add';
+            const btn = document.getElementById('saveBtn'), mode = document.getElementById('mode').value;
             const payload = {
-                action,
+                action: mode === 'edit' ? 'update' : 'add',
                 rowIndex: document.getElementById('targetRowIndex').value,
-                id: document.getElementById('vID').value,
-                status: document.getElementById('vStatus').value,
-                issue: document.getElementById('vIssue').value,
-                date: document.getElementById('vDate').value,
-                shopStatus: document.getElementById('vShopStatus').value,
-                location: document.getElementById('vLocation').value,
-                partsOrdered: document.getElementById('vPartsOrdered').value,
-                partsEta: document.getElementById('vPartsEta').value
+                id: document.getElementById('vID').value, status: document.getElementById('vStatus').value,
+                issue: document.getElementById('vIssue').value, date: document.getElementById('vDate').value,
+                shopStatus: document.getElementById('vShopStatus').value, location: document.getElementById('vLocation').value,
+                partsOrdered: document.getElementById('vPartsOrdered').value, partsEta: document.getElementById('vPartsEta').value
             };
-            btn.innerText = "SAVING…";
-            btn.disabled = true;
+            btn.innerText = "SAVING…"; btn.disabled = true;
             fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) }).then(() => {
-                closeModal();
-                btn.innerText = "SAVE";
-                btn.disabled = false;
-                showToast("✓ Saved successfully");
-                setTimeout(fetchSheetData, 1000);
+                closeModal(); btn.innerText = "SAVE"; btn.disabled = false;
+                showToast("✓ Saved"); setTimeout(fetchSheetData, 1000);
             });
         }
-
         function deleteCurrent() {
-            if (confirm("Delete this vehicle?")) {
-                const rowIndex = document.getElementById('targetRowIndex').value;
-                const btn = document.getElementById('deleteBtn');
-                btn.innerText = "DELETING…";
-                fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ action: "delete", rowIndex }) }).then(() => {
-                    closeModal();
-                    btn.innerText = "DELETE";
-                    showToast("🗑 Unit deleted");
-                    setTimeout(fetchSheetData, 1000);
-                });
-            }
+            if (!confirm("Delete this vehicle?")) return;
+            const ri = document.getElementById('targetRowIndex').value, btn = document.getElementById('deleteBtn');
+            btn.innerText = "DELETING…";
+            fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ action: "delete", rowIndex: ri }) }).then(() => {
+                closeModal(); btn.innerText = "DELETE"; showToast("🗑 Deleted"); setTimeout(fetchSheetData, 1000);
+            });
         }
-
         function showToast(msg) {
-            const existing = document.querySelector('.toast');
-            if (existing) existing.remove();
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.textContent = msg;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
+            document.querySelectorAll('.toast').forEach(el => el.remove());
+            const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+            document.body.appendChild(t); setTimeout(() => t.remove(), 3000);
         }
-
         function toggleTheme() { document.body.classList.toggle('light-mode'); }
         function toggleWallboardMode() { document.body.classList.toggle('wallboard-mode'); }
-
-        // Keyboard shortcut: Escape to close modal
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeModal();
-        });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
         fetchSheetData();
         setInterval(fetchSheetData, 30000);
