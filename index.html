@@ -97,7 +97,6 @@
         @keyframes cardIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         .vehicle-card:hover { border-color: var(--border-hover); background-color: var(--bg-card-hover); }
         
-        /* Mapped Colors for 5 Columns */
         .border-complaints { border-left-color: var(--c-intake); }
         .border-ready { border-left-color: var(--c-ready); }
         .border-parts { border-left-color: var(--c-parts); }
@@ -106,7 +105,6 @@
 
         .vehicle-card.dragging { opacity: 0.3; transform: scale(0.97); border-style: dashed; }
 
-        /* Priority card styles */
         .vehicle-card.priority-high {
             border-color: var(--c-high);
             box-shadow: inset 0 0 0 1px rgba(245,158,11,0.15), 0 0 12px rgba(245,158,11,0.08);
@@ -152,7 +150,6 @@
         .card-meta { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; }
         .card-pill { font-family: 'JetBrains Mono', monospace; display: inline-block; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
         
-        /* Mapped Badges */
         .pill-complaints { background: var(--c-intake-dim); color: var(--c-intake); } 
         .pill-ready { background: rgba(34,211,238,0.12); color: var(--c-ready); }
         .pill-parts { background: var(--c-parts-dim); color: var(--c-parts); } 
@@ -186,7 +183,6 @@
         .btn-danger:hover { background: rgba(248,113,113,0.25); }
         .modal-content::-webkit-scrollbar { width: 6px; } .modal-content::-webkit-scrollbar-track { background: transparent; } .modal-content::-webkit-scrollbar-thumb { background: #2a2f38; border-radius: 3px; }
 
-        /* Priority selector styling in modal */
         #vPriority option[value="High"] { color: var(--c-high); }
         #vPriority option[value="Urgent"] { color: var(--c-urgent); }
 
@@ -241,6 +237,153 @@
         .bulletin-msg.pinned .bulletin-msg-body { color: var(--text-main); }
         .pin-btn { background: none; border: none; color: #444; cursor: pointer; font-size: 0.75rem; padding: 2px 4px; border-radius: 3px; transition: all var(--transition); }
         .pin-btn:hover { color: var(--c-bulletin); } .pin-btn.is-pinned { color: var(--c-bulletin); }
+
+        /* ===== MOBILE SWIPER ===== */
+        .swiper-nav { display: none; }
+        .swiper-dots { display: none; }
+
+        @media (max-width: 1200px) {
+            header { padding: 0.6rem 0.8rem; flex-wrap: wrap; gap: 0.5rem; }
+            h1 { font-size: 1rem; letter-spacing: 1px; }
+            .controls { flex-wrap: wrap; gap: 0.4rem; }
+            .search-input { width: 100%; order: 10; }
+            .search-input:focus { width: 100%; }
+            .controls button { padding: 0.4rem 0.7rem; font-size: 0.7rem; }
+
+            .kpi-container { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; padding: 0.5rem 0.8rem; }
+            .kpi-card { padding: 0.5rem 0.7rem; }
+            .kpi-value { font-size: 1.3rem; }
+            .kpi-label { font-size: 0.6rem; }
+
+            /* Swiper layout */
+            .kanban-board {
+                display: flex;
+                flex-direction: row;
+                grid-template-columns: none; /* Clear desktop grid layout */
+                overflow: hidden;
+                padding: 0;
+                gap: 0;
+                position: relative;
+                touch-action: pan-y;
+            }
+            .kanban-column {
+                min-width: 100%;
+                width: 100%;
+                flex-shrink: 0;
+                border-radius: 0;
+                border: none;
+                border-top: 1px solid var(--border);
+                transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            }
+            .column-header {
+                position: sticky;
+                top: 0;
+                z-index: 5;
+                background: var(--bg-column);
+                padding: 0.6rem 0.8rem;
+            }
+            .column-content { padding: 0.5rem 0.8rem; }
+
+            /* Swiper navigation arrows */
+            .swiper-nav {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0 0.8rem;
+                flex-shrink: 0;
+                gap: 0.5rem;
+            }
+            .swiper-arrow {
+                background: var(--bg-column);
+                border: 1px solid var(--border);
+                color: var(--text-main);
+                width: 36px;
+                height: 36px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                font-size: 1.1rem;
+                font-weight: 800;
+                transition: all var(--transition);
+                flex-shrink: 0;
+                -webkit-tap-highlight-color: transparent;
+            }
+            .swiper-arrow:active { transform: scale(0.9); background: var(--bg-card-hover); }
+            .swiper-arrow:disabled { opacity: 0.2; pointer-events: none; }
+
+            /* Dot indicators */
+            .swiper-dots {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 6px;
+                flex: 1;
+            }
+            .swiper-dot {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background: var(--border-hover);
+                border: none;
+                padding: 0;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                -webkit-tap-highlight-color: transparent;
+                position: relative;
+            }
+            .swiper-dot::after {
+                content: attr(data-count);
+                position: absolute;
+                top: -18px;
+                left: 50%;
+                transform: translateX(-50%);
+                font-family: 'JetBrains Mono', monospace;
+                font-size: 0.55rem;
+                font-weight: 800;
+                color: var(--text-muted);
+                opacity: 0;
+                transition: opacity 0.2s;
+                white-space: nowrap;
+            }
+            .swiper-dot.active {
+                width: 24px;
+                border-radius: 4px;
+                transform: scaleY(1.1);
+            }
+            .swiper-dot.active::after { opacity: 1; }
+            .swiper-dot:nth-child(1) { background: var(--c-intake); }
+            .swiper-dot:nth-child(2) { background: var(--c-ready); }
+            .swiper-dot:nth-child(3) { background: var(--c-parts); }
+            .swiper-dot:nth-child(4) { background: var(--c-shop); }
+            .swiper-dot:nth-child(5) { background: var(--c-done); }
+            .swiper-dot:not(.active) { opacity: 0.35; }
+
+            /* Swiper column label shown below dots */
+            .swiper-label {
+                font-family: 'JetBrains Mono', monospace;
+                font-size: 0.65rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                color: var(--text-muted);
+                text-align: center;
+                padding: 0.2rem 0 0.3rem;
+                transition: color 0.3s;
+            }
+
+            /* Hide drag handles on mobile */
+            .drag-handle { display: none; }
+            .vehicle-card { cursor: pointer; }
+
+            .toast { bottom: 4.5rem; right: 0.8rem; left: 0.8rem; justify-content: center; }
+        }
+
+        /* Light mode swiper overrides */
+        body.light-mode .swiper-arrow { background: #fff; border-color: #d1d5db; color: #111; }
+        body.light-mode .swiper-arrow:active { background: #e5e7eb; }
+        body.light-mode .swiper-dot:not(.active) { opacity: 0.25; }
     </style>
 </head>
 <body>
@@ -261,7 +404,14 @@
         <div class="kpi-card kpi-done"><div class="kpi-text"><span class="kpi-value" id="kpi-complete" style="color:var(--c-done)">0</span><span class="kpi-label">Complete</span></div></div>
     </div>
     
-    <div class="kanban-board">
+    <!-- Mobile Swiper Nav -->
+    <div class="swiper-nav" id="swiperNav">
+        <button class="swiper-arrow" id="swiperPrev" onclick="swiperGo(-1)">‹</button>
+        <div class="swiper-dots" id="swiperDots"></div>
+        <button class="swiper-arrow" id="swiperNext" onclick="swiperGo(1)">›</button>
+    </div>
+
+    <div class="kanban-board" id="kanbanBoard">
         <div class="kanban-column">
             <div class="column-header">
                 <div class="col-header-left">
@@ -294,8 +444,7 @@
             <div class="column-header">
                 <div class="col-header-left">
                     <div class="col-dot" style="background:var(--c-parts)"></div>
-                    <span style="color:var(--c-parts)">Parts Hold / Diagnostics
-</span>
+                    <span style="color:var(--c-parts)">Parts Hold / Diagnostics</span>
                 </div>
                 <div class="column-actions">
                     <button class="collapse-all-btn" onclick="toggleCollapseAll('col-parts')">⊟</button>
@@ -398,11 +547,10 @@
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxVv34BESHIyT_-HohJ-gUc4a2QdQdwHOzEmxFtr1WFxjwV620spd3KnjyHd8If5HSfYQ/exec"; 
         let fleetData = [], collapsedCards = new Set();
         
-        // 5 Explicit Columns - UPDATED MAPPING
         const COLUMN_STATUSES = { 
             complaints: ["Reported"], 
             ready:      ["Ready for Pickup"],
-            parts:      ["Awaiting part order", "Assessment"], // Moved Assessment here
+            parts:      ["Awaiting part order", "Assessment"],
             progress:   ["Received", "Parts Received - Waiting for Technician", "Repair in Progress"], 
             returned:   ["Complete"] 
         };
@@ -414,10 +562,161 @@
             return 'complaints'; 
         }
 
+        // ==================== MOBILE SWIPER ====================
+        const COLUMN_NAMES = ['Complaints', 'Ready', 'Parts', 'In Progress', 'Returned'];
+        const COLUMN_COLORS = ['var(--c-intake)', 'var(--c-ready)', 'var(--c-parts)', 'var(--c-shop)', 'var(--c-done)'];
+        let swiperIndex = 0;
+        let touchStartX = 0, touchStartY = 0, touchDeltaX = 0, isSwiping = false, swipeStartTime = 0;
+        const SWIPE_THRESHOLD = 50;
+        const SWIPE_VELOCITY_THRESHOLD = 0.3;
+
+        function isMobile() {
+            return window.innerWidth <= 1200;
+        }
+
+        function initSwiperDots() {
+            const dotsContainer = document.getElementById('swiperDots');
+            dotsContainer.innerHTML = '';
+            for (let i = 0; i < 5; i++) {
+                const dot = document.createElement('button');
+                dot.className = 'swiper-dot' + (i === swiperIndex ? ' active' : '');
+                dot.dataset.count = '';
+                dot.onclick = () => swiperGoTo(i);
+                dotsContainer.appendChild(dot);
+            }
+            updateSwiperUI();
+        }
+
+        function updateSwiperUI() {
+    if (!isMobile()) return;
+    const dots = document.querySelectorAll('.swiper-dot');
+    const columns = document.querySelectorAll('.kanban-column');
+    const counts = [
+        document.getElementById('count-col-1').textContent,
+        document.getElementById('count-col-2').textContent,
+        document.getElementById('count-col-3').textContent,
+        document.getElementById('count-col-4').textContent,
+        document.getElementById('count-col-5').textContent,
+    ];
+
+    dots.forEach((dot, i) => {
+        dot.classList.toggle('active', i === swiperIndex);
+        dot.dataset.count = counts[i];
+    });
+
+    columns.forEach((col, i) => {
+        // FIXED: Removed 'i' from the calculation. 
+        // We shift the whole flex row left by the swiperIndex.
+        col.style.transform = `translateX(${-swiperIndex * 100}%)`;
+    });
+
+    document.getElementById('swiperPrev').disabled = swiperIndex === 0;
+    document.getElementById('swiperNext').disabled = swiperIndex === 4;
+}
+
+        function swiperGo(dir) {
+            const next = swiperIndex + dir;
+            if (next < 0 || next > 4) return;
+            swiperGoTo(next);
+        }
+
+        function swiperGoTo(idx) {
+            swiperIndex = Math.max(0, Math.min(4, idx));
+            updateSwiperUI();
+        }
+
+        // Touch handlers for swipe
+        function onTouchStart(e) {
+            if (!isMobile()) return;
+            // Don't intercept scrolling within column content
+            const touch = e.touches[0];
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+            touchDeltaX = 0;
+            isSwiping = false;
+            swipeStartTime = Date.now();
+        }
+
+        function onTouchMove(e) {
+    if (!isMobile()) return;
+    const touch = e.touches[0];
+    const deltaX = touch.clientX - touchStartX;
+    const deltaY = touch.clientY - touchStartY;
+
+    // Determine swipe direction: if horizontal motion > vertical, it's a swipe
+    if (!isSwiping && Math.abs(deltaX) > 10) {
+        if (Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
+            isSwiping = true;
+        }
+    }
+
+    if (isSwiping) {
+        e.preventDefault();
+        touchDeltaX = deltaX;
+
+        // Visual feedback: translate columns with finger
+        const columns = document.querySelectorAll('.kanban-column');
+        const pct = (touchDeltaX / window.innerWidth) * 100;
+        columns.forEach((col, i) => {
+            col.style.transition = 'none';
+            // FIXED: Removed 'i' from calculation here as well
+            col.style.transform = `translateX(${-swiperIndex * 100 + pct}%)`;
+        });
+    }
+}
+        function onTouchEnd(e) {
+            if (!isMobile() || !isSwiping) return;
+
+            const elapsed = Date.now() - swipeStartTime;
+            const velocity = Math.abs(touchDeltaX) / elapsed;
+
+            // Restore transitions
+            const columns = document.querySelectorAll('.kanban-column');
+            columns.forEach(col => {
+                col.style.transition = 'transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+            });
+
+            // Determine if swipe is valid
+            if (Math.abs(touchDeltaX) > SWIPE_THRESHOLD || velocity > SWIPE_VELOCITY_THRESHOLD) {
+                if (touchDeltaX > 0 && swiperIndex > 0) {
+                    swiperIndex--;
+                } else if (touchDeltaX < 0 && swiperIndex < 4) {
+                    swiperIndex++;
+                }
+            }
+
+            updateSwiperUI();
+            isSwiping = false;
+            touchDeltaX = 0;
+        }
+
+        // Attach swipe listeners to board
+        const kanbanBoard = document.getElementById('kanbanBoard');
+        kanbanBoard.addEventListener('touchstart', onTouchStart, { passive: true });
+        kanbanBoard.addEventListener('touchmove', onTouchMove, { passive: false });
+        kanbanBoard.addEventListener('touchend', onTouchEnd, { passive: true });
+
+        // Re-init on resize
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                if (isMobile()) {
+                    updateSwiperUI();
+                } else {
+                    // Reset transforms for desktop
+                    document.querySelectorAll('.kanban-column').forEach(col => {
+                        col.style.transform = '';
+                        col.style.transition = '';
+                    });
+                }
+            }, 150);
+        });
+
         // ==================== DRAG & DROP ====================
         let draggedRowIndex = null, draggedEl = null, currentIndicator = null;
         function clearIndicators() { document.querySelectorAll('.drop-indicator').forEach(e=>e.remove()); document.querySelectorAll('.drag-over-column').forEach(e=>e.classList.remove('drag-over-column')); currentIndicator = null; }
-        function onDragStart(e, ri) { draggedRowIndex = ri; draggedEl = e.target.closest('.vehicle-card'); draggedEl.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(ri)); const g = document.createElement('div'); g.style.cssText = 'position:absolute;top:-1000px;'; document.body.appendChild(g); e.dataTransfer.setDragImage(g, 0, 0); setTimeout(() => g.remove(), 0); }
+        function onDragStart(e, ri) { if (isMobile()) { e.preventDefault(); return; } draggedRowIndex = ri; draggedEl = e.target.closest('.vehicle-card'); draggedEl.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(ri)); const g = document.createElement('div'); g.style.cssText = 'position:absolute;top:-1000px;'; document.body.appendChild(g); e.dataTransfer.setDragImage(g, 0, 0); setTimeout(() => g.remove(), 0); }
         function onDragEnd() { if (draggedEl) { draggedEl.classList.remove('dragging'); draggedEl.style.opacity = ''; } draggedRowIndex = null; draggedEl = null; clearIndicators(); }
         function getClosestCard(col, y) { const cards = [...col.querySelectorAll('.vehicle-card:not(.dragging)')]; let closest = null, co = Number.NEGATIVE_INFINITY; for (const c of cards) { const b = c.getBoundingClientRect(), o = y - b.top - b.height / 2; if (o < 0 && o > co) { co = o; closest = c; } } return closest; }
         function onDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; const cc = e.target.closest('.column-content'); if (!cc) return; document.querySelectorAll('.drag-over-column').forEach(e => e.classList.remove('drag-over-column')); cc.closest('.kanban-column').classList.add('drag-over-column'); const cl = getClosestCard(cc, e.clientY); if (currentIndicator) currentIndicator.remove(); const ind = document.createElement('div'); ind.className = 'drop-indicator'; currentIndicator = ind; if (cl) cc.insertBefore(ind, cl); else cc.appendChild(ind); }
@@ -455,7 +754,6 @@
                 if (groups[key]) groups[key].push(v);
             });
 
-            // Sort logic
             for (const col of Object.keys(groups)) {
                 groups[col].sort((a, b) => {
                     const prioRank = { Urgent: 0, High: 1, Normal: 2 };
@@ -498,12 +796,11 @@
                     const card = document.createElement('div');
                     card.className = `vehicle-card ${bc}${prioClass} ${ic ? 'collapsed' : ''}`;
                     card.style.animationDelay = `${Math.min(animIdx * 0.025, 0.3)}s`;
-                    card.dataset.cardKey = ck; card.dataset.rowIndex = v.rowIndex; card.draggable = true;
+                    card.dataset.cardKey = ck; card.dataset.rowIndex = v.rowIndex; card.draggable = !isMobile();
                     
                     card.addEventListener('dragstart', e => onDragStart(e, v.rowIndex));
                     card.addEventListener('dragend', onDragEnd);
                     
-                    // Added Notes Display here
                     const notesHtml = v.notes ? `<div class="card-notes">📝 ${v.notes}</div>` : '';
 
                     card.innerHTML = `<div class="card-top-bar"><div class="card-id-group"><div class="drag-handle" title="Drag">${GRIP}</div><span class="card-id">${v.id}</span><span class="card-condition ${cc}">${v.status || ''}</span>${prioBadge}${db}</div><div class="card-right"><span class="card-date">${formatDate(v.date)}</span><button class="collapse-toggle" onclick="event.stopPropagation();toggleCard('${ck}',this);">${CHEV}</button></div></div><div class="card-body" onclick="openModal('edit',${v.rowIndex})"><div class="card-issue">${v.issue}</div><div class="card-meta"><span class="card-pill ${pc}">${status}</span><div class="card-location">📍 ${v.location || 'Dispatch Lot'}</div></div><div class="card-location-row">${homeLoc}</div>${ph}${notesHtml}</div>`;
@@ -526,6 +823,9 @@
             document.getElementById('kpi-parts').innerText = groups.parts.length;
             document.getElementById('kpi-complete').innerText = groups.returned.length;
             document.getElementById('kpi-ready').innerText = groups.ready.length;
+
+            // Update swiper after render
+            if (isMobile()) updateSwiperUI();
         }
 
         // ==================== COLLAPSE ====================
@@ -541,7 +841,6 @@
             
             if (s === "Awaiting part order") { 
                 sec.style.display = "block"; 
-                // Changed from required=true to required=false
                 o.required = false; 
                 e.required = false; 
             } else { 
@@ -557,7 +856,7 @@
                 document.getElementById('modalTitle').innerText = "ADD NEW UNIT"; document.getElementById('vehicleForm').reset();
                 document.getElementById('vID').readOnly = false; document.getElementById('vDate').valueAsDate = new Date();
                 document.getElementById('vPriority').value = 'Normal'; document.getElementById('vHomeLocation').value = '';
-                document.getElementById('vNotes').value = ''; // Reset notes
+                document.getElementById('vNotes').value = '';
                 d.style.display = 'none'; togglePartsFields();
             } else {
                 document.getElementById('modalTitle').innerText = "EDIT UNIT"; d.style.display = 'block';
@@ -572,7 +871,7 @@
                     document.getElementById('vPartsEta').value = v.partsEta || "";
                     document.getElementById('vPriority').value = v.priority || "Normal";
                     document.getElementById('vHomeLocation').value = v.homeLocation || "";
-                    document.getElementById('vNotes').value = v.notes || ""; // Load notes
+                    document.getElementById('vNotes').value = v.notes || "";
                     togglePartsFields();
                 }
             }
@@ -592,7 +891,7 @@
                 partsEta: document.getElementById('vPartsEta').value, 
                 priority: document.getElementById('vPriority').value, 
                 homeLocation: document.getElementById('vHomeLocation').value,
-                notes: document.getElementById('vNotes').value // Save notes
+                notes: document.getElementById('vNotes').value
             }; 
             b.innerText = "SAVING…"; b.disabled = true; 
             fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(p) }).then(() => { closeModal(); b.innerText = "SAVE"; b.disabled = false; showToast("✓ Saved"); setTimeout(fetchSheetData, 1000); }); 
@@ -619,9 +918,10 @@
         function toggleTheme() { document.body.classList.toggle('light-mode'); }
         function toggleWallboardMode() { document.body.classList.toggle('wallboard-mode'); }
         document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); if (document.getElementById('bulletinPanel').classList.contains('open')) toggleBulletin(); } });
+
+        // Init
+        initSwiperDots();
         fetchSheetData(); setInterval(fetchSheetData, 30000); loadBulletin();
     </script>
 </body>
 </html>
-
-
