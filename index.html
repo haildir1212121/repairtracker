@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fleet Command</title>
+    <title>DLX/DMT Repair Tracker</title>
     <style>
         :root {
             /* HIGH CONTRAST DARK MODE */
@@ -18,10 +18,10 @@
             --accent: #2563eb; 
             
             /* Status Colors (High Visibility) */
-            --c-intake: #d946ef; /* Neon Fuchsia (Reported) */
-            --c-shop: #3b82f6;   /* Electric Blue (Working) */
-            --c-parts: #ff3d00;  /* Safety Orange (Blocked) */
-            --c-done: #00e676;   /* Neon Green (Ready) */
+            --c-intake: #d946ef; /* Neon Fuchsia */
+            --c-shop: #3b82f6;   /* Electric Blue */
+            --c-parts: #ff3d00;  /* Safety Orange */
+            --c-done: #00e676;   /* Neon Green */
             
             --shadow: 0 4px 15px rgba(0,0,0,0.5);
             --modal-bg: rgba(0, 0, 0, 0.9);
@@ -38,7 +38,6 @@
             --shadow: 0 2px 8px rgba(0,0,0,0.1);
             --modal-bg: rgba(255, 255, 255, 0.9);
             
-            /* Darker accents for white background readability */
             --c-intake: #9333ea; 
             --c-shop: #0056b3;   
             --c-parts: #d32f2f;  
@@ -105,7 +104,6 @@
             overflow: hidden;
         }
         
-        /* Colored Top Borders for KPIs */
         .kpi-intake { border-top: 5px solid var(--c-intake); }
         .kpi-parts { border-top: 5px solid var(--c-parts); }
         .kpi-done { border-top: 5px solid var(--c-done); }
@@ -165,30 +163,41 @@
             margin-bottom: 1rem;
             box-shadow: var(--shadow);
             cursor: pointer;
-            border-left: 6px solid transparent; /* Thicker border */
+            border-left: 6px solid transparent; 
             transition: transform 0.1s;
         }
         .vehicle-card:hover { transform: scale(1.02); background-color: #2a2a2a; }
 
-        /* High Contrast Borders */
         .border-intake { border-left-color: var(--c-intake); }
         .border-shop { border-left-color: var(--c-shop); }
         .border-parts { border-left-color: var(--c-parts); }
         .border-done { border-left-color: var(--c-done); }
 
         .card-header { display: flex; justify-content: space-between; margin-bottom: 0.5rem; align-items: center; }
-        .card-id { font-weight: 500; font-size: 1.6rem; color: var(--text-main); letter-spacing: 0.1rem; }
+        .card-id { font-weight: 900; font-size: 1.3rem; color: var(--text-main); }
         .card-date { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; }
         
         .card-issue { 
             font-size: 1rem; margin-bottom: 1rem; color: #ddd; font-weight: 500;
             display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
         }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: 1rem;
+        }
         
         .card-pill {
             display: inline-block; padding: 0.3rem 0.8rem; border-radius: 4px; 
             font-size: 0.75rem; font-weight: 800; text-transform: uppercase;
-            color: #000; /* Black text on colored pills for max contrast */
+            color: #000; 
+        }
+
+        .card-location {
+            font-size: 0.8rem; font-weight: 700; color: var(--text-muted);
+            text-transform: uppercase; display: flex; align-items: center; gap: 4px;
         }
         
         /* Pill specific colors */
@@ -215,7 +224,7 @@
 <body>
 
     <header>
-        <h1>DLX/DMT Maintenence Tracker</h1>
+        <h1>Fleet Command</h1>
         <div class="controls">
             <button class="btn-primary" onclick="openModal('add')">+ Add Unit</button>
             <button class="btn-outline" onclick="toggleTheme()">Contrast</button>
@@ -228,21 +237,17 @@
             <span class="kpi-value" id="kpi-total" style="color: var(--c-intake)">0</span>
             <span class="kpi-label">Reported</span>
         </div>
-
-
-
-        <div class="kpi-card kpi-ready">
-            <span class="kpi-value" id="kpi-ready" style="color: #00bcd4">0</span>
-            <span class="kpi-label">To Deliver</span>
-        </div>
         <div class="kpi-card kpi-parts">
             <span class="kpi-value" id="kpi-parts" style="color: var(--c-parts)">0</span>
             <span class="kpi-label">Parts Hold</span>
         </div>
-
         <div class="kpi-card kpi-done">
             <span class="kpi-value" id="kpi-complete" style="color: var(--c-done)">0</span>
             <span class="kpi-label">Complete</span>
+        </div>
+        <div class="kpi-card kpi-ready">
+            <span class="kpi-value" id="kpi-ready" style="color: #00bcd4">0</span>
+            <span class="kpi-label">To Deliver</span>
         </div>
     </div>
 
@@ -306,6 +311,17 @@
                 <div class="form-group">
                     <label>Issue</label>
                     <input type="text" id="vIssue" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Current Location</label>
+                    <select id="vLocation">
+                        <option value="Dispatch Lot">Dispatch Lot</option>
+                        <option value="Pam (Ridesource, DMV)">Pam (Ridesource, DMV)</option>
+                        <option value="Shop">Shop</option>
+                        <option value="Paint">Paint</option>
+                        <option value="Glass">Glass</option>
+                    </select>
                 </div>
 
                 <div class="form-group">
@@ -412,9 +428,10 @@
                         <span class="card-date">${v.date}</span>
                     </div>
                     <div class="card-issue">${v.issue}</div>
-                    <span class="card-pill ${pillClass}">${status}</span>
-                    <div style="font-size:0.7rem; color:var(--text-muted); margin-top:0.8rem; text-align:right; font-weight:bold;">
-                        ${v.lastUpdated || ''}
+                    
+                    <div class="card-footer">
+                        <span class="card-pill ${pillClass}">${status}</span>
+                        <div class="card-location">📍 ${v.location || 'Dispatch Lot'}</div>
                     </div>
                 `;
                 targetCol.appendChild(card);
@@ -454,6 +471,7 @@
                     document.getElementById('vIssue').value = vehicle.issue;
                     document.getElementById('vDate').value = vehicle.date; 
                     document.getElementById('vShopStatus').value = vehicle.shopStatus;
+                    document.getElementById('vLocation').value = vehicle.location || "Dispatch Lot";
                 }
             }
         }
@@ -473,7 +491,8 @@
                 status: document.getElementById('vStatus').value,
                 issue: document.getElementById('vIssue').value,
                 date: document.getElementById('vDate').value,
-                shopStatus: document.getElementById('vShopStatus').value
+                shopStatus: document.getElementById('vShopStatus').value,
+                location: document.getElementById('vLocation').value
             };
 
             btn.innerText = "SAVING...";
@@ -512,4 +531,3 @@
     </script>
 </body>
 </html>
-
