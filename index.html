@@ -17,18 +17,17 @@
             /* NEON PALETTE */
             --accent: #2563eb; 
             
-            /* Status Colors (High Visibility) */
-            --c-intake: #d946ef; /* Neon Fuchsia */
-            --c-shop: #3b82f6;   /* Electric Blue */
-            --c-parts: #ff3d00;  /* Safety Orange */
-            --c-done: #00e676;   /* Neon Green */
+            /* Status Colors */
+            --c-intake: #d946ef; 
+            --c-shop: #3b82f6;   
+            --c-parts: #ff3d00;  
+            --c-done: #00e676;   
             
             --shadow: 0 4px 15px rgba(0,0,0,0.5);
             --modal-bg: rgba(0, 0, 0, 0.9);
         }
 
         body.light-mode {
-            /* HIGH CONTRAST LIGHT MODE */
             --bg-body: #f0f2f5;       
             --bg-column: #ffffff;       
             --bg-card: #ffffff;
@@ -197,10 +196,21 @@
 
         .card-location {
             font-size: 0.8rem; font-weight: 700; color: var(--text-muted);
-            text-transform: uppercase; display: flex; align-items: center; gap: 4px;
+            text-transform: uppercase; display: flex; align-items: center; gap: 4px; margin-top: 15px;
         }
+
+        /* Parts Info Block on Card */
+        .parts-info-block {
+            margin-top: 0.8rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid #444;
+            font-size: 0.8rem;
+        }
+        .parts-row { display: flex; justify-content: space-between; margin-bottom: 2px; }
+        .parts-label { color: #888; text-transform: uppercase; font-size: 0.7rem; font-weight: bold; }
+        .parts-val { color: white; font-weight: bold; }
+        .parts-val.eta { color: var(--c-parts); }
         
-        /* Pill specific colors */
         .pill-intake { background: var(--c-intake); color: white; }
         .pill-shop { background: var(--c-shop); color: white;}
         .pill-parts { background: var(--c-parts); color: black;}
@@ -214,17 +224,25 @@
         input, select { width: 100%; padding: 1rem; background-color: #000; border: 1px solid #444; color: white; border-radius: 4px; font-size: 1.1rem; font-weight: 500;}
         input:focus, select:focus { border-color: var(--c-shop); outline: none; }
         
+        #partsSection {
+            background: rgba(255, 61, 0, 0.1);
+            border: 1px solid var(--c-parts);
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            display: none; 
+        }
+
         .modal-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem; }
         .btn-danger { background-color: var(--c-parts); color: black; font-weight: bold; }
 
-        /* Wallboard Mode Hides */
         body.wallboard-mode .controls { display: none; }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>Fleet Command</h1>
+        <h1>DLX/DMT Repair Tracker</h1>
         <div class="controls">
             <button class="btn-primary" onclick="openModal('add')">+ Add Unit</button>
             <button class="btn-outline" onclick="toggleTheme()">Contrast</button>
@@ -252,7 +270,6 @@
     </div>
 
     <div class="kanban-board">
-        
         <div class="kanban-column" style="border-top: 4px solid var(--c-intake)">
             <div class="column-header">
                 <span style="color: var(--c-intake)">Intake / Pickup</span>
@@ -284,7 +301,6 @@
             </div>
             <div class="column-content" id="col-done"></div>
         </div>
-
     </div>
 
     <div id="entryModal" class="modal-overlay">
@@ -325,13 +341,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Date In</label>
-                    <input type="date" id="vDate" required>
-                </div>
-
-                <div class="form-group">
                     <label>Shop Status</label>
-                    <select id="vShopStatus">
+                    <select id="vShopStatus" onchange="togglePartsFields()">
                         <option value="Reported">Reported</option>
                         <option value="Awaiting Pickup">Awaiting Pickup</option>
                         <option value="Received">Received</option>
@@ -340,6 +351,22 @@
                         <option value="Complete">Complete</option>
                         <option value="Ready for Delivery">Ready for Delivery</option>
                     </select>
+                </div>
+
+                <div id="partsSection">
+                    <div class="form-group">
+                        <label>Date Parts Ordered</label>
+                        <input type="date" id="vPartsOrdered">
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label>Estimated Delivery (ETA)</label>
+                        <input type="date" id="vPartsEta">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Date In</label>
+                    <input type="date" id="vDate" required>
                 </div>
 
                 <div class="modal-actions">
@@ -379,6 +406,16 @@
             }
         }
 
+        // Helper to turn YYYY-MM-DD into MM/DD/YYYY
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const parts = dateString.split('-');
+            if (parts.length === 3) {
+                return `${parts[1]}/${parts[2]}/${parts[0]}`;
+            }
+            return dateString;
+        }
+
         function renderBoard() {
             const cols = {
                 intake: document.getElementById('col-intake'),
@@ -395,12 +432,14 @@
                 let targetCol = cols.intake; 
                 let borderClass = "border-intake";
                 let pillClass = "pill-intake";
+                let showPartsInfo = false;
 
                 if (status === "Awaiting part order") {
                     targetCol = cols.parts;
                     borderClass = "border-parts";
                     pillClass = "pill-parts";
                     counts.parts++;
+                    showPartsInfo = true;
                 } 
                 else if (status === "Received" || status === "Assessment") {
                     targetCol = cols.shop;
@@ -419,20 +458,41 @@
                     counts.intake++;
                 }
 
+                // Logic for the card footer
+                let footerContent = `<div class="card-location">📍 ${v.location || 'Dispatch Lot'}</div>`;
+                
+                // If it is awaiting parts, show the detailed dates block instead of location
+                if (showPartsInfo) {
+                    const ord = formatDate(v.partsOrdered);
+                    const eta = formatDate(v.partsEta);
+                    footerContent = `
+                        <div class="parts-info-block">
+                            <div class="parts-row">
+                                <span class="parts-label">Ordered</span>
+                                <span class="parts-val">${ord || '-'}</span>
+                            </div>
+                            <div class="parts-row">
+                                <span class="parts-label">ETA</span>
+                                <span class="parts-val eta">${eta || '-'}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+
                 const card = document.createElement('div');
                 card.className = `vehicle-card ${borderClass}`;
                 card.onclick = () => openModal('edit', v.rowIndex);
                 card.innerHTML = `
                     <div class="card-header">
                         <span class="card-id">${v.id}</span>
-                        <span class="card-date">${v.date}</span>
+                        <span class="card-date">${formatDate(v.date)}</span>
                     </div>
                     <div class="card-issue">${v.issue}</div>
                     
                     <div class="card-footer">
                         <span class="card-pill ${pillClass}">${status}</span>
-                        <div class="card-location">📍 ${v.location || 'Dispatch Lot'}</div>
                     </div>
+                    ${footerContent}
                 `;
                 targetCol.appendChild(card);
             });
@@ -449,6 +509,23 @@
         }
 
         // --- FORM LOGIC ---
+        function togglePartsFields() {
+            const status = document.getElementById('vShopStatus').value;
+            const partsSection = document.getElementById('partsSection');
+            const orderedInput = document.getElementById('vPartsOrdered');
+            const etaInput = document.getElementById('vPartsEta');
+
+            if (status === "Awaiting part order") {
+                partsSection.style.display = "block";
+                orderedInput.required = true;
+                etaInput.required = true;
+            } else {
+                partsSection.style.display = "none";
+                orderedInput.required = false;
+                etaInput.required = false;
+            }
+        }
+
         function openModal(mode, rowIndex = null) {
             document.getElementById('entryModal').style.display = 'flex';
             document.getElementById('mode').value = mode;
@@ -460,6 +537,7 @@
                 document.getElementById('vID').readOnly = false;
                 document.getElementById('vDate').valueAsDate = new Date();
                 delBtn.style.display = 'none';
+                togglePartsFields(); 
             } else {
                 document.getElementById('modalTitle').innerText = "EDIT UNIT";
                 delBtn.style.display = 'block';
@@ -472,6 +550,11 @@
                     document.getElementById('vDate').value = vehicle.date; 
                     document.getElementById('vShopStatus').value = vehicle.shopStatus;
                     document.getElementById('vLocation').value = vehicle.location || "Dispatch Lot";
+                    
+                    document.getElementById('vPartsOrdered').value = vehicle.partsOrdered || "";
+                    document.getElementById('vPartsEta').value = vehicle.partsEta || "";
+                    
+                    togglePartsFields(); 
                 }
             }
         }
@@ -492,7 +575,9 @@
                 issue: document.getElementById('vIssue').value,
                 date: document.getElementById('vDate').value,
                 shopStatus: document.getElementById('vShopStatus').value,
-                location: document.getElementById('vLocation').value
+                location: document.getElementById('vLocation').value,
+                partsOrdered: document.getElementById('vPartsOrdered').value,
+                partsEta: document.getElementById('vPartsEta').value
             };
 
             btn.innerText = "SAVING...";
