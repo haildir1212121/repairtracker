@@ -4,293 +4,580 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DLX / DMT Repair Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* HIGH CONTRAST DARK MODE */
-            --bg-body: #000000;       
-            --bg-column: #111111;       
-            --bg-card: #222222;
-            --text-main: #ffffff;
-            --text-muted: #a0a0a0;
-            --border: #333333;
-            
-            /* NEON PALETTE */
-            --accent: #2563eb; 
-            
-            /* Status Colors */
-            --c-intake: #d946ef; 
-            --c-shop: #3b82f6;   
-            --c-parts: #ff3d00;  
-            --c-done: #00e676;   
-            
-            --shadow: 0 4px 15px rgba(0,0,0,0.5);
-            --modal-bg: rgba(0, 0, 0, 0.9);
+            --bg-body: #08090a;
+            --bg-column: #101214;
+            --bg-card: #181b1f;
+            --bg-card-hover: #1e2228;
+            --text-main: #e8eaed;
+            --text-muted: #6b7280;
+            --border: #1e2228;
+            --border-hover: #2a2f38;
+
+            --c-intake: #c084fc;
+            --c-intake-dim: rgba(192, 132, 252, 0.12);
+            --c-shop: #60a5fa;
+            --c-shop-dim: rgba(96, 165, 250, 0.12);
+            --c-parts: #fb923c;
+            --c-parts-dim: rgba(251, 146, 60, 0.12);
+            --c-done: #4ade80;
+            --c-done-dim: rgba(74, 222, 128, 0.12);
+            --c-ready: #22d3ee;
+
+            --radius: 10px;
+            --radius-sm: 6px;
+            --shadow: 0 1px 3px rgba(0,0,0,0.4);
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.6);
+            --modal-bg: rgba(0, 0, 0, 0.8);
+            --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         body.light-mode {
-            --bg-body: #f0f2f5;       
-            --bg-column: #ffffff;       
+            --bg-body: #f1f3f5;
+            --bg-column: #ffffff;
             --bg-card: #ffffff;
-            --text-main: #000000;     
-            --text-muted: #555555;
-            --border: #cccccc;
-            --shadow: 0 2px 8px rgba(0,0,0,0.1);
-            --modal-bg: rgba(255, 255, 255, 0.9);
-            
-            --c-intake: #9333ea; 
-            --c-shop: #0056b3;   
-            --c-parts: #d32f2f;  
-            --c-done: #00701a;   
+            --bg-card-hover: #f8f9fa;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --border-hover: #d1d5db;
+            --shadow: 0 1px 3px rgba(0,0,0,0.06);
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+            --modal-bg: rgba(255, 255, 255, 0.85);
+
+            --c-intake: #a855f7;
+            --c-intake-dim: rgba(168, 85, 247, 0.08);
+            --c-shop: #3b82f6;
+            --c-shop-dim: rgba(59, 130, 246, 0.08);
+            --c-parts: #ea580c;
+            --c-parts-dim: rgba(234, 88, 12, 0.08);
+            --c-done: #16a34a;
+            --c-done-dim: rgba(22, 163, 74, 0.08);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }
+        body.light-mode h1 {
+            background: linear-gradient(135deg, #111, #555);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        body.light-mode .search-input {
+            background: #f1f3f5;
+            color: #111;
+            border-color: #d1d5db;
+        }
+        body.light-mode .search-input::placeholder { color: #999; }
+        body.light-mode .btn-outline { background: #e5e7eb; color: #111; border-color: #d1d5db; }
+        body.light-mode .btn-outline:hover { background: #d1d5db; }
+        body.light-mode input, body.light-mode select {
+            background: #f1f3f5; color: #111; border-color: #d1d5db;
+        }
+        body.light-mode .column-count { background: #e5e7eb; color: #111; }
+        body.light-mode .vehicle-card:hover { background-color: var(--bg-card-hover); }
+        body.light-mode .card-issue { color: #374151; }
+        body.light-mode .parts-label { color: #6b7280; }
+        body.light-mode .parts-val { color: #111; }
+        body.light-mode .collapse-toggle { color: #6b7280; }
+        body.light-mode .collapse-toggle:hover { color: #111; background: #e5e7eb; }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
+            font-family: 'Outfit', sans-serif;
             background-color: var(--bg-body);
             color: var(--text-main);
             height: 100vh;
             display: flex;
             flex-direction: column;
-            overflow: hidden; /* Prevents whole page scroll */
+            overflow: hidden;
         }
 
-        /* HEADER */
+        /* ===== HEADER ===== */
         header {
             background-color: var(--bg-column);
-            padding: 1rem 2rem;
+            padding: 0.8rem 1.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 2px solid var(--border);
-            flex-shrink: 0; /* Prevents header shrinking */
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
         }
 
-        h1 { 
-            font-size: 1.8rem; 
-            font-weight: 900; 
-            letter-spacing: 1px; 
+        h1 {
+     
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: 2px;
             text-transform: uppercase;
-            background: linear-gradient(90deg, #fff, #aaa);
+            background: white;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-right: 2rem;
+            white-space: nowrap;
         }
-        
+
         .controls { display: flex; align-items: center; gap: 0.5rem; }
 
-        /* SEARCH BAR */
-        .search-container { position: relative; margin-right: 1rem; }
         .search-input {
-            padding: 0.6rem 1rem;
-            border-radius: 4px;
-            background: #000;
+            padding: 0.5rem 0.8rem;
+            border-radius: var(--radius-sm);
+            background: #0d0e10;
             border: 1px solid var(--border);
-            color: white;
-            font-weight: bold;
-            width: 200px;
-            transition: width 0.3s;
+            color: var(--text-main);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 600;
+            width: 180px;
+            transition: all var(--transition);
         }
-        .search-input:focus { width: 300px; outline: none; border-color: var(--accent); }
-        .search-input::placeholder { color: #555; text-transform: uppercase; font-size: 0.8rem; }
+        .search-input:focus { width: 260px; outline: none; border-color: var(--c-shop); box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15); }
+        .search-input::placeholder { color: #444; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; }
 
         .controls button {
-            padding: 0.6rem 1.2rem; border: none; border-radius: 4px; cursor: pointer; font-weight: 700; font-size: 0.9rem; text-transform: uppercase;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all var(--transition);
         }
-        .btn-primary { background-color: var(--c-shop); color: white; }
-        .btn-outline { background: #333; border: 1px solid #555; color: white; }
-        .btn-outline:hover { background: #444; }
+        .btn-primary { background: var(--c-shop); color: white; }
+        .btn-primary:hover { filter: brightness(1.15); transform: translateY(-1px); }
+        .btn-outline { background: #1a1d21; border: 1px solid #2a2f38; color: #9ca3af; }
+        .btn-outline:hover { background: #22262c; color: white; }
 
-        /* KPI BAR */
+        /* ===== KPI BAR ===== */
         .kpi-container {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 1.5rem;
-            padding: 1.5rem 2rem;
-            flex-shrink: 0; /* Prevents squishing */
+            gap: 0.8rem;
+            padding: 0.8rem 1.5rem;
+            flex-shrink: 0;
         }
 
         .kpi-card {
             background: var(--bg-column);
-            padding: 1rem;
-            border-radius: 6px;
+            padding: 0.8rem 1rem;
+            border-radius: var(--radius);
             display: flex;
-            flex-direction: column;
+            align-items: center;
+            gap: 0.8rem;
             border: 1px solid var(--border);
-            box-shadow: 0 0 10px rgba(0,0,0,0.3);
             position: relative;
             overflow: hidden;
+            transition: all var(--transition);
         }
-        
-        .kpi-intake { border-top: 5px solid var(--c-intake); }
-        .kpi-parts { border-top: 5px solid var(--c-parts); }
-        .kpi-done { border-top: 5px solid var(--c-done); }
-        .kpi-ready { border-top: 5px solid #00bcd4; }
+        .kpi-card:hover { border-color: var(--border-hover); }
 
-        .kpi-value { font-size: 2.5rem; font-weight: 900; line-height: 1; margin-bottom: 0.2rem; }
-        .kpi-label { font-size: 0.85rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; letter-spacing: 0.5px; }
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+        }
+        .kpi-intake::before { background: var(--c-intake); }
+        .kpi-parts::before { background: var(--c-parts); }
+        .kpi-done::before { background: var(--c-done); }
+        .kpi-ready::before { background: var(--c-ready); }
 
-        /* KANBAN BOARD */
+        .kpi-icon {
+            width: 40px; height: 40px;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        .kpi-intake .kpi-icon { background: var(--c-intake-dim); }
+        .kpi-parts .kpi-icon { background: var(--c-parts-dim); }
+        .kpi-done .kpi-icon { background: var(--c-done-dim); }
+        .kpi-ready .kpi-icon { background: rgba(34, 211, 238, 0.12); }
+
+        .kpi-text { display: flex; flex-direction: column; }
+        .kpi-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.6rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+        .kpi-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-top: 2px;
+        }
+
+        /* ===== KANBAN BOARD ===== */
         .kanban-board {
-            flex: 1; /* Takes remaining height */
-            min-height: 0; /* Critical for scrolling flex children */
+            flex: 1;
+            min-height: 0;
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 1.5rem;
-            padding: 0 2rem 2rem 2rem;
-            overflow-x: auto; /* Allows side scroll if screen is narrow */
-            overflow-y: auto; /* Hides scroll on main container */
+            gap: 0.8rem;
+            padding: 0 1.5rem 1rem 1.5rem;
+            overflow-x: auto;
         }
 
         .kanban-column {
             background-color: var(--bg-column);
-            border-radius: 8px;
+            border-radius: var(--radius);
             display: flex;
             flex-direction: column;
-            height: 100%; /* Fills the grid cell */
+            height: 100%;
             border: 1px solid var(--border);
-            min-width: 250px;
-            overflow-x: auto; /* Allows side scroll if screen is narrow */
-            overflow-y: hidden; /* Hides scroll on main container */
+            min-width: 240px;
+            overflow: hidden;
         }
 
         .column-header {
-            padding: 1.2rem;
+            padding: 0.8rem 1rem;
             font-weight: 800;
             text-transform: uppercase;
-            font-size: 1rem;
-            border-bottom: 2px solid var(--border);
+            font-size: 0.8rem;
+            letter-spacing: 1.5px;
+            border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            letter-spacing: 1px;
-            flex-shrink: 0; /* Header stays fixed */
+            flex-shrink: 0;
         }
 
-        .column-count { 
-            background: #333; color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.9rem; font-weight: bold;
+        .col-header-left { display: flex; align-items: center; gap: 0.5rem; }
+        .col-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+        .column-count {
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(255,255,255,0.06);
+            color: var(--text-muted);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 800;
         }
+
+        .column-actions {
+            display: flex; align-items: center; gap: 0.3rem;
+        }
+
+        .collapse-all-btn {
+            background: none; border: none; cursor: pointer;
+            color: var(--text-muted); font-size: 0.7rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            padding: 2px 6px; border-radius: 3px;
+            transition: all var(--transition);
+        }
+        .collapse-all-btn:hover { color: var(--text-main); background: rgba(255,255,255,0.06); }
 
         .column-content {
-            padding: 1rem;
-            overflow-y: auto; /* SCROLL HERE */
+            padding: 0.6rem;
+            overflow-y: auto;
             flex: 1;
-            background: rgba(0,0,0,0.1);
-            /* Custom Scrollbar for columns */
             scrollbar-width: thin;
-            scrollbar-color: #444 #111;
+            scrollbar-color: #2a2f38 transparent;
         }
-        
-        /* Chrome Scrollbar styling */
-        .column-content::-webkit-scrollbar { width: 8px; }
-        .column-content::-webkit-scrollbar-track { background: #111; }
-        .column-content::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
-        .column-content::-webkit-scrollbar-thumb:hover { background: #666; }
+        .column-content::-webkit-scrollbar { width: 6px; }
+        .column-content::-webkit-scrollbar-track { background: transparent; }
+        .column-content::-webkit-scrollbar-thumb { background: #2a2f38; border-radius: 3px; }
+        .column-content::-webkit-scrollbar-thumb:hover { background: #3a3f48; }
 
-        /* VEHICLE CARD */
+        /* ===== VEHICLE CARD ===== */
         .vehicle-card {
             background-color: var(--bg-card);
-            border-radius: 6px;
-            padding: 1.2rem;
-            margin-bottom: 1rem;
-            box-shadow: var(--shadow);
-            cursor: pointer;
-            border-left: 6px solid transparent; 
-            transition: transform 0.1s;
+            border-radius: var(--radius-sm);
+            margin-bottom: 0.5rem;
+            border: 1px solid var(--border);
+            border-left: 4px solid transparent;
+            transition: all var(--transition);
+            overflow: hidden;
+            animation: cardIn 0.3s ease both;
         }
-        .vehicle-card:hover { transform: scale(1.02); background-color: #2a2a2a; }
+        @keyframes cardIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .vehicle-card:hover { border-color: var(--border-hover); background-color: var(--bg-card-hover); }
 
         .border-intake { border-left-color: var(--c-intake); }
         .border-shop { border-left-color: var(--c-shop); }
         .border-parts { border-left-color: var(--c-parts); }
         .border-done { border-left-color: var(--c-done); }
 
-        .card-header { display: flex; justify-content: space-between; margin-bottom: 0.5rem; align-items: center; }
-        .card-id { font-weight: 600; font-size: 1.3rem; color: var(--text-main); }
-        .card-date { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; }
-        
-        .card-issue { 
-            font-size: 1rem; margin-bottom: 1rem; color: #ddd; font-weight: 500;
-            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-        }
-
-        .card-footer {
+        .card-top-bar {
             display: flex;
             justify-content: space-between;
-            align-items: flex-end;
-            margin-top: 1rem;
+            align-items: center;
+            padding: 0.6rem 0.8rem;
+            cursor: pointer;
+            user-select: none;
         }
-        
+        .card-top-bar:hover .collapse-toggle { opacity: 1; }
+
+        .card-id-group { display: flex; align-items: center; gap: 0.5rem; }
+        .card-id {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 800;
+            font-size: 1rem;
+            color: var(--text-main);
+        }
+        .card-condition {
+            font-size: 0.6rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 1px 6px;
+            border-radius: 3px;
+        }
+        .cond-operational { background: rgba(74,222,128,0.15); color: var(--c-done); }
+        .cond-warning { background: rgba(251,146,60,0.15); color: var(--c-parts); }
+        .cond-down { background: rgba(248,113,113,0.15); color: #f87171; }
+
+        .card-right { display: flex; align-items: center; gap: 0.5rem; }
+        .card-date {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+        .collapse-toggle {
+            background: none; border: none; cursor: pointer;
+            color: #555; font-size: 1rem;
+            padding: 2px;
+            transition: all var(--transition);
+            opacity: 0.5;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 3px;
+            width: 22px; height: 22px;
+        }
+        .collapse-toggle:hover { color: var(--text-main); opacity: 1; background: rgba(255,255,255,0.06); }
+        .collapse-toggle svg { width: 14px; height: 14px; transition: transform var(--transition); }
+        .vehicle-card.collapsed .collapse-toggle svg { transform: rotate(-90deg); }
+
+        .card-body {
+            padding: 0 0.8rem 0.6rem;
+            overflow: hidden;
+            max-height: 300px;
+            transition: max-height 0.3s ease, padding 0.3s ease, opacity 0.2s ease;
+            opacity: 1;
+        }
+        .vehicle-card.collapsed .card-body {
+            max-height: 0;
+            padding: 0 0.8rem;
+            opacity: 0;
+        }
+
+        .card-issue {
+            font-size: 0.85rem;
+            color: #9ca3af;
+            font-weight: 500;
+            line-height: 1.4;
+            margin-bottom: 0.5rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .card-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
         .card-pill {
-            display: inline-block; padding: 0.3rem 0.8rem; border-radius: 4px; 
-            font-size: 0.75rem; font-weight: 800; text-transform: uppercase;
-            color: #000; 
+            font-family: 'JetBrains Mono', monospace;
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
+        .pill-intake { background: var(--c-intake-dim); color: var(--c-intake); }
+        .pill-shop { background: var(--c-shop-dim); color: var(--c-shop); }
+        .pill-parts { background: var(--c-parts-dim); color: var(--c-parts); }
+        .pill-done { background: var(--c-done-dim); color: var(--c-done); }
 
         .card-location {
-            font-size: 0.8rem; font-weight: 700; color: var(--text-muted);
-            text-transform: uppercase; display: flex; align-items: center; gap: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            letter-spacing: 0.3px;
         }
 
-        /* Parts Info Block on Card */
         .parts-info-block {
-            margin-top: 0.8rem;
-            padding-top: 0.5rem;
-            border-top: 1px solid #444;
-            font-size: 0.8rem;
+            margin-top: 0.5rem;
+            padding: 0.4rem 0.6rem;
+            background: var(--c-parts-dim);
+            border-radius: 4px;
+            font-size: 0.75rem;
         }
-        .parts-row { display: flex; justify-content: space-between; margin-bottom: 2px; }
-        .parts-label { color: #888; text-transform: uppercase; font-size: 0.7rem; font-weight: bold; }
-        .parts-val { color: white; font-weight: bold; }
+        .parts-row { display: flex; justify-content: space-between; align-items: center; }
+        .parts-row + .parts-row { margin-top: 2px; }
+        .parts-label {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        .parts-val {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-main);
+            font-weight: 700;
+            font-size: 0.75rem;
+        }
         .parts-val.eta { color: var(--c-parts); }
-        
-        .pill-intake { background: var(--c-intake); color: white; }
-        .pill-shop { background: var(--c-shop); color: white;}
-        .pill-parts { background: var(--c-parts); color: black;}
-        .pill-done { background: var(--c-done); color: black; }
 
-        /* MODAL */
-        .modal-overlay { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: var(--modal-bg); display: none; 
-            justify-content: center; align-items: center; z-index: 100; 
-            backdrop-filter: blur(5px); 
+        /* Days counter */
+        .days-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            font-weight: 700;
+            padding: 1px 5px;
+            border-radius: 3px;
+            background: rgba(255,255,255,0.05);
+            color: var(--text-muted);
         }
+        .days-badge.warn { background: rgba(251,146,60,0.15); color: var(--c-parts); }
+        .days-badge.crit { background: rgba(248,113,113,0.15); color: #f87171; }
 
-        .modal-content { 
-            background: var(--bg-column); 
-            padding: 2rem; 
-            border-radius: 8px; 
-            width: 90%; 
-            max-width: 500px; 
-            max-height: 85vh; 
+        /* ===== MODAL ===== */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--modal-bg);
+            display: none;
+            justify-content: center; align-items: center;
+            z-index: 100;
+            backdrop-filter: blur(12px);
+            animation: fadeIn 0.2s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .modal-content {
+            background: var(--bg-column);
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            width: 90%;
+            max-width: 460px;
+            max-height: 85vh;
             overflow-y: auto;
-            box-shadow: 0 0 30px rgba(0,0,0,0.8); 
-            border: 1px solid var(--border); 
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border);
+            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .modal-content h2 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            letter-spacing: 2px;
+            margin-bottom: 1.2rem;
+            color: var(--text-main);
         }
 
-        .form-group { margin-bottom: 1.2rem; }
-        label { display: block; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.5rem; text-transform: uppercase; font-weight: bold; }
-        input, select { width: 100%; padding: 1rem; background-color: #000; border: 1px solid #444; color: white; border-radius: 4px; font-size: 1.1rem; font-weight: 500;}
-        input:focus, select:focus { border-color: var(--c-shop); outline: none; }
-        
+        .form-group { margin-bottom: 1rem; }
+        label {
+            display: block;
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            margin-bottom: 0.3rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        input, select {
+            width: 100%;
+            padding: 0.7rem 0.8rem;
+            background-color: #0d0e10;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            border-radius: var(--radius-sm);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all var(--transition);
+        }
+        input:focus, select:focus { border-color: var(--c-shop); outline: none; box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15); }
+
         #partsSection {
-            background: rgba(255, 61, 0, 0.1);
-            border: 1px solid var(--c-parts);
-            padding: 1rem;
-            border-radius: 6px;
+            background: var(--c-parts-dim);
+            border: 1px solid rgba(251, 146, 60, 0.25);
+            padding: 0.8rem;
+            border-radius: var(--radius-sm);
             margin-bottom: 1rem;
-            display: none; 
+            display: none;
         }
 
-        .modal-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem; padding-bottom: 1rem; }
-        .btn-danger { background-color: var(--c-parts); color: black; font-weight: bold; }
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+        }
+        .btn-danger {
+            background: rgba(248, 113, 113, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(248, 113, 113, 0.3);
+            font-weight: 700;
+        }
+        .btn-danger:hover { background: rgba(248, 113, 113, 0.25); }
 
-        .modal-content::-webkit-scrollbar { width: 8px; }
-        .modal-content::-webkit-scrollbar-track { background: #111; }
-        .modal-content::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
-        .modal-content::-webkit-scrollbar-thumb:hover { background: #666; }
+        .modal-content::-webkit-scrollbar { width: 6px; }
+        .modal-content::-webkit-scrollbar-track { background: transparent; }
+        .modal-content::-webkit-scrollbar-thumb { background: #2a2f38; border-radius: 3px; }
 
         body.wallboard-mode .controls { display: none; }
+
+        /* Empty state */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            text-align: center;
+        }
+        .empty-state svg { opacity: 0.3; margin-bottom: 0.5rem; }
+
+        /* Loading pulse */
+        @keyframes pulse {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+        .loading-dot { animation: pulse 1.5s infinite; }
+
+        /* Toast notification */
+        .toast {
+            position: fixed; bottom: 1.5rem; right: 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0.7rem 1.2rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-main);
+            box-shadow: var(--shadow-lg);
+            z-index: 200;
+            animation: toastIn 0.3s ease, toastOut 0.3s ease 2.5s forwards;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        @keyframes toastIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes toastOut { from { opacity: 1; } to { opacity: 0; pointer-events: none; } }
     </style>
 </head>
 <body>
@@ -298,83 +585,115 @@
     <header>
         <h1>DLX / DMT Repair Tracker</h1>
         <div class="controls">
-            <div class="search-container">
-                <input type="text" id="searchInput" class="search-input" placeholder="Search Vehicle..." onkeyup="renderBoard()">
-            </div>
+            <input type="text" id="searchInput" class="search-input" placeholder="Search unit…" onkeyup="renderBoard()">
             <button class="btn-primary" onclick="openModal('add')">+ Add Unit</button>
-            <button class="btn-outline" onclick="toggleTheme()">Contrast</button>
-            <button class="btn-outline" onclick="toggleWallboardMode()">Wallboard</button>
+            <button class="btn-outline" onclick="toggleTheme()">◑ Theme</button>
+            <button class="btn-outline" onclick="toggleWallboardMode()">▣ Wall</button>
         </div>
     </header>
 
     <div class="kpi-container">
         <div class="kpi-card kpi-intake">
-            <span class="kpi-value" id="kpi-total" style="color: var(--c-intake)">0</span>
-            <span class="kpi-label">Reported</span>
+   
+            <div class="kpi-text">
+                <span class="kpi-value" id="kpi-total" style="color: var(--c-intake)">0</span>
+                <span class="kpi-label">Reported</span>
+            </div>
         </div>
-
-
         <div class="kpi-card kpi-ready">
-            <span class="kpi-value" id="kpi-ready" style="color: #00bcd4">0</span>
-            <span class="kpi-label">To Deliver</span>
+
+            <div class="kpi-text">
+                <span class="kpi-value" id="kpi-ready" style="color: var(--c-ready)">0</span>
+                <span class="kpi-label">To Deliver</span>
+            </div>
         </div>
         <div class="kpi-card kpi-parts">
-            <span class="kpi-value" id="kpi-parts" style="color: var(--c-parts)">0</span>
-            <span class="kpi-label">Parts Hold</span>
-        </div>
 
+            <div class="kpi-text">
+                <span class="kpi-value" id="kpi-parts" style="color: var(--c-parts)">0</span>
+                <span class="kpi-label">Parts Hold</span>
+            </div>
+        </div>
         <div class="kpi-card kpi-done">
-            <span class="kpi-value" id="kpi-complete" style="color: var(--c-done)">0</span>
-            <span class="kpi-label">Complete</span>
+
+            <div class="kpi-text">
+                <span class="kpi-value" id="kpi-complete" style="color: var(--c-done)">0</span>
+                <span class="kpi-label">Complete</span>
+            </div>
         </div>
     </div>
 
     <div class="kanban-board">
-        <div class="kanban-column" style="border-top: 4px solid var(--c-intake)">
+        <div class="kanban-column" id="column-intake">
             <div class="column-header">
-                <span style="color: var(--c-intake)">Intake / Pickup</span>
-                <span class="column-count" id="count-col-1">0</span>
+                <div class="col-header-left">
+                    <div class="col-dot" style="background: var(--c-intake)"></div>
+                    <span style="color: var(--c-intake)">Intake / Pickup</span>
+                </div>
+                <div class="column-actions">
+                    <button class="collapse-all-btn" onclick="toggleCollapseAll('col-intake')">⊟</button>
+                    <span class="column-count" id="count-col-1">0</span>
+                </div>
             </div>
             <div class="column-content" id="col-intake"></div>
         </div>
 
-        <div class="kanban-column" style="border-top: 4px solid var(--c-shop)">
+        <div class="kanban-column" id="column-shop">
             <div class="column-header">
-                <span style="color: var(--c-shop)">In Progress</span>
-                <span class="column-count" id="count-col-2">0</span>
+                <div class="col-header-left">
+                    <div class="col-dot" style="background: var(--c-shop)"></div>
+                    <span style="color: var(--c-shop)">In Progress</span>
+                </div>
+                <div class="column-actions">
+                    <button class="collapse-all-btn" onclick="toggleCollapseAll('col-shop')">⊟</button>
+                    <span class="column-count" id="count-col-2">0</span>
+                </div>
             </div>
             <div class="column-content" id="col-shop"></div>
         </div>
 
-        <div class="kanban-column" style="border-top: 4px solid var(--c-parts)">
+        <div class="kanban-column" id="column-parts">
             <div class="column-header">
-                <span style="color: var(--c-parts)">Parts Hold</span>
-                <span class="column-count" id="count-col-3">0</span>
+                <div class="col-header-left">
+                    <div class="col-dot" style="background: var(--c-parts)"></div>
+                    <span style="color: var(--c-parts)">Parts Hold</span>
+                </div>
+                <div class="column-actions">
+                    <button class="collapse-all-btn" onclick="toggleCollapseAll('col-parts')">⊟</button>
+                    <span class="column-count" id="count-col-3">0</span>
+                </div>
             </div>
             <div class="column-content" id="col-parts"></div>
         </div>
 
-        <div class="kanban-column" style="border-top: 4px solid var(--c-done)">
+        <div class="kanban-column" id="column-done">
             <div class="column-header">
-                <span style="color: var(--c-done)">Complete</span>
-                <span class="column-count" id="count-col-4">0</span>
+                <div class="col-header-left">
+                    <div class="col-dot" style="background: var(--c-done)"></div>
+                    <span style="color: var(--c-done)">Complete</span>
+                </div>
+                <div class="column-actions">
+                    <button class="collapse-all-btn" onclick="toggleCollapseAll('col-done')">⊟</button>
+                    <span class="column-count" id="count-col-4">0</span>
+                </div>
             </div>
             <div class="column-content" id="col-done"></div>
         </div>
     </div>
 
-    <div id="entryModal" class="modal-overlay">
+    <!-- MODAL -->
+    <div id="entryModal" class="modal-overlay" onclick="if(event.target===this)closeModal()">
         <div class="modal-content">
-            <h2 style="margin-bottom:1.5rem; text-transform:uppercase;" id="modalTitle">Edit Vehicle</h2>
+            <h2 id="modalTitle">EDIT UNIT</h2>
             <form id="vehicleForm" onsubmit="saveVehicle(event)">
-                <input type="hidden" id="mode" value="add"> 
+                <input type="hidden" id="mode" value="add">
                 <input type="hidden" id="targetRowIndex" value="">
-                
+
                 <div class="form-group">
                     <label>Vehicle ID</label>
                     <input type="text" id="vID" required>
                 </div>
-                
+
                 <div class="form-group">
                     <label>Condition</label>
                     <select id="vStatus">
@@ -431,9 +750,9 @@
                 </div>
 
                 <div class="modal-actions">
-                    <button type="button" id="deleteBtn" class="btn-danger" style="display:none;" onclick="deleteCurrent()">DELETE</button>
+                    <button type="button" id="deleteBtn" class="controls btn-danger" style="display:none;" onclick="deleteCurrent()">DELETE</button>
                     <button type="button" class="btn-outline" onclick="closeModal()">CANCEL</button>
-                    <button type="submit" class="btn-primary" id="saveBtn">SAVE CHANGES</button>
+                    <button type="submit" class="btn-primary" id="saveBtn">SAVE</button>
                 </div>
             </form>
         </div>
@@ -445,21 +764,21 @@
         // ---------------------------
 
         let fleetData = [];
+        let collapsedCards = new Set(); // Track collapsed card IDs
+        let columnCollapseState = {}; // Track per-column collapse-all state
 
         async function fetchSheetData() {
-            if(SCRIPT_URL.includes("PASTE_YOUR")) {
-                document.querySelector('.kanban-board').innerHTML = `<h2 style="color:red; padding:2rem;">⚠️ Paste your Apps Script URL in the code</h2>`;
+            if (SCRIPT_URL.includes("PASTE_YOUR")) {
+                document.querySelector('.kanban-board').innerHTML = `<div style="grid-column:1/-1;display:flex;align-items:center;justify-content:center;color:#f87171;font-size:1.1rem;font-weight:700;">⚠️ Paste your Apps Script URL in the code</div>`;
                 return;
             }
             try {
                 const response = await fetch(SCRIPT_URL);
                 const data = await response.json();
-
                 if (Array.isArray(data) && data.length > 0 && Array.isArray(data[0])) {
-                    alert("⚠️ SCRIPT VERSION MISMATCH ⚠️\nPlease Deploy 'New Version' in Apps Script.");
+                    showToast("⚠️ Script version mismatch — redeploy Apps Script");
                     return;
                 }
-                
                 fleetData = data;
                 renderBoard();
             } catch (error) {
@@ -467,100 +786,123 @@
             }
         }
 
-        // Helper to turn YYYY-MM-DD into MM/DD/YYYY
         function formatDate(dateString) {
             if (!dateString) return '';
             const parts = dateString.split('-');
-            if (parts.length === 3) {
-                return `${parts[1]}/${parts[2]}/${parts[0]}`;
-            }
+            if (parts.length === 3) return `${parts[1]}/${parts[2]}/${parts[0]}`;
             return dateString;
+        }
+
+        function daysElapsed(dateString) {
+            if (!dateString) return null;
+            const d = new Date(dateString + 'T00:00:00');
+            const now = new Date();
+            now.setHours(0, 0, 0, 0);
+            return Math.floor((now - d) / (1000 * 60 * 60 * 24));
         }
 
         function renderBoard() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-
             const cols = {
                 intake: document.getElementById('col-intake'),
                 shop: document.getElementById('col-shop'),
                 parts: document.getElementById('col-parts'),
                 done: document.getElementById('col-done')
             };
-            
             Object.values(cols).forEach(col => col.innerHTML = '');
             let counts = { intake: 0, shop: 0, parts: 0, done: 0, ready: 0 };
 
-            [...fleetData].reverse().forEach(v => {
-                // Search Logic: Skip if ID doesn't match
-                if (searchTerm && !v.id.toLowerCase().includes(searchTerm)) {
-                    return; // Skip this vehicle
-                }
+            [...fleetData].reverse().forEach((v, i) => {
+                if (searchTerm && !v.id.toLowerCase().includes(searchTerm) && !(v.issue || '').toLowerCase().includes(searchTerm)) return;
 
                 let status = v.shopStatus || "";
-                let targetCol = cols.intake; 
+                let targetCol = cols.intake;
                 let borderClass = "border-intake";
                 let pillClass = "pill-intake";
                 let showPartsInfo = false;
 
                 if (status === "Awaiting part order") {
-                    targetCol = cols.parts;
-                    borderClass = "border-parts";
-                    pillClass = "pill-parts";
-                    counts.parts++;
-                    showPartsInfo = true;
-                } 
-                else if (status === "Received" || status === "Assessment") {
-                    targetCol = cols.shop;
-                    borderClass = "border-shop";
-                    pillClass = "pill-shop";
-                    counts.shop++;
-                }
-                else if (status === "Complete" || status === "Ready for Delivery") {
-                    targetCol = cols.done;
-                    borderClass = "border-done";
-                    pillClass = "pill-done";
-                    counts.done++;
-                    if(status === "Ready for Delivery") counts.ready++;
-                }
-                else {
+                    targetCol = cols.parts; borderClass = "border-parts"; pillClass = "pill-parts"; counts.parts++; showPartsInfo = true;
+                } else if (status === "Received" || status === "Assessment") {
+                    targetCol = cols.shop; borderClass = "border-shop"; pillClass = "pill-shop"; counts.shop++;
+                } else if (status === "Complete" || status === "Ready for Delivery") {
+                    targetCol = cols.done; borderClass = "border-done"; pillClass = "pill-done"; counts.done++;
+                    if (status === "Ready for Delivery") counts.ready++;
+                } else {
                     counts.intake++;
                 }
 
-                // Card Footer Logic
-                let footerContent = `<div class="card-location">📍 ${v.location || 'Dispatch Lot'}</div>`;
+                // Condition badge
+                const condClass = v.status === 'Down' ? 'cond-down' : v.status === 'Warning' ? 'cond-warning' : 'cond-operational';
+
+                // Days elapsed badge
+                const days = daysElapsed(v.date);
+                let daysBadge = '';
+                if (days !== null && status !== "Complete" && status !== "Ready for Delivery") {
+                    const cls = days > 14 ? 'crit' : days > 7 ? 'warn' : '';
+                    daysBadge = `<span class="days-badge ${cls}">${days}d</span>`;
+                }
+
+                // Location display
+                let locationHtml = `<div class="card-location">📍 ${v.location || 'Dispatch Lot'}</div>`;
+
+                // Parts info
+                let partsHtml = '';
                 if (showPartsInfo) {
                     const ord = formatDate(v.partsOrdered);
                     const eta = formatDate(v.partsEta);
-                    footerContent = `
+                    partsHtml = `
                         <div class="parts-info-block">
                             <div class="parts-row">
                                 <span class="parts-label">Ordered</span>
-                                <span class="parts-val">${ord || '-'}</span>
+                                <span class="parts-val">${ord || '—'}</span>
                             </div>
                             <div class="parts-row">
                                 <span class="parts-label">ETA</span>
-                                <span class="parts-val eta">${eta || '-'}</span>
+                                <span class="parts-val eta">${eta || '—'}</span>
                             </div>
-                        </div>
-                    `;
+                        </div>`;
                 }
 
+                const cardKey = v.rowIndex || v.id + '-' + i;
+                const isCollapsed = collapsedCards.has(cardKey);
+
                 const card = document.createElement('div');
-                card.className = `vehicle-card ${borderClass}`;
-                card.onclick = () => openModal('edit', v.rowIndex);
+                card.className = `vehicle-card ${borderClass} ${isCollapsed ? 'collapsed' : ''}`;
+                card.style.animationDelay = `${Math.min(i * 0.03, 0.3)}s`;
+                card.dataset.cardKey = cardKey;
+
                 card.innerHTML = `
-                    <div class="card-header">
-                        <span class="card-id">${v.id}</span>
-                        <span class="card-date">${formatDate(v.date)}</span>
+                    <div class="card-top-bar" onclick="event.stopPropagation();">
+                        <div class="card-id-group">
+                            <span class="card-id">${v.id}</span>
+                            <span class="card-condition ${condClass}">${v.status || ''}</span>
+                            ${daysBadge}
+                        </div>
+                        <div class="card-right">
+                            <span class="card-date">${formatDate(v.date)}</span>
+                            <button class="collapse-toggle" onclick="event.stopPropagation(); toggleCard('${cardKey}', this);" title="Collapse/Expand">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </button>
+                        </div>
                     </div>
-                    <div class="card-issue">${v.issue}</div>
-                    
-                    <div class="card-footer">
-                        <span class="card-pill ${pillClass}">${status}</span>
+                    <div class="card-body" onclick="openModal('edit', ${v.rowIndex})">
+                        <div class="card-issue">${v.issue}</div>
+                        <div class="card-meta">
+                            <span class="card-pill ${pillClass}">${status}</span>
+                            ${locationHtml}
+                        </div>
+                        ${partsHtml}
                     </div>
-                    ${footerContent}
                 `;
                 targetCol.appendChild(card);
+            });
+
+            // Empty states
+            Object.entries(cols).forEach(([key, col]) => {
+                if (col.children.length === 0) {
+                    col.innerHTML = `<div class="empty-state"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg><span>No units</span></div>`;
+                }
             });
 
             document.getElementById('count-col-1').innerText = counts.intake;
@@ -568,12 +910,39 @@
             document.getElementById('count-col-3').innerText = counts.parts;
             document.getElementById('count-col-4').innerText = counts.done;
 
-            // KPIs always show TOTALS (ignoring filter for overview) or you can filter them too.
-            // Currently showing total database counts:
             document.getElementById('kpi-total').innerText = fleetData.length;
             document.getElementById('kpi-parts').innerText = fleetData.filter(v => v.shopStatus === "Awaiting part order").length;
             document.getElementById('kpi-complete').innerText = fleetData.filter(v => v.shopStatus === "Complete" || v.shopStatus === "Ready for Delivery").length;
             document.getElementById('kpi-ready').innerText = fleetData.filter(v => v.shopStatus === "Ready for Delivery").length;
+        }
+
+        // --- COLLAPSE LOGIC ---
+        function toggleCard(cardKey, btnEl) {
+            const card = btnEl.closest('.vehicle-card');
+            if (collapsedCards.has(cardKey)) {
+                collapsedCards.delete(cardKey);
+                card.classList.remove('collapsed');
+            } else {
+                collapsedCards.add(cardKey);
+                card.classList.add('collapsed');
+            }
+        }
+
+        function toggleCollapseAll(colId) {
+            const col = document.getElementById(colId);
+            const cards = col.querySelectorAll('.vehicle-card');
+            const allCollapsed = [...cards].every(c => c.classList.contains('collapsed'));
+
+            cards.forEach(card => {
+                const key = card.dataset.cardKey;
+                if (allCollapsed) {
+                    collapsedCards.delete(key);
+                    card.classList.remove('collapsed');
+                } else {
+                    collapsedCards.add(key);
+                    card.classList.add('collapsed');
+                }
+            });
         }
 
         // --- FORM LOGIC ---
@@ -582,7 +951,6 @@
             const partsSection = document.getElementById('partsSection');
             const orderedInput = document.getElementById('vPartsOrdered');
             const etaInput = document.getElementById('vPartsEta');
-
             if (status === "Awaiting part order") {
                 partsSection.style.display = "block";
                 orderedInput.required = true;
@@ -598,14 +966,13 @@
             document.getElementById('entryModal').style.display = 'flex';
             document.getElementById('mode').value = mode;
             const delBtn = document.getElementById('deleteBtn');
-
             if (mode === 'add') {
                 document.getElementById('modalTitle').innerText = "ADD NEW UNIT";
                 document.getElementById('vehicleForm').reset();
                 document.getElementById('vID').readOnly = false;
                 document.getElementById('vDate').valueAsDate = new Date();
                 delBtn.style.display = 'none';
-                togglePartsFields(); 
+                togglePartsFields();
             } else {
                 document.getElementById('modalTitle').innerText = "EDIT UNIT";
                 delBtn.style.display = 'block';
@@ -615,14 +982,12 @@
                     document.getElementById('vID').value = vehicle.id;
                     document.getElementById('vStatus').value = vehicle.status;
                     document.getElementById('vIssue').value = vehicle.issue;
-                    document.getElementById('vDate').value = vehicle.date; 
+                    document.getElementById('vDate').value = vehicle.date;
                     document.getElementById('vShopStatus').value = vehicle.shopStatus;
                     document.getElementById('vLocation').value = vehicle.location || "Dispatch Lot";
-                    
                     document.getElementById('vPartsOrdered').value = vehicle.partsOrdered || "";
                     document.getElementById('vPartsEta').value = vehicle.partsEta || "";
-                    
-                    togglePartsFields(); 
+                    togglePartsFields();
                 }
             }
         }
@@ -634,9 +999,8 @@
             const btn = document.getElementById('saveBtn');
             const mode = document.getElementById('mode').value;
             const action = mode === 'edit' ? 'update' : 'add';
-
             const payload = {
-                action: action,
+                action,
                 rowIndex: document.getElementById('targetRowIndex').value,
                 id: document.getElementById('vID').value,
                 status: document.getElementById('vStatus').value,
@@ -647,16 +1011,13 @@
                 partsOrdered: document.getElementById('vPartsOrdered').value,
                 partsEta: document.getElementById('vPartsEta').value
             };
-
-            btn.innerText = "SAVING...";
+            btn.innerText = "SAVING…";
             btn.disabled = true;
-
-            fetch(SCRIPT_URL, {
-                method: "POST", mode: "no-cors", body: JSON.stringify(payload)
-            }).then(() => {
+            fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) }).then(() => {
                 closeModal();
-                btn.innerText = "SAVE CHANGES";
+                btn.innerText = "SAVE";
                 btn.disabled = false;
+                showToast("✓ Saved successfully");
                 setTimeout(fetchSheetData, 1000);
             });
         }
@@ -665,22 +1026,36 @@
             if (confirm("Delete this vehicle?")) {
                 const rowIndex = document.getElementById('targetRowIndex').value;
                 const btn = document.getElementById('deleteBtn');
-                btn.innerText = "DELETING...";
-                fetch(SCRIPT_URL, {
-                    method: "POST", mode: "no-cors", body: JSON.stringify({ action: "delete", rowIndex: rowIndex })
-                }).then(() => {
+                btn.innerText = "DELETING…";
+                fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ action: "delete", rowIndex }) }).then(() => {
                     closeModal();
                     btn.innerText = "DELETE";
+                    showToast("🗑 Unit deleted");
                     setTimeout(fetchSheetData, 1000);
                 });
             }
         }
 
+        function showToast(msg) {
+            const existing = document.querySelector('.toast');
+            if (existing) existing.remove();
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
         function toggleTheme() { document.body.classList.toggle('light-mode'); }
         function toggleWallboardMode() { document.body.classList.toggle('wallboard-mode'); }
 
+        // Keyboard shortcut: Escape to close modal
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+
         fetchSheetData();
-        setInterval(fetchSheetData, 30000); 
+        setInterval(fetchSheetData, 30000);
     </script>
 </body>
 </html>
