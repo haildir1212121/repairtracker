@@ -16,7 +16,6 @@
             --text-muted: #6b7280;
             --border: #1e2228;
             --border-hover: #2a2f38;
-
             --c-intake: #c084fc;
             --c-intake-dim: rgba(192, 132, 252, 0.12);
             --c-shop: #60a5fa;
@@ -26,7 +25,8 @@
             --c-done: #4ade80;
             --c-done-dim: rgba(74, 222, 128, 0.12);
             --c-ready: #22d3ee;
-
+            --c-bulletin: #f472b6;
+            --c-bulletin-dim: rgba(244, 114, 182, 0.12);
             --radius: 10px;
             --radius-sm: 6px;
             --shadow: 0 1px 3px rgba(0,0,0,0.4);
@@ -34,36 +34,23 @@
             --modal-bg: rgba(0, 0, 0, 0.8);
             --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
-
         body.light-mode {
-            --bg-body: #f1f3f5;
-            --bg-column: #ffffff;
-            --bg-card: #ffffff;
-            --bg-card-hover: #f8f9fa;
-            --text-main: #111827;
-            --text-muted: #6b7280;
-            --border: #e5e7eb;
-            --border-hover: #d1d5db;
-            --shadow: 0 1px 3px rgba(0,0,0,0.06);
-            --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+            --bg-body: #f1f3f5; --bg-column: #ffffff; --bg-card: #ffffff; --bg-card-hover: #f8f9fa;
+            --text-main: #111827; --text-muted: #6b7280; --border: #e5e7eb; --border-hover: #d1d5db;
+            --shadow: 0 1px 3px rgba(0,0,0,0.06); --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
             --modal-bg: rgba(255, 255, 255, 0.85);
-
-            --c-intake: #a855f7;
-            --c-intake-dim: rgba(168, 85, 247, 0.08);
-            --c-shop: #3b82f6;
-            --c-shop-dim: rgba(59, 130, 246, 0.08);
-            --c-parts: #ea580c;
-            --c-parts-dim: rgba(234, 88, 12, 0.08);
-            --c-done: #16a34a;
-            --c-done-dim: rgba(22, 163, 74, 0.08);
+            --c-intake: #a855f7; --c-intake-dim: rgba(168, 85, 247, 0.08);
+            --c-shop: #3b82f6; --c-shop-dim: rgba(59, 130, 246, 0.08);
+            --c-parts: #ea580c; --c-parts-dim: rgba(234, 88, 12, 0.08);
+            --c-done: #16a34a; --c-done-dim: rgba(22, 163, 74, 0.08);
+            --c-bulletin: #db2777; --c-bulletin-dim: rgba(219, 39, 119, 0.08);
         }
-
         body.light-mode h1 { background: linear-gradient(135deg, #111, #555); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         body.light-mode .search-input { background: #f1f3f5; color: #111; border-color: #d1d5db; }
         body.light-mode .search-input::placeholder { color: #999; }
         body.light-mode .btn-outline { background: #e5e7eb; color: #111; border-color: #d1d5db; }
         body.light-mode .btn-outline:hover { background: #d1d5db; }
-        body.light-mode input, body.light-mode select { background: #f1f3f5; color: #111; border-color: #d1d5db; }
+        body.light-mode input, body.light-mode select, body.light-mode textarea { background: #f1f3f5; color: #111; border-color: #d1d5db; }
         body.light-mode .column-count { background: #e5e7eb; color: #111; }
         body.light-mode .vehicle-card:hover { background-color: var(--bg-card-hover); }
         body.light-mode .card-issue { color: #374151; }
@@ -72,248 +59,159 @@
         body.light-mode .collapse-toggle { color: #6b7280; }
         body.light-mode .collapse-toggle:hover { color: #111; background: #e5e7eb; }
         body.light-mode .drop-indicator { background: #3b82f6; box-shadow: 0 0 8px rgba(59,130,246,0.4); }
+        body.light-mode .bulletin-panel { background: #fff; border-color: #e5e7eb; }
+        body.light-mode .bulletin-msg { background: #f8f9fa; border-color: #e5e7eb; }
+        body.light-mode .bulletin-msg:hover { background: #f1f3f5; }
+        body.light-mode .bulletin-compose textarea { background: #f1f3f5; border-color: #d1d5db; color: #111; }
+        body.light-mode .bulletin-compose input { background: #f1f3f5; border-color: #d1d5db; color: #111; }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Outfit', sans-serif; background-color: var(--bg-body); color: var(--text-main); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        body {
-            font-family: 'Outfit', sans-serif;
-            background-color: var(--bg-body);
-            color: var(--text-main);
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        header {
-            background-color: var(--bg-column);
-            padding: 0.8rem 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
-            flex-shrink: 0;
-        }
-        h1 {
-            font-size: 1.25rem; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
-            background: white; -webkit-background-clip: text; -webkit-text-fill-color: transparent; white-space: nowrap;
-        }
+        header { background-color: var(--bg-column); padding: 0.8rem 1.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        h1 { font-size: 1.25rem; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; background: white; -webkit-background-clip: text; -webkit-text-fill-color: transparent; white-space: nowrap; }
         .controls { display: flex; align-items: center; gap: 0.5rem; }
-        .search-input {
-            padding: 0.5rem 0.8rem; border-radius: var(--radius-sm); background: #0d0e10;
-            border: 1px solid var(--border); color: var(--text-main); font-family: 'JetBrains Mono', monospace;
-            font-size: 0.8rem; font-weight: 600; width: 180px; transition: all var(--transition);
-        }
+        .search-input { padding: 0.5rem 0.8rem; border-radius: var(--radius-sm); background: #0d0e10; border: 1px solid var(--border); color: var(--text-main); font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; font-weight: 600; width: 180px; transition: all var(--transition); }
         .search-input:focus { width: 260px; outline: none; border-color: var(--c-shop); box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15); }
         .search-input::placeholder { color: #444; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; }
-        .controls button {
-            padding: 0.5rem 1rem; border: none; border-radius: var(--radius-sm); cursor: pointer;
-            font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.8rem;
-            text-transform: uppercase; letter-spacing: 0.5px; transition: all var(--transition);
-        }
+        .controls button { padding: 0.5rem 1rem; border: none; border-radius: var(--radius-sm); cursor: pointer; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; transition: all var(--transition); }
         .btn-primary { background: var(--c-shop); color: white; }
         .btn-primary:hover { filter: brightness(1.15); transform: translateY(-1px); }
         .btn-outline { background: #1a1d21; border: 1px solid #2a2f38; color: #9ca3af; }
         .btn-outline:hover { background: #22262c; color: white; }
+        .btn-bulletin { background: var(--c-bulletin-dim); border: 1px solid rgba(244,114,182,0.3); color: var(--c-bulletin); position: relative; }
+        .btn-bulletin:hover { background: rgba(244,114,182,0.2); color: #f9a8d4; }
+        .btn-bulletin.has-new::after { content: ''; position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; background: var(--c-bulletin); border-radius: 50%; animation: notifPulse 2s ease infinite; }
+        @keyframes notifPulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.3); opacity: 0.7; } }
+        .badge-count { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; font-weight: 800; background: var(--c-bulletin); color: #000; padding: 0px 5px; border-radius: 10px; margin-left: 4px; min-width: 16px; text-align: center; display: inline-block; }
 
         .kpi-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8rem; padding: 0.8rem 1.5rem; flex-shrink: 0; }
-        .kpi-card {
-            background: var(--bg-column); padding: 0.8rem 1rem; border-radius: var(--radius);
-            display: flex; align-items: center; gap: 0.8rem; border: 1px solid var(--border);
-            position: relative; overflow: hidden; transition: all var(--transition);
-        }
+        .kpi-card { background: var(--bg-column); padding: 0.8rem 1rem; border-radius: var(--radius); display: flex; align-items: center; gap: 0.8rem; border: 1px solid var(--border); position: relative; overflow: hidden; transition: all var(--transition); }
         .kpi-card:hover { border-color: var(--border-hover); }
         .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
-        .kpi-intake::before { background: var(--c-intake); }
-        .kpi-parts::before { background: var(--c-parts); }
-        .kpi-done::before { background: var(--c-done); }
-        .kpi-ready::before { background: var(--c-ready); }
+        .kpi-intake::before { background: var(--c-intake); } .kpi-parts::before { background: var(--c-parts); } .kpi-done::before { background: var(--c-done); } .kpi-ready::before { background: var(--c-ready); }
         .kpi-text { display: flex; flex-direction: column; }
         .kpi-value { font-family: 'JetBrains Mono', monospace; font-size: 1.6rem; font-weight: 800; line-height: 1; }
         .kpi-label { font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; letter-spacing: 1px; margin-top: 2px; }
 
         .kanban-board { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8rem; padding: 0 1.5rem 1rem 1.5rem; overflow-x: auto; }
-        .kanban-column {
-            background-color: var(--bg-column); border-radius: var(--radius); display: flex; flex-direction: column;
-            height: 100%; border: 1px solid var(--border); min-width: 240px; overflow: hidden;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
+        .kanban-column { background-color: var(--bg-column); border-radius: var(--radius); display: flex; flex-direction: column; height: 100%; border: 1px solid var(--border); min-width: 240px; overflow: hidden; transition: border-color 0.2s, box-shadow 0.2s; }
         .kanban-column.drag-over-column { border-color: var(--c-shop); box-shadow: inset 0 0 20px rgba(96, 165, 250, 0.06); }
-        .column-header {
-            padding: 0.8rem 1rem; font-weight: 800; text-transform: uppercase; font-size: 0.8rem;
-            letter-spacing: 1.5px; border-bottom: 1px solid var(--border);
-            display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
-        }
+        .column-header { padding: 0.8rem 1rem; font-weight: 800; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1.5px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
         .col-header-left { display: flex; align-items: center; gap: 0.5rem; }
         .col-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-        .column-count {
-            font-family: 'JetBrains Mono', monospace; background: rgba(255,255,255,0.06);
-            color: var(--text-muted); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 800;
-        }
+        .column-count { font-family: 'JetBrains Mono', monospace; background: rgba(255,255,255,0.06); color: var(--text-muted); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 800; }
         .column-actions { display: flex; align-items: center; gap: 0.3rem; }
-        .collapse-all-btn {
-            background: none; border: none; cursor: pointer; color: var(--text-muted);
-            font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
-            padding: 2px 6px; border-radius: 3px; transition: all var(--transition);
-        }
+        .collapse-all-btn { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 2px 6px; border-radius: 3px; transition: all var(--transition); }
         .collapse-all-btn:hover { color: var(--text-main); background: rgba(255,255,255,0.06); }
-        .column-content {
-            padding: 0.6rem; overflow-y: auto; flex: 1; min-height: 60px;
-            scrollbar-width: thin; scrollbar-color: #2a2f38 transparent;
-        }
-        .column-content::-webkit-scrollbar { width: 6px; }
-        .column-content::-webkit-scrollbar-track { background: transparent; }
-        .column-content::-webkit-scrollbar-thumb { background: #2a2f38; border-radius: 3px; }
+        .column-content { padding: 0.6rem; overflow-y: auto; flex: 1; min-height: 60px; scrollbar-width: thin; scrollbar-color: #2a2f38 transparent; }
+        .column-content::-webkit-scrollbar { width: 6px; } .column-content::-webkit-scrollbar-track { background: transparent; } .column-content::-webkit-scrollbar-thumb { background: #2a2f38; border-radius: 3px; }
 
-        .vehicle-card {
-            background-color: var(--bg-card); border-radius: var(--radius-sm); margin-bottom: 0.5rem;
-            border: 1px solid var(--border); border-left: 4px solid transparent;
-            transition: all var(--transition); overflow: hidden; animation: cardIn 0.3s ease both; position: relative;
-        }
+        .vehicle-card { background-color: var(--bg-card); border-radius: var(--radius-sm); margin-bottom: 0.5rem; border: 1px solid var(--border); border-left: 4px solid transparent; transition: all var(--transition); overflow: hidden; animation: cardIn 0.3s ease both; position: relative; }
         @keyframes cardIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         .vehicle-card:hover { border-color: var(--border-hover); background-color: var(--bg-card-hover); }
-        .border-intake { border-left-color: var(--c-intake); }
-        .border-shop { border-left-color: var(--c-shop); }
-        .border-parts { border-left-color: var(--c-parts); }
-        .border-done { border-left-color: var(--c-done); }
+        .border-intake { border-left-color: var(--c-intake); } .border-shop { border-left-color: var(--c-shop); } .border-parts { border-left-color: var(--c-parts); } .border-done { border-left-color: var(--c-done); }
         .vehicle-card.dragging { opacity: 0.3; transform: scale(0.97); border-style: dashed; }
-
-        .drag-handle {
-            cursor: grab; display: flex; align-items: center; justify-content: center;
-            padding: 0 4px; color: #333; transition: color var(--transition); flex-shrink: 0;
-        }
+        .drag-handle { cursor: grab; display: flex; align-items: center; justify-content: center; padding: 0 4px; color: #333; transition: color var(--transition); flex-shrink: 0; }
         .vehicle-card:hover .drag-handle { color: #666; }
         .drag-handle:active { cursor: grabbing; }
         .drag-handle svg { width: 14px; height: 14px; pointer-events: none; }
-
-        .drop-indicator {
-            height: 3px; background: var(--c-shop); border-radius: 2px; margin: -1px 0;
-            pointer-events: none; box-shadow: 0 0 10px rgba(96, 165, 250, 0.5);
-            animation: dropPulse 1s ease infinite; position: relative; z-index: 10;
-        }
+        .drop-indicator { height: 3px; background: var(--c-shop); border-radius: 2px; margin: -1px 0; pointer-events: none; box-shadow: 0 0 10px rgba(96, 165, 250, 0.5); animation: dropPulse 1s ease infinite; position: relative; z-index: 10; }
         @keyframes dropPulse { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
-
-        .card-top-bar {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 0.6rem 0.8rem; cursor: pointer; user-select: none;
-        }
+        .card-top-bar { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0.8rem; cursor: pointer; user-select: none; }
         .card-top-bar:hover .collapse-toggle { opacity: 1; }
         .card-id-group { display: flex; align-items: center; gap: 0.5rem; }
         .card-id { font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 1rem; color: var(--text-main); }
         .card-condition { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 1px 6px; border-radius: 3px; }
-        .cond-operational { background: rgba(74,222,128,0.15); color: var(--c-done); }
-        .cond-warning { background: rgba(251,146,60,0.15); color: var(--c-parts); }
-        .cond-down { background: rgba(248,113,113,0.15); color: #f87171; }
+        .cond-operational { background: rgba(74,222,128,0.15); color: var(--c-done); } .cond-warning { background: rgba(251,146,60,0.15); color: var(--c-parts); } .cond-down { background: rgba(248,113,113,0.15); color: #f87171; }
         .card-right { display: flex; align-items: center; gap: 0.5rem; }
         .card-date { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-muted); font-weight: 600; }
-        .collapse-toggle {
-            background: none; border: none; cursor: pointer; color: #555; font-size: 1rem; padding: 2px;
-            transition: all var(--transition); opacity: 0.5; display: flex; align-items: center;
-            justify-content: center; border-radius: 3px; width: 22px; height: 22px;
-        }
+        .collapse-toggle { background: none; border: none; cursor: pointer; color: #555; padding: 2px; transition: all var(--transition); opacity: 0.5; display: flex; align-items: center; justify-content: center; border-radius: 3px; width: 22px; height: 22px; }
         .collapse-toggle:hover { color: var(--text-main); opacity: 1; background: rgba(255,255,255,0.06); }
         .collapse-toggle svg { width: 14px; height: 14px; transition: transform var(--transition); }
         .vehicle-card.collapsed .collapse-toggle svg { transform: rotate(-90deg); }
-        .card-body {
-            padding: 0 0.8rem 0.6rem; overflow: hidden; max-height: 300px;
-            transition: max-height 0.3s ease, padding 0.3s ease, opacity 0.2s ease; opacity: 1;
-        }
+        .card-body { padding: 0 0.8rem 0.6rem; overflow: hidden; max-height: 300px; transition: max-height 0.3s ease, padding 0.3s ease, opacity 0.2s ease; opacity: 1; }
         .vehicle-card.collapsed .card-body { max-height: 0; padding: 0 0.8rem; opacity: 0; }
-        .card-issue {
-            font-size: 0.85rem; color: #9ca3af; font-weight: 500; line-height: 1.4; margin-bottom: 0.5rem;
-            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-        }
+        .card-issue { font-size: 0.85rem; color: #9ca3af; font-weight: 500; line-height: 1.4; margin-bottom: 0.5rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .card-meta { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; }
-        .card-pill {
-            font-family: 'JetBrains Mono', monospace; display: inline-block; padding: 0.2rem 0.5rem;
-            border-radius: 4px; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;
-        }
-        .pill-intake { background: var(--c-intake-dim); color: var(--c-intake); }
-        .pill-shop { background: var(--c-shop-dim); color: var(--c-shop); }
-        .pill-parts { background: var(--c-parts-dim); color: var(--c-parts); }
-        .pill-done { background: var(--c-done-dim); color: var(--c-done); }
+        .card-pill { font-family: 'JetBrains Mono', monospace; display: inline-block; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+        .pill-intake { background: var(--c-intake-dim); color: var(--c-intake); } .pill-shop { background: var(--c-shop-dim); color: var(--c-shop); } .pill-parts { background: var(--c-parts-dim); color: var(--c-parts); } .pill-done { background: var(--c-done-dim); color: var(--c-done); }
         .card-location { font-size: 0.7rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; display: flex; align-items: center; gap: 3px; letter-spacing: 0.3px; }
         .parts-info-block { margin-top: 0.5rem; padding: 0.4rem 0.6rem; background: var(--c-parts-dim); border-radius: 4px; font-size: 0.75rem; }
-        .parts-row { display: flex; justify-content: space-between; align-items: center; }
-        .parts-row + .parts-row { margin-top: 2px; }
+        .parts-row { display: flex; justify-content: space-between; align-items: center; } .parts-row + .parts-row { margin-top: 2px; }
         .parts-label { font-family: 'JetBrains Mono', monospace; color: var(--text-muted); text-transform: uppercase; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.5px; }
-        .parts-val { font-family: 'JetBrains Mono', monospace; color: var(--text-main); font-weight: 700; font-size: 0.75rem; }
-        .parts-val.eta { color: var(--c-parts); }
+        .parts-val { font-family: 'JetBrains Mono', monospace; color: var(--text-main); font-weight: 700; font-size: 0.75rem; } .parts-val.eta { color: var(--c-parts); }
         .days-badge { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; font-weight: 700; padding: 1px 5px; border-radius: 3px; background: rgba(255,255,255,0.05); color: var(--text-muted); }
-        .days-badge.warn { background: rgba(251,146,60,0.15); color: var(--c-parts); }
-        .days-badge.crit { background: rgba(248,113,113,0.15); color: #f87171; }
+        .days-badge.warn { background: rgba(251,146,60,0.15); color: var(--c-parts); } .days-badge.crit { background: rgba(248,113,113,0.15); color: #f87171; }
 
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--modal-bg); display: none; justify-content: center; align-items: center;
-            z-index: 100; backdrop-filter: blur(12px); animation: fadeIn 0.2s ease;
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--modal-bg); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(12px); animation: fadeIn 0.2s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .modal-content {
-            background: var(--bg-column); padding: 1.5rem; border-radius: var(--radius);
-            width: 90%; max-width: 460px; max-height: 85vh; overflow-y: auto;
-            box-shadow: var(--shadow-lg); border: 1px solid var(--border);
-            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
+        .modal-content { background: var(--bg-column); padding: 1.5rem; border-radius: var(--radius); width: 90%; max-width: 460px; max-height: 85vh; overflow-y: auto; box-shadow: var(--shadow-lg); border: 1px solid var(--border); animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         .modal-content h2 { font-family: 'JetBrains Mono', monospace; font-size: 1rem; letter-spacing: 2px; margin-bottom: 1.2rem; color: var(--text-main); }
         .form-group { margin-bottom: 1rem; }
         label { display: block; color: var(--text-muted); font-size: 0.7rem; margin-bottom: 0.3rem; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; }
-        input, select {
-            width: 100%; padding: 0.7rem 0.8rem; background-color: #0d0e10; border: 1px solid var(--border);
-            color: var(--text-main); border-radius: var(--radius-sm); font-family: 'Outfit', sans-serif;
-            font-size: 0.95rem; font-weight: 500; transition: all var(--transition);
-        }
-        input:focus, select:focus { border-color: var(--c-shop); outline: none; box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15); }
-        #partsSection {
-            background: var(--c-parts-dim); border: 1px solid rgba(251, 146, 60, 0.25);
-            padding: 0.8rem; border-radius: var(--radius-sm); margin-bottom: 1rem; display: none;
-        }
+        input, select, textarea { width: 100%; padding: 0.7rem 0.8rem; background-color: #0d0e10; border: 1px solid var(--border); color: var(--text-main); border-radius: var(--radius-sm); font-family: 'Outfit', sans-serif; font-size: 0.95rem; font-weight: 500; transition: all var(--transition); }
+        input:focus, select:focus, textarea:focus { border-color: var(--c-shop); outline: none; box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15); }
+        #partsSection { background: var(--c-parts-dim); border: 1px solid rgba(251, 146, 60, 0.25); padding: 0.8rem; border-radius: var(--radius-sm); margin-bottom: 1rem; display: none; }
         .modal-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.5rem; }
         .btn-danger { background: rgba(248, 113, 113, 0.15); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.3); font-weight: 700; }
         .btn-danger:hover { background: rgba(248, 113, 113, 0.25); }
-        .modal-content::-webkit-scrollbar { width: 6px; }
-        .modal-content::-webkit-scrollbar-track { background: transparent; }
-        .modal-content::-webkit-scrollbar-thumb { background: #2a2f38; border-radius: 3px; }
-
+        .modal-content::-webkit-scrollbar { width: 6px; } .modal-content::-webkit-scrollbar-track { background: transparent; } .modal-content::-webkit-scrollbar-thumb { background: #2a2f38; border-radius: 3px; }
         body.wallboard-mode .controls { display: none; }
         .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem 1rem; color: var(--text-muted); font-size: 0.8rem; text-align: center; }
         .empty-state svg { opacity: 0.3; margin-bottom: 0.5rem; }
-
-        .toast {
-            position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--bg-card);
-            border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.7rem 1.2rem;
-            font-size: 0.85rem; font-weight: 600; color: var(--text-main); box-shadow: var(--shadow-lg);
-            z-index: 200; animation: toastIn 0.3s ease, toastOut 0.3s ease 2.5s forwards;
-            display: flex; align-items: center; gap: 0.5rem;
-        }
+        .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.7rem 1.2rem; font-size: 0.85rem; font-weight: 600; color: var(--text-main); box-shadow: var(--shadow-lg); z-index: 200; animation: toastIn 0.3s ease, toastOut 0.3s ease 2.5s forwards; display: flex; align-items: center; gap: 0.5rem; }
         @keyframes toastIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes toastOut { from { opacity: 1; } to { opacity: 0; pointer-events: none; } }
-
-        .status-picker-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center;
-            z-index: 150; backdrop-filter: blur(6px); animation: fadeIn 0.15s ease;
-        }
-        .status-picker {
-            background: var(--bg-column); border: 1px solid var(--border); border-radius: var(--radius);
-            padding: 1.2rem; min-width: 260px; box-shadow: var(--shadow-lg);
-            animation: slideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-        }
+        .status-picker-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 150; backdrop-filter: blur(6px); animation: fadeIn 0.15s ease; }
+        .status-picker { background: var(--bg-column); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.2rem; min-width: 260px; box-shadow: var(--shadow-lg); animation: slideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
         .status-picker h3 { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); margin-bottom: 0.8rem; }
-        .status-picker-btn {
-            display: block; width: 100%; text-align: left; padding: 0.6rem 0.8rem; margin-bottom: 0.3rem;
-            border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-card);
-            color: var(--text-main); font-family: 'Outfit', sans-serif; font-size: 0.85rem; font-weight: 600;
-            cursor: pointer; transition: all var(--transition);
-        }
+        .status-picker-btn { display: block; width: 100%; text-align: left; padding: 0.6rem 0.8rem; margin-bottom: 0.3rem; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-card); color: var(--text-main); font-family: 'Outfit', sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all var(--transition); }
         .status-picker-btn:hover { background: var(--bg-card-hover); border-color: var(--c-shop); }
-        .status-picker-cancel {
-            display: block; width: 100%; text-align: center; padding: 0.5rem; margin-top: 0.5rem;
-            border: none; background: none; color: var(--text-muted); font-size: 0.75rem; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: color var(--transition);
-        }
+        .status-picker-cancel { display: block; width: 100%; text-align: center; padding: 0.5rem; margin-top: 0.5rem; border: none; background: none; color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; }
         .status-picker-cancel:hover { color: var(--text-main); }
+
+        .bulletin-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 90; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .bulletin-overlay.open { opacity: 1; pointer-events: all; }
+        .bulletin-panel { position: fixed; top: 0; right: 0; width: 380px; max-width: 90vw; height: 100%; background: var(--bg-column); border-left: 1px solid var(--border); z-index: 95; display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: -8px 0 32px rgba(0,0,0,0.4); }
+        .bulletin-panel.open { transform: translateX(0); }
+        .bulletin-header { padding: 1rem 1.2rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+        .bulletin-header h2 { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px; color: var(--c-bulletin); display: flex; align-items: center; gap: 0.5rem; }
+        .bulletin-close { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.4rem; padding: 4px; border-radius: 4px; transition: all var(--transition); display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; }
+        .bulletin-close:hover { color: var(--text-main); background: rgba(255,255,255,0.06); }
+        .bulletin-compose { padding: 1rem 1.2rem; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        .compose-row { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+        .bulletin-compose input[type="text"] { flex: 1; padding: 0.5rem 0.7rem; font-size: 0.8rem; background: #0d0e10; border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-main); font-family: 'Outfit', sans-serif; }
+        .bulletin-compose select { padding: 0.5rem 0.5rem; font-size: 0.75rem; width: auto; min-width: 90px; background: #0d0e10; border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-main); font-family: 'Outfit', sans-serif; }
+        .bulletin-compose textarea { width: 100%; padding: 0.6rem 0.7rem; font-size: 0.85rem; min-height: 60px; max-height: 120px; resize: vertical; background: #0d0e10; border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-main); font-family: 'Outfit', sans-serif; line-height: 1.4; }
+        .compose-actions { display: flex; justify-content: flex-end; margin-top: 0.5rem; }
+        .btn-post { padding: 0.4rem 1rem; border: none; border-radius: var(--radius-sm); cursor: pointer; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; background: var(--c-bulletin); color: #000; transition: all var(--transition); }
+        .btn-post:hover { filter: brightness(1.15); } .btn-post:disabled { opacity: 0.4; cursor: default; }
+        .bulletin-feed { flex: 1; overflow-y: auto; padding: 0.8rem; scrollbar-width: thin; scrollbar-color: #2a2f38 transparent; }
+        .bulletin-feed::-webkit-scrollbar { width: 6px; } .bulletin-feed::-webkit-scrollbar-track { background: transparent; } .bulletin-feed::-webkit-scrollbar-thumb { background: #2a2f38; border-radius: 3px; }
+        .bulletin-msg { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.8rem; margin-bottom: 0.5rem; transition: all var(--transition); animation: cardIn 0.2s ease both; position: relative; }
+        .bulletin-msg:hover { border-color: var(--border-hover); }
+        .bulletin-msg-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; }
+        .bulletin-msg-author { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.8rem; color: var(--text-main); display: flex; align-items: center; gap: 0.4rem; }
+        .bulletin-msg-time { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--text-muted); font-weight: 600; }
+        .bulletin-msg-body { font-size: 0.85rem; color: #bbb; line-height: 1.5; word-wrap: break-word; }
+        .bulletin-msg-delete { position: absolute; top: 6px; right: 6px; background: none; border: none; color: #444; cursor: pointer; font-size: 0.9rem; padding: 2px 4px; border-radius: 3px; opacity: 0; transition: all var(--transition); }
+        .bulletin-msg:hover .bulletin-msg-delete { opacity: 1; }
+        .bulletin-msg-delete:hover { color: #f87171; background: rgba(248,113,113,0.1); }
+        .priority-tag { font-family: 'JetBrains Mono', monospace; font-size: 0.55rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; padding: 1px 5px; border-radius: 3px; }
+        .priority-info { background: var(--c-shop-dim); color: var(--c-shop); }
+        .priority-heads-up { background: var(--c-parts-dim); color: var(--c-parts); }
+        .priority-urgent { background: rgba(248,113,113,0.15); color: #f87171; }
+        .priority-fyi { background: rgba(255,255,255,0.05); color: var(--text-muted); }
+        .bulletin-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 3rem 1rem; color: var(--text-muted); text-align: center; }
+        .bulletin-empty-icon { font-size: 2rem; opacity: 0.3; margin-bottom: 0.5rem; }
+        .bulletin-empty-text { font-size: 0.85rem; font-weight: 500; }
+        .bulletin-empty-sub { font-size: 0.7rem; color: #444; margin-top: 0.3rem; }
+        .bulletin-msg.pinned { border-color: rgba(244,114,182,0.3); background: var(--c-bulletin-dim); }
+        .bulletin-msg.pinned .bulletin-msg-body { color: var(--text-main); }
+        .pin-btn { background: none; border: none; color: #444; cursor: pointer; font-size: 0.75rem; padding: 2px 4px; border-radius: 3px; transition: all var(--transition); }
+        .pin-btn:hover { color: var(--c-bulletin); } .pin-btn.is-pinned { color: var(--c-bulletin); }
     </style>
 </head>
 <body>
@@ -322,64 +220,44 @@
         <div class="controls">
             <input type="text" id="searchInput" class="search-input" placeholder="Search unit…" onkeyup="renderBoard()">
             <button class="btn-primary" onclick="openModal('add')">+ Add Unit</button>
+            <button class="btn-bulletin" id="bulletinToggle" onclick="toggleBulletin()">📌 Board <span class="badge-count" id="msgCount" style="display:none">0</span></button>
             <button class="btn-outline" onclick="toggleTheme()">◑ Theme</button>
             <button class="btn-outline" onclick="toggleWallboardMode()">▣ Wall</button>
         </div>
     </header>
-
     <div class="kpi-container">
-        <div class="kpi-card kpi-intake"><div class="kpi-text"><span class="kpi-value" id="kpi-total" style="color: var(--c-intake)">0</span><span class="kpi-label">Reported</span></div></div>
-        <div class="kpi-card kpi-ready"><div class="kpi-text"><span class="kpi-value" id="kpi-ready" style="color: var(--c-ready)">0</span><span class="kpi-label">To Deliver</span></div></div>
-        <div class="kpi-card kpi-parts"><div class="kpi-text"><span class="kpi-value" id="kpi-parts" style="color: var(--c-parts)">0</span><span class="kpi-label">Parts Hold</span></div></div>
-        <div class="kpi-card kpi-done"><div class="kpi-text"><span class="kpi-value" id="kpi-complete" style="color: var(--c-done)">0</span><span class="kpi-label">Complete</span></div></div>
+        <div class="kpi-card kpi-intake"><div class="kpi-text"><span class="kpi-value" id="kpi-total" style="color:var(--c-intake)">0</span><span class="kpi-label">Reported</span></div></div>
+        <div class="kpi-card kpi-ready"><div class="kpi-text"><span class="kpi-value" id="kpi-ready" style="color:var(--c-ready)">0</span><span class="kpi-label">To Deliver</span></div></div>
+        <div class="kpi-card kpi-parts"><div class="kpi-text"><span class="kpi-value" id="kpi-parts" style="color:var(--c-parts)">0</span><span class="kpi-label">Parts Hold</span></div></div>
+        <div class="kpi-card kpi-done"><div class="kpi-text"><span class="kpi-value" id="kpi-complete" style="color:var(--c-done)">0</span><span class="kpi-label">Complete</span></div></div>
     </div>
-
     <div class="kanban-board">
-        <div class="kanban-column" id="column-intake">
-            <div class="column-header">
-                <div class="col-header-left"><div class="col-dot" style="background: var(--c-intake)"></div><span style="color: var(--c-intake)">Intake / Pickup</span></div>
-                <div class="column-actions"><button class="collapse-all-btn" onclick="toggleCollapseAll('col-intake')">⊟</button><span class="column-count" id="count-col-1">0</span></div>
-            </div>
-            <div class="column-content" id="col-intake" data-col="intake"></div>
-        </div>
-        <div class="kanban-column" id="column-shop">
-            <div class="column-header">
-                <div class="col-header-left"><div class="col-dot" style="background: var(--c-shop)"></div><span style="color: var(--c-shop)">In Progress</span></div>
-                <div class="column-actions"><button class="collapse-all-btn" onclick="toggleCollapseAll('col-shop')">⊟</button><span class="column-count" id="count-col-2">0</span></div>
-            </div>
-            <div class="column-content" id="col-shop" data-col="shop"></div>
-        </div>
-        <div class="kanban-column" id="column-parts">
-            <div class="column-header">
-                <div class="col-header-left"><div class="col-dot" style="background: var(--c-parts)"></div><span style="color: var(--c-parts)">Parts Hold</span></div>
-                <div class="column-actions"><button class="collapse-all-btn" onclick="toggleCollapseAll('col-parts')">⊟</button><span class="column-count" id="count-col-3">0</span></div>
-            </div>
-            <div class="column-content" id="col-parts" data-col="parts"></div>
-        </div>
-        <div class="kanban-column" id="column-done">
-            <div class="column-header">
-                <div class="col-header-left"><div class="col-dot" style="background: var(--c-done)"></div><span style="color: var(--c-done)">Complete</span></div>
-                <div class="column-actions"><button class="collapse-all-btn" onclick="toggleCollapseAll('col-done')">⊟</button><span class="column-count" id="count-col-4">0</span></div>
-            </div>
-            <div class="column-content" id="col-done" data-col="done"></div>
-        </div>
+        <div class="kanban-column"><div class="column-header"><div class="col-header-left"><div class="col-dot" style="background:var(--c-intake)"></div><span style="color:var(--c-intake)">Intake / Pickup</span></div><div class="column-actions"><button class="collapse-all-btn" onclick="toggleCollapseAll('col-intake')">⊟</button><span class="column-count" id="count-col-1">0</span></div></div><div class="column-content" id="col-intake" data-col="intake"></div></div>
+        <div class="kanban-column"><div class="column-header"><div class="col-header-left"><div class="col-dot" style="background:var(--c-shop)"></div><span style="color:var(--c-shop)">In Progress</span></div><div class="column-actions"><button class="collapse-all-btn" onclick="toggleCollapseAll('col-shop')">⊟</button><span class="column-count" id="count-col-2">0</span></div></div><div class="column-content" id="col-shop" data-col="shop"></div></div>
+        <div class="kanban-column"><div class="column-header"><div class="col-header-left"><div class="col-dot" style="background:var(--c-parts)"></div><span style="color:var(--c-parts)">Parts Hold</span></div><div class="column-actions"><button class="collapse-all-btn" onclick="toggleCollapseAll('col-parts')">⊟</button><span class="column-count" id="count-col-3">0</span></div></div><div class="column-content" id="col-parts" data-col="parts"></div></div>
+        <div class="kanban-column"><div class="column-header"><div class="col-header-left"><div class="col-dot" style="background:var(--c-done)"></div><span style="color:var(--c-done)">Complete</span></div><div class="column-actions"><button class="collapse-all-btn" onclick="toggleCollapseAll('col-done')">⊟</button><span class="column-count" id="count-col-4">0</span></div></div><div class="column-content" id="col-done" data-col="done"></div></div>
     </div>
-
+    <div class="bulletin-overlay" id="bulletinOverlay" onclick="toggleBulletin()"></div>
+    <div class="bulletin-panel" id="bulletinPanel">
+        <div class="bulletin-header"><h2>📌 Bulletin Board</h2><button class="bulletin-close" onclick="toggleBulletin()">✕</button></div>
+        <div class="bulletin-compose">
+            <div class="compose-row"><input type="text" id="msgAuthor" placeholder="Your name…" maxlength="30"><select id="msgPriority"><option value="fyi">FYI</option><option value="info" selected>Info</option><option value="heads-up">Heads Up</option><option value="urgent">Urgent</option></select></div>
+            <textarea id="msgBody" placeholder="Post a message to the board…" maxlength="500"></textarea>
+            <div class="compose-actions"><button class="btn-post" id="postBtn" onclick="postMessage()" disabled>Post</button></div>
+        </div>
+        <div class="bulletin-feed" id="bulletinFeed"></div>
+    </div>
     <div id="entryModal" class="modal-overlay" onclick="if(event.target===this)closeModal()">
         <div class="modal-content">
             <h2 id="modalTitle">EDIT UNIT</h2>
             <form id="vehicleForm" onsubmit="saveVehicle(event)">
-                <input type="hidden" id="mode" value="add">
-                <input type="hidden" id="targetRowIndex" value="">
+                <input type="hidden" id="mode" value="add"><input type="hidden" id="targetRowIndex" value="">
                 <div class="form-group"><label>Vehicle ID</label><input type="text" id="vID" required></div>
                 <div class="form-group"><label>Condition</label><select id="vStatus"><option value="Operational">Operational</option><option value="Warning">Warning</option><option value="Down">Down</option></select></div>
                 <div class="form-group"><label>Issue</label><input type="text" id="vIssue" required></div>
                 <div class="form-group"><label>Current Location</label><select id="vLocation"><option value="Dispatch Lot">Dispatch Lot</option><option value="On the road">On the road</option><option value="Pam (Ridesource, DMV)">Pam (Ridesource, DMV)</option><option value="Shop">Shop</option><option value="Paint">Paint</option><option value="Glass">Glass</option></select></div>
                 <div class="form-group"><label>Shop Status</label><select id="vShopStatus" onchange="togglePartsFields()"><option value="Reported">Reported</option><option value="Awaiting Pickup">Awaiting Pickup</option><option value="Received">Received</option><option value="Assessment">Assessment</option><option value="Awaiting part order">Awaiting part order</option><option value="Complete">Complete</option><option value="Ready for Delivery">Ready for Delivery</option></select></div>
-                <div id="partsSection">
-                    <div class="form-group"><label>Date Parts Ordered</label><input type="date" id="vPartsOrdered"></div>
-                    <div class="form-group" style="margin-bottom:0;"><label>Estimated Delivery (ETA)</label><input type="date" id="vPartsEta"></div>
-                </div>
+                <div id="partsSection"><div class="form-group"><label>Date Parts Ordered</label><input type="date" id="vPartsOrdered"></div><div class="form-group" style="margin-bottom:0;"><label>Estimated Delivery (ETA)</label><input type="date" id="vPartsEta"></div></div>
                 <div class="form-group"><label>Date In</label><input type="date" id="vDate" required></div>
                 <div class="modal-actions">
                     <button type="button" id="deleteBtn" class="controls btn-danger" style="display:none;" onclick="deleteCurrent()">DELETE</button>
@@ -391,259 +269,153 @@
     </div>
 
     <script>
+        // ============================================================
+        //  PASTE YOUR NEW APPS SCRIPT URL HERE (must be the v2 script)
+        // ============================================================
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxVv34BESHIyT_-HohJ-gUc4a2QdQdwHOzEmxFtr1WFxjwV620spd3KnjyHd8If5HSfYQ/exec";
+        // ============================================================
 
         let fleetData = [];
         let collapsedCards = new Set();
 
-        // Column ↔ status mapping
-        const COLUMN_STATUSES = {
-            intake: ["Reported", "Awaiting Pickup"],
-            shop:   ["Received", "Assessment"],
-            parts:  ["Awaiting part order"],
-            done:   ["Complete", "Ready for Delivery"]
-        };
-        function statusToCol(status) {
-            for (const [col, sts] of Object.entries(COLUMN_STATUSES)) { if (sts.includes(status)) return col; }
-            return 'intake';
-        }
+        const COLUMN_STATUSES = { intake: ["Reported","Awaiting Pickup"], shop: ["Received","Assessment"], parts: ["Awaiting part order"], done: ["Complete","Ready for Delivery"] };
+        function statusToCol(s) { for (const [c, sts] of Object.entries(COLUMN_STATUSES)) { if (sts.includes(s)) return c; } return 'intake'; }
 
         // ==================== DRAG & DROP ====================
-        let draggedRowIndex = null;
-        let draggedEl = null;
-        let currentIndicator = null;
-
-        function clearIndicators() {
-            document.querySelectorAll('.drop-indicator').forEach(el => el.remove());
-            document.querySelectorAll('.drag-over-column').forEach(el => el.classList.remove('drag-over-column'));
-            currentIndicator = null;
-        }
-
-        function onDragStart(e, rowIndex) {
-            draggedRowIndex = rowIndex;
-            draggedEl = e.target.closest('.vehicle-card');
-            draggedEl.classList.add('dragging');
-            e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/plain', String(rowIndex));
-            // Transparent drag image — the in-place ghost is cleaner
-            const ghost = document.createElement('div');
-            ghost.style.cssText = 'position:absolute;top:-1000px;width:1px;height:1px;';
-            document.body.appendChild(ghost);
-            e.dataTransfer.setDragImage(ghost, 0, 0);
-            setTimeout(() => ghost.remove(), 0);
-        }
-
-        function onDragEnd() {
-            if (draggedEl) { draggedEl.classList.remove('dragging'); draggedEl.style.opacity = ''; }
-            draggedRowIndex = null;
-            draggedEl = null;
-            clearIndicators();
-        }
-
-        function getClosestCard(colContent, y) {
-            const cards = [...colContent.querySelectorAll('.vehicle-card:not(.dragging)')];
-            let closest = null;
-            let closestOffset = Number.NEGATIVE_INFINITY;
-            for (const card of cards) {
-                const box = card.getBoundingClientRect();
-                const offset = y - box.top - box.height / 2;
-                if (offset < 0 && offset > closestOffset) { closestOffset = offset; closest = card; }
-            }
-            return closest;
-        }
-
-        function onDragOver(e) {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
-            const colContent = e.target.closest('.column-content');
-            if (!colContent) return;
-
-            const col = colContent.closest('.kanban-column');
-            document.querySelectorAll('.drag-over-column').forEach(el => el.classList.remove('drag-over-column'));
-            col.classList.add('drag-over-column');
-
-            const closestCard = getClosestCard(colContent, e.clientY);
-            if (currentIndicator) currentIndicator.remove();
-            const indicator = document.createElement('div');
-            indicator.className = 'drop-indicator';
-            currentIndicator = indicator;
-            if (closestCard) colContent.insertBefore(indicator, closestCard);
-            else colContent.appendChild(indicator);
-        }
+        let draggedRowIndex = null, draggedEl = null, currentIndicator = null;
+        function clearIndicators() { document.querySelectorAll('.drop-indicator').forEach(e => e.remove()); document.querySelectorAll('.drag-over-column').forEach(e => e.classList.remove('drag-over-column')); currentIndicator = null; }
+        function onDragStart(e, ri) { draggedRowIndex = ri; draggedEl = e.target.closest('.vehicle-card'); draggedEl.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(ri)); const g = document.createElement('div'); g.style.cssText = 'position:absolute;top:-1000px;width:1px;height:1px;'; document.body.appendChild(g); e.dataTransfer.setDragImage(g, 0, 0); setTimeout(() => g.remove(), 0); }
+        function onDragEnd() { if (draggedEl) { draggedEl.classList.remove('dragging'); draggedEl.style.opacity = ''; } draggedRowIndex = null; draggedEl = null; clearIndicators(); }
+        function getClosestCard(col, y) { const cards = [...col.querySelectorAll('.vehicle-card:not(.dragging)')]; let closest = null, co = Number.NEGATIVE_INFINITY; for (const c of cards) { const b = c.getBoundingClientRect(), o = y - b.top - b.height / 2; if (o < 0 && o > co) { co = o; closest = c; } } return closest; }
+        function onDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; const cc = e.target.closest('.column-content'); if (!cc) return; const col = cc.closest('.kanban-column'); document.querySelectorAll('.drag-over-column').forEach(e => e.classList.remove('drag-over-column')); col.classList.add('drag-over-column'); const cl = getClosestCard(cc, e.clientY); if (currentIndicator) currentIndicator.remove(); const ind = document.createElement('div'); ind.className = 'drop-indicator'; currentIndicator = ind; if (cl) cc.insertBefore(ind, cl); else cc.appendChild(ind); }
 
         function onDrop(e) {
             e.preventDefault();
-            const colContent = e.target.closest('.column-content');
-            if (!colContent || draggedRowIndex === null) { clearIndicators(); return; }
+            const cc = e.target.closest('.column-content');
+            if (!cc || draggedRowIndex === null) { clearIndicators(); return; }
+            const tk = cc.dataset.col;
+            const v = fleetData.find(v => v.rowIndex == draggedRowIndex);
+            if (!v) { clearIndicators(); return; }
+            const sc = statusToCol(v.shopStatus || "Reported");
 
-            const targetColKey = colContent.dataset.col;
-            const vehicle = fleetData.find(v => v.rowIndex == draggedRowIndex);
-            if (!vehicle) { clearIndicators(); return; }
-
-            const sourceCol = statusToCol(vehicle.shopStatus || "Reported");
-
-            if (sourceCol === targetColKey) {
-                // Same column — visual reorder only
-                if (draggedEl && currentIndicator) colContent.insertBefore(draggedEl, currentIndicator);
-                else if (draggedEl) colContent.appendChild(draggedEl);
+            if (sc === tk) {
+                // SAME COLUMN — reorder and persist sortOrder
+                if (draggedEl && currentIndicator) cc.insertBefore(draggedEl, currentIndicator);
+                else if (draggedEl) cc.appendChild(draggedEl);
                 if (draggedEl) { draggedEl.classList.remove('dragging'); draggedEl.style.opacity = ''; }
                 clearIndicators();
-                showToast("↕ Reordered");
+                persistColumnOrder(cc);
             } else {
+                // CROSS COLUMN — change status
                 clearIndicators();
-                const targetStatuses = COLUMN_STATUSES[targetColKey];
-                if (targetStatuses.length === 1) updateVehicleStatus(vehicle, targetStatuses[0]);
-                else showStatusPicker(vehicle, targetStatuses);
+                const ts = COLUMN_STATUSES[tk];
+                if (ts.length === 1) updateVehicleStatus(v, ts[0]);
+                else showStatusPicker(v, ts);
             }
         }
 
-        function showStatusPicker(vehicle, statuses) {
-            document.querySelectorAll('.status-picker-overlay').forEach(el => el.remove());
-            const overlay = document.createElement('div');
-            overlay.className = 'status-picker-overlay';
-            overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
-
-            const picker = document.createElement('div');
-            picker.className = 'status-picker';
-            picker.innerHTML = `<h3>Set status for ${vehicle.id}</h3>`;
-            statuses.forEach(status => {
-                const btn = document.createElement('button');
-                btn.className = 'status-picker-btn';
-                btn.textContent = status;
-                btn.onclick = () => { overlay.remove(); updateVehicleStatus(vehicle, status); };
-                picker.appendChild(btn);
+        // Save the current DOM order of cards in a column as sortOrder values to the sheet
+        function persistColumnOrder(colContent) {
+            const cards = colContent.querySelectorAll('.vehicle-card');
+            const items = [];
+            cards.forEach((card, idx) => {
+                const ri = parseInt(card.dataset.rowIndex);
+                if (!ri) return;
+                const sortVal = idx + 1; // 1, 2, 3, ...
+                items.push({ rowIndex: ri, sortOrder: sortVal });
+                // Update local data immediately so next render keeps this order
+                const veh = fleetData.find(v => v.rowIndex === ri);
+                if (veh) veh.sortOrder = sortVal;
             });
-            const cancel = document.createElement('button');
-            cancel.className = 'status-picker-cancel';
-            cancel.textContent = 'Cancel';
-            cancel.onclick = () => overlay.remove();
-            picker.appendChild(cancel);
-            overlay.appendChild(picker);
-            document.body.appendChild(overlay);
+
+            if (items.length === 0) return;
+
+            showToast("↕ Saving order…");
+            fetch(SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors",
+                body: JSON.stringify({ action: "reorder", items: items })
+            }).then(() => {
+                showToast("✓ Order saved");
+            });
         }
 
-        function updateVehicleStatus(vehicle, newStatus) {
-            vehicle.shopStatus = newStatus;
-            const payload = {
-                action: 'update', rowIndex: vehicle.rowIndex, id: vehicle.id, status: vehicle.status,
-                issue: vehicle.issue, date: vehicle.date, shopStatus: newStatus, location: vehicle.location,
-                partsOrdered: vehicle.partsOrdered || '', partsEta: vehicle.partsEta || ''
-            };
-            showToast(`⟳ ${vehicle.id} → ${newStatus}`);
-            fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) }).then(() => {
-                showToast(`✓ ${vehicle.id} updated`);
-                setTimeout(fetchSheetData, 800);
-            });
-            renderBoard();
-        }
-
-        // Wire up drop zones
-        document.querySelectorAll('.column-content').forEach(col => {
-            col.addEventListener('dragover', onDragOver);
-            col.addEventListener('dragleave', (e) => {
-                if (!col.contains(e.relatedTarget)) {
-                    col.closest('.kanban-column').classList.remove('drag-over-column');
-                    if (currentIndicator && col.contains(currentIndicator)) { currentIndicator.remove(); currentIndicator = null; }
-                }
-            });
-            col.addEventListener('drop', onDrop);
-        });
+        function showStatusPicker(v, statuses) { document.querySelectorAll('.status-picker-overlay').forEach(e => e.remove()); const ol = document.createElement('div'); ol.className = 'status-picker-overlay'; ol.onclick = e => { if (e.target === ol) ol.remove(); }; const pk = document.createElement('div'); pk.className = 'status-picker'; pk.innerHTML = `<h3>Set status for ${v.id}</h3>`; statuses.forEach(s => { const b = document.createElement('button'); b.className = 'status-picker-btn'; b.textContent = s; b.onclick = () => { ol.remove(); updateVehicleStatus(v, s); }; pk.appendChild(b); }); const c = document.createElement('button'); c.className = 'status-picker-cancel'; c.textContent = 'Cancel'; c.onclick = () => ol.remove(); pk.appendChild(c); ol.appendChild(pk); document.body.appendChild(ol); }
+        function updateVehicleStatus(v, ns) { v.shopStatus = ns; const p = { action: 'update', rowIndex: v.rowIndex, id: v.id, status: v.status, issue: v.issue, date: v.date, shopStatus: ns, location: v.location, partsOrdered: v.partsOrdered || '', partsEta: v.partsEta || '' }; showToast(`⟳ ${v.id} → ${ns}`); fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(p) }).then(() => { showToast(`✓ ${v.id} updated`); setTimeout(fetchSheetData, 800); }); renderBoard(); }
+        document.querySelectorAll('.column-content').forEach(col => { col.addEventListener('dragover', onDragOver); col.addEventListener('dragleave', e => { if (!col.contains(e.relatedTarget)) { col.closest('.kanban-column').classList.remove('drag-over-column'); if (currentIndicator && col.contains(currentIndicator)) { currentIndicator.remove(); currentIndicator = null; } } }); col.addEventListener('drop', onDrop); });
 
         // ==================== DATA ====================
         async function fetchSheetData() {
-            if (SCRIPT_URL.includes("PASTE_YOUR")) {
-                document.querySelector('.kanban-board').innerHTML = `<div style="grid-column:1/-1;display:flex;align-items:center;justify-content:center;color:#f87171;font-size:1.1rem;font-weight:700;">⚠️ Paste your Apps Script URL</div>`;
-                return;
-            }
-            try {
-                const res = await fetch(SCRIPT_URL);
-                const data = await res.json();
-                if (Array.isArray(data) && data.length > 0 && Array.isArray(data[0])) { showToast("⚠️ Script mismatch — redeploy"); return; }
-                fleetData = data;
-                renderBoard();
-            } catch (err) { console.error(err); }
+            if (SCRIPT_URL.includes("PASTE_YOUR")) { document.querySelector('.kanban-board').innerHTML = `<div style="grid-column:1/-1;display:flex;align-items:center;justify-content:center;color:#f87171;font-size:1.1rem;font-weight:700;">⚠️ Paste your Apps Script URL</div>`; return; }
+            try { const r = await fetch(SCRIPT_URL); const d = await r.json(); if (Array.isArray(d) && d.length > 0 && Array.isArray(d[0])) { showToast("⚠️ Script mismatch — redeploy v2"); return; } fleetData = d; renderBoard(); } catch (e) { console.error(e); }
         }
-
         function formatDate(s) { if (!s) return ''; const p = s.split('-'); return p.length === 3 ? `${p[1]}/${p[2]}/${p[0]}` : s; }
-        function daysElapsed(s) { if (!s) return null; const d = new Date(s+'T00:00:00'), n = new Date(); n.setHours(0,0,0,0); return Math.floor((n-d)/(864e5)); }
+        function daysElapsed(s) { if (!s) return null; const d = new Date(s + 'T00:00:00'), n = new Date(); n.setHours(0, 0, 0, 0); return Math.floor((n - d) / 864e5); }
 
         // ==================== RENDER ====================
-        const GRIP_SVG = `<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg>`;
-        const CHEVRON_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
+        const GRIP = `<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg>`;
+        const CHEV = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
 
         function renderBoard() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const st = document.getElementById('searchInput').value.toLowerCase();
             const cols = { intake: document.getElementById('col-intake'), shop: document.getElementById('col-shop'), parts: document.getElementById('col-parts'), done: document.getElementById('col-done') };
             Object.values(cols).forEach(c => c.innerHTML = '');
             let counts = { intake: 0, shop: 0, parts: 0, done: 0, ready: 0 };
 
-            [...fleetData].reverse().forEach((v, i) => {
-                if (searchTerm && !v.id.toLowerCase().includes(searchTerm) && !(v.issue||'').toLowerCase().includes(searchTerm)) return;
-
-                let status = v.shopStatus || "";
-                let targetCol = cols.intake, borderClass = "border-intake", pillClass = "pill-intake", showParts = false;
-
-                if (status === "Awaiting part order") { targetCol = cols.parts; borderClass = "border-parts"; pillClass = "pill-parts"; counts.parts++; showParts = true; }
-                else if (status === "Received" || status === "Assessment") { targetCol = cols.shop; borderClass = "border-shop"; pillClass = "pill-shop"; counts.shop++; }
-                else if (status === "Complete" || status === "Ready for Delivery") { targetCol = cols.done; borderClass = "border-done"; pillClass = "pill-done"; counts.done++; if (status === "Ready for Delivery") counts.ready++; }
-                else { counts.intake++; }
-
-                const condClass = v.status === 'Down' ? 'cond-down' : v.status === 'Warning' ? 'cond-warning' : 'cond-operational';
-                const days = daysElapsed(v.date);
-                let daysBadge = '';
-                if (days !== null && status !== "Complete" && status !== "Ready for Delivery") {
-                    daysBadge = `<span class="days-badge ${days > 14 ? 'crit' : days > 7 ? 'warn' : ''}">${days}d</span>`;
-                }
-
-                let partsHtml = '';
-                if (showParts) {
-                    partsHtml = `<div class="parts-info-block"><div class="parts-row"><span class="parts-label">Ordered</span><span class="parts-val">${formatDate(v.partsOrdered)||'—'}</span></div><div class="parts-row"><span class="parts-label">ETA</span><span class="parts-val eta">${formatDate(v.partsEta)||'—'}</span></div></div>`;
-                }
-
-                const cardKey = String(v.rowIndex || v.id + '-' + i);
-                const isCollapsed = collapsedCards.has(cardKey);
-
-                const card = document.createElement('div');
-                card.className = `vehicle-card ${borderClass} ${isCollapsed ? 'collapsed' : ''}`;
-                card.style.animationDelay = `${Math.min(i * 0.025, 0.3)}s`;
-                card.dataset.cardKey = cardKey;
-                card.dataset.rowIndex = v.rowIndex;
-                card.draggable = true;
-                card.addEventListener('dragstart', (e) => onDragStart(e, v.rowIndex));
-                card.addEventListener('dragend', onDragEnd);
-
-                card.innerHTML = `
-                    <div class="card-top-bar">
-                        <div class="card-id-group">
-                            <div class="drag-handle" title="Drag to reorder">${GRIP_SVG}</div>
-                            <span class="card-id">${v.id}</span>
-                            <span class="card-condition ${condClass}">${v.status || ''}</span>
-                            ${daysBadge}
-                        </div>
-                        <div class="card-right">
-                            <span class="card-date">${formatDate(v.date)}</span>
-                            <button class="collapse-toggle" onclick="event.stopPropagation(); toggleCard('${cardKey}', this);" title="Collapse">${CHEVRON_SVG}</button>
-                        </div>
-                    </div>
-                    <div class="card-body" onclick="openModal('edit', ${v.rowIndex})">
-                        <div class="card-issue">${v.issue}</div>
-                        <div class="card-meta">
-                            <span class="card-pill ${pillClass}">${status}</span>
-                            <div class="card-location">📍 ${v.location || 'Dispatch Lot'}</div>
-                        </div>
-                        ${partsHtml}
-                    </div>`;
-                targetCol.appendChild(card);
+            // Group vehicles by column, then sort each group by sortOrder (ascending), falling back to reverse insertion
+            const groups = { intake: [], shop: [], parts: [], done: [] };
+            fleetData.forEach(v => {
+                const col = statusToCol(v.shopStatus || "Reported");
+                groups[col].push(v);
             });
 
-            Object.values(cols).forEach(col => {
-                if (!col.children.length) col.innerHTML = `<div class="empty-state"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg><span>No units</span></div>`;
-            });
+            // Sort each group: vehicles WITH a sortOrder go by that value, those without go to the end (newest first)
+            for (const col of Object.keys(groups)) {
+                groups[col].sort((a, b) => {
+                    const aHas = a.sortOrder && a.sortOrder > 0;
+                    const bHas = b.sortOrder && b.sortOrder > 0;
+                    if (aHas && bHas) return a.sortOrder - b.sortOrder;
+                    if (aHas && !bHas) return -1;
+                    if (!aHas && bHas) return 1;
+                    // Neither has sortOrder — newest first (higher rowIndex = newer)
+                    return (b.rowIndex || 0) - (a.rowIndex || 0);
+                });
+            }
 
-            document.getElementById('count-col-1').innerText = counts.intake;
-            document.getElementById('count-col-2').innerText = counts.shop;
-            document.getElementById('count-col-3').innerText = counts.parts;
-            document.getElementById('count-col-4').innerText = counts.done;
+            let animIdx = 0;
+            for (const [colKey, vehicles] of Object.entries(groups)) {
+                vehicles.forEach(v => {
+                    if (st && !v.id.toLowerCase().includes(st) && !(v.issue || '').toLowerCase().includes(st)) return;
+
+                    let status = v.shopStatus || "";
+                    let tc = cols[colKey], bc = `border-${colKey === 'intake' ? 'intake' : colKey}`, pc = `pill-${colKey === 'intake' ? 'intake' : colKey}`, sp = false;
+
+                    if (colKey === 'parts') { bc = 'border-parts'; pc = 'pill-parts'; counts.parts++; sp = true; }
+                    else if (colKey === 'shop') { bc = 'border-shop'; pc = 'pill-shop'; counts.shop++; }
+                    else if (colKey === 'done') { bc = 'border-done'; pc = 'pill-done'; counts.done++; if (status === "Ready for Delivery") counts.ready++; }
+                    else { counts.intake++; }
+
+                    const cc = v.status === 'Down' ? 'cond-down' : v.status === 'Warning' ? 'cond-warning' : 'cond-operational';
+                    const days = daysElapsed(v.date); let db = '';
+                    if (days !== null && status !== "Complete" && status !== "Ready for Delivery") { db = `<span class="days-badge ${days > 14 ? 'crit' : days > 7 ? 'warn' : ''}">${days}d</span>`; }
+                    let ph = '';
+                    if (sp) { ph = `<div class="parts-info-block"><div class="parts-row"><span class="parts-label">Ordered</span><span class="parts-val">${formatDate(v.partsOrdered) || '—'}</span></div><div class="parts-row"><span class="parts-label">ETA</span><span class="parts-val eta">${formatDate(v.partsEta) || '—'}</span></div></div>`; }
+                    const ck = String(v.rowIndex || v.id + '-' + animIdx), ic = collapsedCards.has(ck);
+                    const card = document.createElement('div');
+                    card.className = `vehicle-card ${bc} ${ic ? 'collapsed' : ''}`;
+                    card.style.animationDelay = `${Math.min(animIdx * 0.025, 0.3)}s`;
+                    card.dataset.cardKey = ck; card.dataset.rowIndex = v.rowIndex; card.draggable = true;
+                    card.addEventListener('dragstart', e => onDragStart(e, v.rowIndex));
+                    card.addEventListener('dragend', onDragEnd);
+                    card.innerHTML = `<div class="card-top-bar"><div class="card-id-group"><div class="drag-handle" title="Drag">${GRIP}</div><span class="card-id">${v.id}</span><span class="card-condition ${cc}">${v.status || ''}</span>${db}</div><div class="card-right"><span class="card-date">${formatDate(v.date)}</span><button class="collapse-toggle" onclick="event.stopPropagation();toggleCard('${ck}',this);">${CHEV}</button></div></div><div class="card-body" onclick="openModal('edit',${v.rowIndex})"><div class="card-issue">${v.issue}</div><div class="card-meta"><span class="card-pill ${pc}">${status}</span><div class="card-location">📍 ${v.location || 'Dispatch Lot'}</div></div>${ph}</div>`;
+                    tc.appendChild(card);
+                    animIdx++;
+                });
+            }
+
+            Object.values(cols).forEach(c => { if (!c.children.length) c.innerHTML = `<div class="empty-state"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg><span>No units</span></div>`; });
+            document.getElementById('count-col-1').innerText = counts.intake; document.getElementById('count-col-2').innerText = counts.shop;
+            document.getElementById('count-col-3').innerText = counts.parts; document.getElementById('count-col-4').innerText = counts.done;
             document.getElementById('kpi-total').innerText = fleetData.length;
             document.getElementById('kpi-parts').innerText = fleetData.filter(v => v.shopStatus === "Awaiting part order").length;
             document.getElementById('kpi-complete').innerText = fleetData.filter(v => v.shopStatus === "Complete" || v.shopStatus === "Ready for Delivery").length;
@@ -651,94 +423,40 @@
         }
 
         // ==================== COLLAPSE ====================
-        function toggleCard(cardKey, btnEl) {
-            const card = btnEl.closest('.vehicle-card');
-            if (collapsedCards.has(cardKey)) { collapsedCards.delete(cardKey); card.classList.remove('collapsed'); }
-            else { collapsedCards.add(cardKey); card.classList.add('collapsed'); }
-        }
-        function toggleCollapseAll(colId) {
-            const col = document.getElementById(colId);
-            const cards = col.querySelectorAll('.vehicle-card');
-            const allC = [...cards].every(c => c.classList.contains('collapsed'));
-            cards.forEach(card => {
-                const k = card.dataset.cardKey;
-                if (allC) { collapsedCards.delete(k); card.classList.remove('collapsed'); }
-                else { collapsedCards.add(k); card.classList.add('collapsed'); }
-            });
-        }
+        function toggleCard(k, b) { const c = b.closest('.vehicle-card'); if (collapsedCards.has(k)) { collapsedCards.delete(k); c.classList.remove('collapsed'); } else { collapsedCards.add(k); c.classList.add('collapsed'); } }
+        function toggleCollapseAll(id) { const c = document.getElementById(id), cards = c.querySelectorAll('.vehicle-card'), all = [...cards].every(c => c.classList.contains('collapsed')); cards.forEach(card => { const k = card.dataset.cardKey; if (all) { collapsedCards.delete(k); card.classList.remove('collapsed'); } else { collapsedCards.add(k); card.classList.add('collapsed'); } }); }
 
         // ==================== FORM ====================
-        function togglePartsFields() {
-            const s = document.getElementById('vShopStatus').value, sec = document.getElementById('partsSection');
-            const o = document.getElementById('vPartsOrdered'), e = document.getElementById('vPartsEta');
-            if (s === "Awaiting part order") { sec.style.display = "block"; o.required = e.required = true; }
-            else { sec.style.display = "none"; o.required = e.required = false; }
-        }
-        function openModal(mode, rowIndex = null) {
-            document.getElementById('entryModal').style.display = 'flex';
-            document.getElementById('mode').value = mode;
-            const del = document.getElementById('deleteBtn');
-            if (mode === 'add') {
-                document.getElementById('modalTitle').innerText = "ADD NEW UNIT";
-                document.getElementById('vehicleForm').reset();
-                document.getElementById('vID').readOnly = false;
-                document.getElementById('vDate').valueAsDate = new Date();
-                del.style.display = 'none'; togglePartsFields();
-            } else {
-                document.getElementById('modalTitle').innerText = "EDIT UNIT";
-                del.style.display = 'block';
-                const v = fleetData.find(v => v.rowIndex === rowIndex);
-                if (v) {
-                    document.getElementById('targetRowIndex').value = v.rowIndex;
-                    document.getElementById('vID').value = v.id;
-                    document.getElementById('vStatus').value = v.status;
-                    document.getElementById('vIssue').value = v.issue;
-                    document.getElementById('vDate').value = v.date;
-                    document.getElementById('vShopStatus').value = v.shopStatus;
-                    document.getElementById('vLocation').value = v.location || "Dispatch Lot";
-                    document.getElementById('vPartsOrdered').value = v.partsOrdered || "";
-                    document.getElementById('vPartsEta').value = v.partsEta || "";
-                    togglePartsFields();
-                }
-            }
-        }
+        function togglePartsFields() { const s = document.getElementById('vShopStatus').value, sec = document.getElementById('partsSection'), o = document.getElementById('vPartsOrdered'), e = document.getElementById('vPartsEta'); if (s === "Awaiting part order") { sec.style.display = "block"; o.required = e.required = true; } else { sec.style.display = "none"; o.required = e.required = false; } }
+        function openModal(mode, ri = null) { document.getElementById('entryModal').style.display = 'flex'; document.getElementById('mode').value = mode; const d = document.getElementById('deleteBtn'); if (mode === 'add') { document.getElementById('modalTitle').innerText = "ADD NEW UNIT"; document.getElementById('vehicleForm').reset(); document.getElementById('vID').readOnly = false; document.getElementById('vDate').valueAsDate = new Date(); d.style.display = 'none'; togglePartsFields(); } else { document.getElementById('modalTitle').innerText = "EDIT UNIT"; d.style.display = 'block'; const v = fleetData.find(v => v.rowIndex === ri); if (v) { document.getElementById('targetRowIndex').value = v.rowIndex; document.getElementById('vID').value = v.id; document.getElementById('vStatus').value = v.status; document.getElementById('vIssue').value = v.issue; document.getElementById('vDate').value = v.date; document.getElementById('vShopStatus').value = v.shopStatus; document.getElementById('vLocation').value = v.location || "Dispatch Lot"; document.getElementById('vPartsOrdered').value = v.partsOrdered || ""; document.getElementById('vPartsEta').value = v.partsEta || ""; togglePartsFields(); } } }
         function closeModal() { document.getElementById('entryModal').style.display = 'none'; }
-        function saveVehicle(e) {
-            e.preventDefault();
-            const btn = document.getElementById('saveBtn'), mode = document.getElementById('mode').value;
-            const payload = {
-                action: mode === 'edit' ? 'update' : 'add',
-                rowIndex: document.getElementById('targetRowIndex').value,
-                id: document.getElementById('vID').value, status: document.getElementById('vStatus').value,
-                issue: document.getElementById('vIssue').value, date: document.getElementById('vDate').value,
-                shopStatus: document.getElementById('vShopStatus').value, location: document.getElementById('vLocation').value,
-                partsOrdered: document.getElementById('vPartsOrdered').value, partsEta: document.getElementById('vPartsEta').value
-            };
-            btn.innerText = "SAVING…"; btn.disabled = true;
-            fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) }).then(() => {
-                closeModal(); btn.innerText = "SAVE"; btn.disabled = false;
-                showToast("✓ Saved"); setTimeout(fetchSheetData, 1000);
-            });
-        }
-        function deleteCurrent() {
-            if (!confirm("Delete this vehicle?")) return;
-            const ri = document.getElementById('targetRowIndex').value, btn = document.getElementById('deleteBtn');
-            btn.innerText = "DELETING…";
-            fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ action: "delete", rowIndex: ri }) }).then(() => {
-                closeModal(); btn.innerText = "DELETE"; showToast("🗑 Deleted"); setTimeout(fetchSheetData, 1000);
-            });
-        }
-        function showToast(msg) {
-            document.querySelectorAll('.toast').forEach(el => el.remove());
-            const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
-            document.body.appendChild(t); setTimeout(() => t.remove(), 3000);
-        }
+        function saveVehicle(e) { e.preventDefault(); const b = document.getElementById('saveBtn'), m = document.getElementById('mode').value; const p = { action: m === 'edit' ? 'update' : 'add', rowIndex: document.getElementById('targetRowIndex').value, id: document.getElementById('vID').value, status: document.getElementById('vStatus').value, issue: document.getElementById('vIssue').value, date: document.getElementById('vDate').value, shopStatus: document.getElementById('vShopStatus').value, location: document.getElementById('vLocation').value, partsOrdered: document.getElementById('vPartsOrdered').value, partsEta: document.getElementById('vPartsEta').value }; b.innerText = "SAVING…"; b.disabled = true; fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(p) }).then(() => { closeModal(); b.innerText = "SAVE"; b.disabled = false; showToast("✓ Saved"); setTimeout(fetchSheetData, 1000); }); }
+        function deleteCurrent() { if (!confirm("Delete this vehicle?")) return; const ri = document.getElementById('targetRowIndex').value, b = document.getElementById('deleteBtn'); b.innerText = "DELETING…"; fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ action: "delete", rowIndex: ri }) }).then(() => { closeModal(); b.innerText = "DELETE"; showToast("🗑 Deleted"); setTimeout(fetchSheetData, 1000); }); }
+
+        // ==================== BULLETIN ====================
+        let bulletinMessages = [];
+        function loadBulletin() { try { bulletinMessages = JSON.parse(localStorage.getItem('dlx_bulletin_messages')) || []; } catch { bulletinMessages = []; } const sa = localStorage.getItem('dlx_bulletin_author'); if (sa) document.getElementById('msgAuthor').value = sa; renderBulletin(); updateBadge(); }
+        function saveBulletin() { localStorage.setItem('dlx_bulletin_messages', JSON.stringify(bulletinMessages)); }
+        function toggleBulletin() { const p = document.getElementById('bulletinPanel'), o = document.getElementById('bulletinOverlay'); if (p.classList.contains('open')) { p.classList.remove('open'); o.classList.remove('open'); } else { p.classList.add('open'); o.classList.add('open'); document.getElementById('bulletinToggle').classList.remove('has-new'); localStorage.setItem('dlx_bulletin_seen', String(bulletinMessages.length)); updateBadge(); } }
+        function updateBadge() { const seen = parseInt(localStorage.getItem('dlx_bulletin_seen') || '0'), unseen = Math.max(0, bulletinMessages.length - seen), badge = document.getElementById('msgCount'), btn = document.getElementById('bulletinToggle'); if (unseen > 0) { badge.textContent = unseen; badge.style.display = 'inline-block'; btn.classList.add('has-new'); } else { badge.style.display = 'none'; btn.classList.remove('has-new'); } }
+        function postMessage() { const a = document.getElementById('msgAuthor').value.trim(), body = document.getElementById('msgBody').value.trim(), pr = document.getElementById('msgPriority').value; if (!body) return; const msg = { id: Date.now() + '_' + Math.random().toString(36).substr(2, 5), author: a || 'Anonymous', body, priority: pr, time: new Date().toISOString(), pinned: false }; bulletinMessages.unshift(msg); saveBulletin(); localStorage.setItem('dlx_bulletin_author', msg.author); localStorage.setItem('dlx_bulletin_seen', String(bulletinMessages.length)); document.getElementById('msgBody').value = ''; document.getElementById('postBtn').disabled = true; renderBulletin(); showToast("📌 Posted"); }
+        function deleteMessage(id) { bulletinMessages = bulletinMessages.filter(m => m.id !== id); saveBulletin(); renderBulletin(); updateBadge(); }
+        function togglePin(id) { const m = bulletinMessages.find(m => m.id === id); if (m) { m.pinned = !m.pinned; saveBulletin(); renderBulletin(); } }
+        function formatRelativeTime(iso) { const diff = Math.floor((new Date() - new Date(iso)) / 1000); if (diff < 60) return 'just now'; if (diff < 3600) return Math.floor(diff / 60) + 'm ago'; if (diff < 86400) return Math.floor(diff / 3600) + 'h ago'; if (diff < 604800) return Math.floor(diff / 86400) + 'd ago'; return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }
+        function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+        function renderBulletin() { const f = document.getElementById('bulletinFeed'); if (!bulletinMessages.length) { f.innerHTML = `<div class="bulletin-empty"><div class="bulletin-empty-icon">📋</div><div class="bulletin-empty-text">No messages yet</div><div class="bulletin-empty-sub">Post an update for the team</div></div>`; return; } const sorted = [...bulletinMessages].sort((a, b) => { if (a.pinned && !b.pinned) return -1; if (!a.pinned && b.pinned) return 1; return 0; }); f.innerHTML = sorted.map(m => `<div class="bulletin-msg ${m.pinned ? 'pinned' : ''}"><div class="bulletin-msg-header"><div class="bulletin-msg-author">${escapeHtml(m.author)}<span class="priority-tag priority-${m.priority}">${m.priority.replace('-', ' ')}</span>${m.pinned ? '<span style="color:var(--c-bulletin);font-size:0.7rem;">📌</span>' : ''}</div><span class="bulletin-msg-time">${formatRelativeTime(m.time)}</span></div><div class="bulletin-msg-body">${escapeHtml(m.body)}</div><button class="pin-btn ${m.pinned ? 'is-pinned' : ''}" onclick="togglePin('${m.id}')" title="${m.pinned ? 'Unpin' : 'Pin'}">📌</button><button class="bulletin-msg-delete" onclick="deleteMessage('${m.id}')" title="Delete">✕</button></div>`).join(''); }
+        document.getElementById('msgBody').addEventListener('input', function () { document.getElementById('postBtn').disabled = !this.value.trim(); });
+        document.getElementById('msgBody').addEventListener('keydown', function (e) { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && this.value.trim()) postMessage(); });
+
+        // ==================== UTILITIES ====================
+        function showToast(msg) { document.querySelectorAll('.toast').forEach(e => e.remove()); const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 3000); }
         function toggleTheme() { document.body.classList.toggle('light-mode'); }
         function toggleWallboardMode() { document.body.classList.toggle('wallboard-mode'); }
-        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); if (document.getElementById('bulletinPanel').classList.contains('open')) toggleBulletin(); } });
 
         fetchSheetData();
         setInterval(fetchSheetData, 30000);
+        loadBulletin();
     </script>
 </body>
 </html>
