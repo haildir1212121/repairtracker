@@ -371,7 +371,7 @@
                     <div class="form-group"><label>Shop Status</label>
                         <select id="vShopStatus" onchange="togglePartsFields()">
                             <option value="Reported">Reported</option>
-                            <option value="Awaiting Pickup">Awaiting Pickup</option>
+                            <option value="Ready for Pickup">Ready for Pickup</option>
                             <option value="Received">Received</option>
                             <option value="Assessment">Assessment</option>
                             <option value="Repair in Progress">Repair in Progress</option>
@@ -397,12 +397,12 @@
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxVv34BESHIyT_-HohJ-gUc4a2QdQdwHOzEmxFtr1WFxjwV620spd3KnjyHd8If5HSfYQ/exec"; 
         let fleetData = [], collapsedCards = new Set();
         
-        // 5 Explicit Columns
+        // 5 Explicit Columns - UPDATED MAPPING
         const COLUMN_STATUSES = { 
-            complaints: ["Reported", "Awaiting Pickup"], 
-            ready:      ["Ready for Delivery"],
-            parts:      ["Awaiting part order", "Assessment"], 
-            progress:   ["Received",  "Parts Received - Waiting for Technician", "Repair in Progress"], 
+            complaints: ["Reported"], 
+            ready:      ["Ready for Pickup"],
+            parts:      ["Awaiting part order", "Assessment"], // Moved Assessment here
+            progress:   ["Received", "Parts Received - Waiting for Technician", "Repair in Progress"], 
             returned:   ["Complete"] 
         };
 
