@@ -256,7 +256,7 @@
     </header>
     <div class="kpi-container">
         <div class="kpi-card kpi-intake"><div class="kpi-text"><span class="kpi-value" id="kpi-total" style="color:var(--c-intake)">0</span><span class="kpi-label">Reported</span></div></div>
-        <div class="kpi-card kpi-ready"><div class="kpi-text"><span class="kpi-value" id="kpi-ready" style="color:var(--c-ready)">0</span><span class="kpi-label">To Pickup</span></div></div>
+        <div class="kpi-card kpi-ready"><div class="kpi-text"><span class="kpi-value" id="kpi-ready" style="color:var(--c-ready)">0</span><span class="kpi-label">To Deliver</span></div></div>
         <div class="kpi-card kpi-parts"><div class="kpi-text"><span class="kpi-value" id="kpi-parts" style="color:var(--c-parts)">0</span><span class="kpi-label">Parts Hold / Diagnostics</span></div></div>
         <div class="kpi-card kpi-done"><div class="kpi-text"><span class="kpi-value" id="kpi-complete" style="color:var(--c-done)">0</span><span class="kpi-label">Complete</span></div></div>
     </div>
@@ -294,7 +294,7 @@
             <div class="column-header">
                 <div class="col-header-left">
                     <div class="col-dot" style="background:var(--c-parts)"></div>
-                    <span style="color:var(--c-parts)">Parts Hold / Diagnostics</span>
+                    <span style="color:var(--c-parts)">Parts Hold</span>
                 </div>
                 <div class="column-actions">
                     <button class="collapse-all-btn" onclick="toggleCollapseAll('col-parts')">⊟</button>
@@ -374,10 +374,11 @@
                             <option value="Awaiting Pickup">Awaiting Pickup</option>
                             <option value="Received">Received</option>
                             <option value="Assessment">Assessment</option>
+                            <option value="Repair in Progress">Repair in Progress</option>
                             <option value="Awaiting part order">Awaiting part order</option>
                             <option value="Parts Received - Waiting for Technician">Parts Received - Waiting for Technician</option>
                             <option value="Complete">Complete</option>
-                            <option value="Ready for Pickup">Ready for Pickup</option>
+                            <option value="Ready for Delivery">Ready for Delivery</option>
                         </select>
                     </div>
                 </div>
@@ -393,15 +394,15 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxVv34BESHIyT_-HohJ-gUc4a2QdQdwHOzEmxFtr1WFxjwV620spd3KnjyHd8If5HSfYQ/exec"; // <--- PASTE NEW URL HERE
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxVv34BESHIyT_-HohJ-gUc4a2QdQdwHOzEmxFtr1WFxjwV620spd3KnjyHd8If5HSfYQ/exec"; 
         let fleetData = [], collapsedCards = new Set();
         
         // 5 Explicit Columns
         const COLUMN_STATUSES = { 
             complaints: ["Reported", "Awaiting Pickup"], 
-            ready:      ["Ready for Pickup"],
-            parts:      ["Awaiting part order"], 
-            progress:   ["Received", "Assessment", "Parts Received - Waiting for Technician"], 
+            ready:      ["Ready for Delivery"],
+            parts:      ["Awaiting part order", "Assessment"], 
+            progress:   ["Received",  "Parts Received - Waiting for Technician", "Repair in Progress"], 
             returned:   ["Complete"] 
         };
 
@@ -480,7 +481,7 @@
 
                     const cc = v.status === 'Down' ? 'cond-down' : v.status === 'Warning' ? 'cond-warning' : 'cond-operational';
                     const days = daysElapsed(v.date); let db = '';
-                    if (days !== null && status !== "Complete" && status !== "Ready for Pickup") db = `<span class="days-badge ${days > 14 ? 'crit' : days > 7 ? 'warn' : ''}">${days}d</span>`;
+                    if (days !== null && status !== "Complete" && status !== "Ready for Delivery") db = `<span class="days-badge ${days > 14 ? 'crit' : days > 7 ? 'warn' : ''}">${days}d</span>`;
 
                     const prio = v.priority || 'Normal';
                     let prioBadge = '';
@@ -531,7 +532,24 @@
         function toggleCollapseAll(id) { const c = document.getElementById(id), cards = c.querySelectorAll('.vehicle-card'), all = [...cards].every(c => c.classList.contains('collapsed')); cards.forEach(card => { const k = card.dataset.cardKey; if (all) { collapsedCards.delete(k); card.classList.remove('collapsed'); } else { collapsedCards.add(k); card.classList.add('collapsed'); } }); }
 
         // ==================== FORM ====================
-        function togglePartsFields() { const s = document.getElementById('vShopStatus').value, sec = document.getElementById('partsSection'), o = document.getElementById('vPartsOrdered'), e = document.getElementById('vPartsEta'); if (s === "Awaiting part order") { sec.style.display = "block"; o.required = e.required = true; } else { sec.style.display = "none"; o.required = e.required = false; } }
+        function togglePartsFields() { 
+            const s = document.getElementById('vShopStatus').value;
+            const sec = document.getElementById('partsSection');
+            const o = document.getElementById('vPartsOrdered');
+            const e = document.getElementById('vPartsEta');
+            
+            if (s === "Awaiting part order") { 
+                sec.style.display = "block"; 
+                // Changed from required=true to required=false
+                o.required = false; 
+                e.required = false; 
+            } else { 
+                sec.style.display = "none"; 
+                o.required = false; 
+                e.required = false; 
+            } 
+        }
+
         function openModal(mode, ri = null) {
             document.getElementById('entryModal').style.display = 'flex'; document.getElementById('mode').value = mode; const d = document.getElementById('deleteBtn');
             if (mode === 'add') {
@@ -604,5 +622,3 @@
     </script>
 </body>
 </html>
-
-
