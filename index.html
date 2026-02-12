@@ -167,6 +167,21 @@
         .card-notes { margin-top: 0.6rem; padding: 0.5rem; background: rgba(255,255,255,0.04); border-radius: 4px; font-size: 0.75rem; color: #a1a1aa; font-style: italic; border-left: 2px solid var(--text-muted); }
         body.light-mode .card-notes { background: rgba(0,0,0,0.04); color: #555; }
 
+        /* TYPE BADGES */
+        .type-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem; font-weight: 700;
+            padding: 1px 4px; border-radius: 3px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .type-van { background: #3b82f6; color: #fff; border-color: rgba(59, 130, 246, 0.4); }
+        .type-prius { background: #10b981; color: #fff; border-color: rgba(16, 185, 129, 0.4); }
+        .type-scion { background: #8b5cf6; color: #fff; border-color: rgba(139, 92, 246, 0.4); }
+        .type-other { background: #6b7280; color: #fff; border-color: rgba(107, 114, 128, 0.4); }
+
+
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--modal-bg); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(12px); animation: fadeIn 0.2s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .modal-content { background: var(--bg-column); padding: 1.5rem; border-radius: var(--radius); width: 90%; max-width: 500px; max-height: 85vh; overflow-y: auto; box-shadow: var(--shadow-lg); border: 1px solid var(--border); animation: slideUp 0.3s cubic-bezier(0.16,1,0.3,1); }
@@ -616,6 +631,20 @@
 
                 <div class="form-row">
                     <div class="form-group"><label>Vehicle ID</label><input type="text" id="vID" required></div>
+                    
+                    <div class="form-group">
+                        <label>Vehicle Type</label>
+                        <select id="vType">
+                            <option value="">Select Type...</option>
+                            <option value="Van">Van</option>
+                            <option value="Prius">Prius</option>
+                            <option value="Scion">Scion</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
                     <div class="form-group"><label>Priority</label>
                         <select id="vPriority">
                             <option value="Urgent">🔴 Urgent</option>
@@ -624,12 +653,13 @@
                             <option value="Normal" selected>Normal Priority</option>
                         </select>
                     </div>
-                </div>
-                <div class="form-row">
                     <div class="form-group"><label>Condition</label><select id="vStatus"><option value="Operational">Operational</option><option value="Warning">Warning</option><option value="Down">Down</option></select></div>
-                    <div class="form-group"><label>Home Location</label><input type="text" id="vHomeLocation" placeholder="e.g. Bend, Salem…"></div>
                 </div>
-                <div class="form-group"><label>Requested By / Dispatcher</label><input type="text" id="vRequestedBy" placeholder="Who asked for this?"></div>
+
+                <div class="form-row">
+                    <div class="form-group"><label>Home Location</label><input type="text" id="vHomeLocation" placeholder="e.g. Bend, Salem…"></div>
+                    <div class="form-group"><label>Requested By</label><input type="text" id="vRequestedBy" placeholder="Dispatcher Name"></div>
+                </div>
                 
                 <div class="form-group"><label>Issue</label><input type="text" id="vIssue" required></div>
                 
@@ -711,7 +741,6 @@
                 list.innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:10px;">No history recorded</div>';
                 return;
             }
-            // Sort newest first
             const sorted = [...historyArray].sort((a,b) => b.ts - a.ts);
             
             list.innerHTML = sorted.map(h => {
@@ -937,7 +966,8 @@
                             homeLocation: v.homeLocation || '',
                             notes: v.notes || '',
                             requestedBy: v.requestedBy || '',
-                            history: v.history
+                            history: v.history,
+                            vehicleType: v.vehicleType || ''
                         };
                         return fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
                     });
@@ -1083,6 +1113,17 @@
                         prioBadge = '<span class="priority-badge pb-maint">🔧 MAINT</span>';
                     }
 
+                    // TYPE BADGE GENERATION
+                    const vType = v.vehicleType || '';
+                    let typeBadge = '';
+                    if(vType) {
+                        let tc = 'type-other';
+                        if(vType === 'Van') tc = 'type-van';
+                        if(vType === 'Prius') tc = 'type-prius';
+                        if(vType === 'Scion') tc = 'type-scion';
+                        typeBadge = `<span class="type-badge ${tc}">${vType}</span>`;
+                    }
+
                     const cc = v.status === 'Down' ? 'cond-down' : v.status === 'Warning' ? 'cond-warning' : 'cond-operational';
                     
                     const days = daysElapsed(v.date); 
@@ -1098,7 +1139,6 @@
                         else if(t.priority === 'High') trClass = 'tr-high';
                         else if(t.priority === 'Oil Change / Bulb Replacement') trClass = 'tr-maint';
 
-                        // REQUESTED BY LINE
                         let reqHtml = '';
                         if(t.requestedBy) {
                             reqHtml = `<div class="req-line"><span>👤 Req:</span><span class="req-val">${t.requestedBy}</span></div>`;
@@ -1141,6 +1181,7 @@
                             <div class="card-id-group">
                                 <div class="drag-handle" title="Drag">${GRIP}</div>
                                 <span class="card-id">${v.id}</span>
+                                ${typeBadge}
                                 ${countBadge}
                                 <span class="card-condition ${cc}">${v.status || ''}</span>
                                 ${prioBadge}
@@ -1223,6 +1264,7 @@
                 document.getElementById('vHomeLocation').value = '';
                 document.getElementById('vNotes').value = '';
                 document.getElementById('vRequestedBy').value = '';
+                document.getElementById('vType').value = '';
                 document.getElementById('vHistory').value = '';
                 document.getElementById('historyList').innerHTML = '<div style="color:var(--text-muted);text-align:center;">New ticket - no history</div>';
                 d.style.display = 'none'; 
@@ -1245,6 +1287,7 @@
                     document.getElementById('vHomeLocation').value = v.homeLocation || "";
                     document.getElementById('vNotes').value = v.notes || "";
                     document.getElementById('vRequestedBy').value = v.requestedBy || "";
+                    document.getElementById('vType').value = v.vehicleType || "";
                     
                     document.getElementById('vHistory').value = v.history || "";
                     const hist = parseHistory(v.history);
@@ -1282,6 +1325,7 @@
             const homeLocation = document.getElementById('vHomeLocation').value;
             const notes = document.getElementById('vNotes').value;
             const requestedBy = document.getElementById('vRequestedBy').value;
+            const vehicleType = document.getElementById('vType').value;
             const rawHist = document.getElementById('vHistory').value;
 
             // --- AUDIT LOGIC ---
@@ -1303,7 +1347,7 @@
             const p = { 
                 action: m === 'edit' ? 'update' : 'add', 
                 rowIndex: oldRi, 
-                id, status, issue, date, shopStatus, location, partsOrdered, partsEta, priority, homeLocation, notes, requestedBy,
+                id, status, issue, date, shopStatus, location, partsOrdered, partsEta, priority, homeLocation, notes, requestedBy, vehicleType,
                 history: JSON.stringify(historyArr)
             }; 
 
