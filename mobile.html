@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#08090a">
-    <title>DLX Density</title>
+    <title>DLX Mobile</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@800&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -13,143 +13,185 @@
             --c-intake: #c084fc; --c-shop: #60a5fa; --c-parts: #fb923c;
             --c-done: #4ade80; --c-ready: #22d3ee; 
             --s-down: #ef4444; --s-warn: #f59e0b; --s-ok: #22c55e;
-            --radius: 6px;
+            --radius: 12px;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Outfit', sans-serif; background-color: var(--bg-body); color: #e8eaed; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
         
-        header { padding: 0.6rem 0.8rem; display: flex; justify-content: space-between; align-items: center; background: var(--bg-body); z-index: 10; border-bottom: 1px solid #222; }
-        h1 { font-size: 1rem; font-weight: 800; letter-spacing: 1px; }
-        .refresh-btn { background: none; border: 1px solid #333; border-radius: 6px; color: #999; padding: 4px 10px; font-weight: 600; font-size: 0.75rem; }
-
+        header { padding: 0.8rem 1rem; display: flex; justify-content: space-between; align-items: center; background: var(--bg-body); z-index: 10; }
+        h1 { font-size: 1.1rem; font-weight: 800; letter-spacing: 1px; }
+        .user-chip { background: #222; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; color: #888; border: 1px solid #333; }
+        
+        /* VIEW TRANSITIONS */
         .view-container { flex: 1; position: relative; overflow: hidden; }
-        .view { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow-y: auto; padding: 8px; transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1); background: var(--bg-body); }
+        .view { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow-y: auto; padding: 10px; transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1); background: var(--bg-body); display: flex; flex-direction: column; }
         .view.hidden { transform: translateX(100%); pointer-events: none; }
         .view.active { transform: translateX(0); }
+        .view.sub-active { transform: translateX(0); z-index: 20; background: var(--bg-body); }
 
-        /* DASHBOARD (Summary View) */
-        .dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-        .d-tile { background: var(--bg-tile); border-radius: 8px; padding: 0.8rem; display: flex; flex-direction: column; justify-content: space-between; height: 90px; border: 1px solid #2a2f38; }
-        .d-tile:active { background: #22262c; }
-        .d-count { font-family: 'JetBrains Mono', monospace; font-size: 2rem; font-weight: 800; line-height: 1; }
-        .d-label { font-size: 0.7rem; font-weight: 700; color: #777; text-transform: uppercase; }
-        
-        .t-intake { border-left: 3px solid var(--c-intake); color: var(--c-intake); }
-        .t-ready { border-left: 3px solid var(--c-ready); color: var(--c-ready); }
-        .t-shop { border-left: 3px solid var(--c-shop); color: var(--c-shop); }
-        .t-parts { border-left: 3px solid var(--c-parts); color: var(--c-parts); }
-        .t-done { border-left: 3px solid var(--c-done); color: var(--c-done); }
-        .t-add { background: #111; border: 1px dashed #444; align-items: center; justify-content: center; }
+        /* === HOME DASHBOARD === */
+        .inbox-widget {
+            background: #1a1d21; border-radius: var(--radius); padding: 12px; margin-bottom: 10px;
+            border: 1px solid #333; display: flex; align-items: center; gap: 10px; cursor: pointer;
+        }
+        .inbox-icon { font-size: 1.2rem; }
+        .inbox-content { flex: 1; overflow: hidden; }
+        .inbox-title { font-size: 0.75rem; color: #888; font-weight: 700; text-transform: uppercase; display: flex; justify-content: space-between; }
+        .inbox-preview { font-size: 0.85rem; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; margin-top: 2px; }
+        .badge { background: #f472b6; color: #000; font-family: 'JetBrains Mono'; font-weight: 800; font-size: 0.65rem; padding: 1px 6px; border-radius: 10px; }
 
-        /* MICRO GRID (The requested "Small Tiles") */
-        .grid-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #222; }
-        .back-btn { background: #2a2f38; border: none; width: 28px; height: 28px; border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
-        .grid-title { font-size: 0.9rem; font-weight: 800; text-transform: uppercase; }
+        .dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; flex: 1; align-content: start; }
+        .d-tile { 
+            background: var(--bg-tile); border-radius: var(--radius); padding: 1rem; 
+            display: flex; flex-direction: column; justify-content: space-between; 
+            border: 1px solid #2a2f38; position: relative; overflow: hidden;
+            min-height: 100px;
+        }
+        .d-tile:active { transform: scale(0.98); filter: brightness(1.2); }
         
-        .vehicle-grid { 
-            display: grid; 
-            grid-template-columns: repeat(5, 1fr); /* 5 COLUMNS = SMALL TILES */
-            gap: 4px; 
-            padding-bottom: 60px; 
+        .d-tile.wide { grid-column: span 2; min-height: 110px; }
+        
+        .d-count { font-family: 'JetBrains Mono', monospace; font-size: 2.5rem; font-weight: 800; line-height: 1; z-index: 2; }
+        .d-label { font-size: 0.8rem; font-weight: 700; color: #ccc; text-transform: uppercase; letter-spacing: 1px; z-index: 2; margin-top: auto; }
+        
+        /* Tile Colors & Accents */
+        .t-intake { background: linear-gradient(145deg, rgba(192,132,252,0.1), rgba(192,132,252,0.02)); border-color: rgba(192,132,252,0.3); }
+        .t-intake .d-count { color: var(--c-intake); }
+        
+        .t-ready { background: linear-gradient(145deg, rgba(34,211,238,0.1), rgba(34,211,238,0.02)); border-color: rgba(34,211,238,0.3); }
+        .t-ready .d-count { color: var(--c-ready); }
+
+        .t-shop { background: linear-gradient(145deg, rgba(96,165,250,0.1), rgba(96,165,250,0.02)); border-color: rgba(96,165,250,0.3); }
+        .t-shop .d-count { color: var(--c-shop); }
+
+        .t-parts { background: linear-gradient(145deg, rgba(251,146,60,0.1), rgba(251,146,60,0.02)); border-color: rgba(251,146,60,0.3); }
+        .t-parts .d-count { color: var(--c-parts); }
+
+        .t-done { background: linear-gradient(145deg, rgba(74,222,128,0.1), rgba(74,222,128,0.02)); border-color: rgba(74,222,128,0.3); }
+        .t-done .d-count { color: var(--c-done); }
+
+        .fab-add {
+            position: fixed; bottom: 20px; right: 20px;
+            width: 56px; height: 56px; border-radius: 50%;
+            background: #fff; color: #000;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            border: none; z-index: 50;
         }
 
+        /* === GRID VIEW (Small Tiles) === */
+        .grid-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; padding-bottom: 8px; }
+        .back-btn { background: #2a2f38; border: none; width: 32px; height: 32px; border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+        .grid-title { font-size: 1.2rem; font-weight: 800; text-transform: uppercase; }
+        
+        .vehicle-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding-bottom: 80px; }
         .v-tile {
-            background: #16181b;
-            border-radius: var(--radius);
-            aspect-ratio: 1 / 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            border: 1px solid #2a2f38;
-            position: relative;
-            cursor: pointer;
-            overflow: hidden;
+            background: #16181b; border-radius: 8px; aspect-ratio: 1 / 1;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            border: 1px solid #2a2f38; position: relative; cursor: pointer; overflow: hidden;
         }
-        .v-tile:active { transform: scale(0.95); background: #222; }
+        .v-tile:active { background: #222; }
+        .v-id { font-family: 'JetBrains Mono'; font-size: 0.85rem; font-weight: 800; color: #fff; z-index: 2; }
         
-        .v-id { 
-            font-family: 'JetBrains Mono', monospace; 
-            font-size: 0.85rem; 
-            font-weight: 800; 
-            color: #fff; 
-            z-index: 2;
-        }
-
-        /* Status Bar (Bottom of tile) */
-        .v-status-bar {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-        }
+        .v-status-bar { position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; }
         .s-down .v-status-bar { background: var(--s-down); }
         .s-warn .v-status-bar { background: var(--s-warn); }
-        .s-ok .v-status-bar { background: #2a2f38; }
-
-        /* Priority Dot (Top Right) */
-        .p-dot { position: absolute; top: 4px; right: 4px; width: 6px; height: 6px; border-radius: 50%; z-index: 3; }
+        
+        .p-dot { position: absolute; top: 4px; right: 4px; width: 6px; height: 6px; border-radius: 50%; }
         .p-urgent { background: #ef4444; box-shadow: 0 0 4px #ef4444; }
         .p-high { background: #f59e0b; }
         .p-maint { background: var(--c-ready); }
-        
-        /* Multi-ticket Count (Top Left) */
-        .m-count { 
-            position: absolute; top: 2px; left: 2px; 
-            font-family: 'JetBrains Mono'; font-size: 0.55rem; 
-            color: #888; font-weight: 700; padding: 0 3px;
-        }
+        .m-count { position: absolute; top: 2px; left: 2px; font-family: 'JetBrains Mono'; font-size: 0.55rem; color: #888; font-weight: 700; }
 
-        /* MODAL */
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 100; display: none; padding: 1rem; }
-        .modal.open { display: block; animation: fadeIn 0.15s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .modal-content { background: var(--bg-modal); border-radius: 12px; height: 100%; display: flex; flex-direction: column; }
-        .modal-header { padding: 1rem; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
+        /* === MODAL & FORM === */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-body); z-index: 100; display: none; flex-direction: column; animation: slideUp 0.2s ease; }
+        .modal.open { display: flex; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        .modal-header { padding: 1rem; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; background: var(--bg-body); }
         .modal-body { flex: 1; overflow-y: auto; padding: 1rem; }
         
-        .ticket-card { background: #000; padding: 12px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #333; }
-        .btn-action { background: #333; color: #fff; border: 1px solid #444; padding: 8px; width: 100%; border-radius: 6px; font-weight: 700; margin-top: 8px; }
+        /* Ticket Detail Styles */
+        .ticket-detail { background: #111; border-radius: 8px; border: 1px solid #333; overflow: hidden; margin-bottom: 1rem; }
+        .td-header { background: #1a1d21; padding: 10px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; }
+        .td-issue { font-weight: 700; font-size: 1rem; padding: 10px; color: #fff; }
+        .td-meta { padding: 0 10px 10px; font-size: 0.75rem; color: #888; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .td-label { font-weight: 700; color: #555; text-transform: uppercase; font-size: 0.65rem; display: block; }
+        
+        .history-block { margin-top: 10px; background: #000; padding: 8px; border-radius: 6px; max-height: 100px; overflow-y: auto; font-size: 0.7rem; border: 1px solid #222; }
+        .h-item { margin-bottom: 4px; color: #aaa; border-bottom: 1px solid #111; padding-bottom: 2px; }
+        .h-user { color: var(--c-shop); font-weight: 700; }
 
-        /* Simple Form (Overlay) */
-        .edit-overlay { position: fixed; bottom: 0; left: 0; width: 100%; height: 60%; background: #1a1d21; z-index: 110; transform: translateY(100%); transition: transform 0.3s; padding: 1.5rem; border-radius: 16px 16px 0 0; border-top: 1px solid #444; display: flex; flex-direction: column; }
+        /* Action Buttons */
+        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px; background: #1a1d21; border-top: 1px solid #333; }
+        .btn-act { padding: 12px; border-radius: 8px; border: none; font-weight: 700; font-size: 0.9rem; cursor: pointer; }
+        .btn-status { background: var(--c-shop); color: #000; }
+        .btn-note { background: #333; color: #fff; border: 1px solid #444; }
+
+        /* EDIT OVERLAY */
+        .edit-overlay { position: fixed; bottom: 0; left: 0; width: 100%; height: 70%; background: #1a1d21; z-index: 150; transform: translateY(100%); transition: transform 0.3s; padding: 1.5rem; border-radius: 16px 16px 0 0; border-top: 1px solid #444; display: flex; flex-direction: column; }
         .edit-overlay.show { transform: translateY(0); }
-        input, select { width: 100%; padding: 12px; background: #000; border: 1px solid #333; color: #fff; border-radius: 8px; margin-bottom: 12px; font-size: 1rem; }
-        .btn-save { background: var(--c-shop); color: #000; padding: 14px; border: none; border-radius: 8px; font-weight: 800; width: 100%; margin-top: auto; }
         .overlay-drag-handle { width: 40px; height: 5px; background: #444; border-radius: 3px; margin: 0 auto 15px auto; }
+        
+        input, select, textarea { width: 100%; padding: 12px; background: #08090a; border: 1px solid #333; color: #fff; border-radius: 8px; margin-bottom: 12px; font-size: 1rem; font-family: 'Outfit'; }
+        textarea { resize: none; height: 80px; }
+        .btn-save { background: #fff; color: #000; padding: 14px; border: none; border-radius: 8px; font-weight: 800; width: 100%; margin-top: auto; font-size: 1rem; }
+
+        /* BULLETIN BOARD MODAL */
+        .msg-list { display: flex; flex-direction: column; gap: 10px; }
+        .msg-card { background: #1a1d21; padding: 12px; border-radius: 8px; border: 1px solid #333; }
+        .msg-top { display: flex; justify-content: space-between; font-size: 0.75rem; color: #888; margin-bottom: 4px; }
+        .msg-body { color: #ddd; font-size: 0.9rem; line-height: 1.4; }
+        .msg-tag { background: #333; padding: 1px 5px; border-radius: 4px; font-weight: 700; font-size: 0.6rem; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
     <header>
         <h1>DLX MOBILE</h1>
-        <button class="refresh-btn" onclick="fetchSheetData()">Sync</button>
+        <div class="user-chip" id="userChip" onclick="promptUser()">Guest</div>
     </header>
 
     <div class="view-container">
         <div id="view-dash" class="view active">
-            <div class="dash-grid">
-                <div class="d-tile t-add" onclick="openForm('add')">
-                    <div style="font-size:1.5rem;color:#fff">+</div>
-                </div>
-                <div class="d-tile t-intake" onclick="openGrid('complaints')">
-                    <div class="d-count" id="c-complaints">0</div><div class="d-label">Complaints</div>
-                </div>
-                <div class="d-tile t-ready" onclick="openGrid('ready')">
-                    <div class="d-count" id="c-ready">0</div><div class="d-label">Ready</div>
-                </div>
-                <div class="d-tile t-shop" onclick="openGrid('progress')">
-                    <div class="d-count" id="c-progress">0</div><div class="d-label">In Shop</div>
-                </div>
-                <div class="d-tile t-parts" onclick="openGrid('parts')">
-                    <div class="d-count" id="c-parts">0</div><div class="d-label">Parts Hold</div>
-                </div>
-                <div class="d-tile t-done" onclick="openGrid('returned')">
-                    <div class="d-count" id="c-returned">0</div><div class="d-label">Returned</div>
+            
+            <div class="inbox-widget" onclick="openBulletin()">
+                <div class="inbox-icon">📌</div>
+                <div class="inbox-content">
+                    <div class="inbox-title"><span>Bulletin Board</span><span class="badge" id="inboxBadge" style="display:none">0</span></div>
+                    <div class="inbox-preview" id="inboxPreview">No new messages</div>
                 </div>
             </div>
+
+            <div class="dash-grid">
+                <div class="d-tile wide t-intake" onclick="openGrid('complaints')">
+                    <div class="d-count" id="c-complaints">0</div>
+                    <div class="d-label">Reported / Intake</div>
+                </div>
+                
+                <div class="d-tile wide t-ready" onclick="openGrid('ready')">
+                    <div class="d-count" id="c-ready">0</div>
+                    <div class="d-label">Ready for Pickup</div>
+                </div>
+
+                <div class="d-tile t-shop" onclick="openGrid('progress')">
+                    <div class="d-count" id="c-progress">0</div>
+                    <div class="d-label">In Shop</div>
+                </div>
+
+                <div class="d-tile t-parts" onclick="openGrid('parts')">
+                    <div class="d-count" id="c-parts">0</div>
+                    <div class="d-label">Parts</div>
+                </div>
+
+                <div class="d-tile wide t-done" onclick="openGrid('returned')">
+                    <div class="d-count" id="c-returned">0</div>
+                    <div class="d-label">Complete / Returned</div>
+                </div>
+            </div>
+            
+            <button class="fab-add" onclick="openEditMode('add')">+</button>
         </div>
 
         <div id="view-grid" class="view hidden">
@@ -161,34 +203,61 @@
         </div>
     </div>
 
-    <div id="detailModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modal-id" style="font-family:'JetBrains Mono';">ID</h2>
-                <button class="back-btn" onclick="closeModal()">✕</button>
-            </div>
-            <div class="modal-body" id="ticket-list"></div>
+    <div id="bulletinModal" class="modal">
+        <div class="modal-header">
+            <h2>📌 Bulletin Board</h2>
+            <button class="back-btn" onclick="closeBulletin()">✕</button>
         </div>
+        <div class="modal-body" style="padding-bottom: 80px;">
+            <div id="msgList" class="msg-list"></div>
+        </div>
+        <div style="padding:1rem; border-top:1px solid #333; background:#08090a;">
+            <input type="text" id="newMsgInput" placeholder="Post an update..." style="margin-bottom:8px">
+            <button class="btn-save" style="padding:10px; font-size:0.9rem;" onclick="postMessage()">POST</button>
+        </div>
+    </div>
+
+    <div id="detailModal" class="modal">
+        <div class="modal-header">
+            <h2 id="modal-id" style="font-family:'JetBrains Mono';">ID</h2>
+            <button class="back-btn" onclick="closeDetail()">✕</button>
+        </div>
+        <div class="modal-body" id="ticket-list"></div>
     </div>
 
     <div id="editOverlay" class="edit-overlay">
         <div class="overlay-drag-handle" onclick="closeEdit()"></div>
-        <h3 style="margin-bottom:15px">Move Status</h3>
-        <input type="hidden" id="targetRowIndex">
-        <select id="vShopStatus">
+        <h3 style="margin-bottom:15px; color:#fff;" id="editTitle">Update Status</h3>
+        
+        <input type="hidden" id="editRowIndex">
+        <input type="hidden" id="editMode"> <div id="addFields" style="display:none;">
+            <input type="text" id="newId" placeholder="Vehicle ID (e.g. VAN 101)">
+            <input type="text" id="newIssue" placeholder="Issue Description">
+            <input type="text" id="newReq" placeholder="Requested By">
+        </div>
+
+        <select id="editStatus">
             <option value="Reported">Reported</option>
             <option value="Ready for Pickup">Ready for Pickup</option>
             <option value="Received">Received</option>
+            <option value="Assessment">Assessment</option>
             <option value="Repair in Progress">In Progress</option>
             <option value="Awaiting part order">Parts Hold</option>
+            <option value="Parts Received - Waiting for Technician">Parts Received</option>
             <option value="Complete">Complete</option>
+            <option value="Ready for Delivery">Ready for Delivery</option>
         </select>
-        <button class="btn-save" onclick="saveStatus()">UPDATE STATUS</button>
+        
+        <textarea id="editNotes" placeholder="Add a note or update history..."></textarea>
+        
+        <button class="btn-save" onclick="saveData()" id="saveBtn">SAVE UPDATE</button>
     </div>
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxVv34BESHIyT_-HohJ-gUc4a2QdQdwHOzEmxFtr1WFxjwV620spd3KnjyHd8If5HSfYQ/exec"; 
         let fleetData = [];
+        let currentUser = localStorage.getItem('dlx_mobile_user') || "";
+        
         const COLUMN_STATUSES = { 
             complaints: ["Reported"], 
             ready:      ["Ready for Pickup"],
@@ -197,14 +266,38 @@
             returned:   ["Complete", "Ready for Delivery"] 
         };
 
+        // --- INIT ---
+        function init() {
+            if(!currentUser) promptUser();
+            else document.getElementById('userChip').innerText = currentUser;
+            
+            loadBulletin();
+            fetchSheetData();
+        }
+
+        function promptUser() {
+            const name = prompt("Who are you? (For History Logs)");
+            if(name) {
+                currentUser = name;
+                localStorage.setItem('dlx_mobile_user', name);
+                document.getElementById('userChip').innerText = name;
+            }
+        }
+
         async function fetchSheetData() {
+            document.querySelector('.fab-add').innerText = '↻';
             try {
                 const r = await fetch(SCRIPT_URL);
                 fleetData = await r.json();
                 renderDashboard();
-            } catch (e) { console.log("Sync Error"); }
+                document.querySelector('.fab-add').innerText = '+';
+            } catch (e) { 
+                console.log("Sync Error"); 
+                document.querySelector('.fab-add').innerText = '!';
+            }
         }
 
+        // --- NAVIGATION ---
         function statusToCol(s) { 
             for (const [c, sts] of Object.entries(COLUMN_STATUSES)) { if (sts.includes(s)) return c; } 
             return 'complaints'; 
@@ -212,17 +305,19 @@
 
         function showDashboard() {
             document.getElementById('view-grid').classList.add('hidden');
-            document.getElementById('view-grid').classList.remove('active');
+            document.getElementById('view-grid').classList.remove('sub-active');
+            fetchSheetData(); // Refresh on back
         }
 
         function openGrid(cat) {
             document.getElementById('view-grid').classList.remove('hidden');
-            document.getElementById('view-grid').classList.add('active');
-            const titles = { complaints: "Complaints", ready: "Ready", parts: "Parts Hold", progress: "In Shop", returned: "Completed" };
+            document.getElementById('view-grid').classList.add('sub-active');
+            const titles = { complaints: "Reported", ready: "Ready", parts: "Parts Hold", progress: "In Shop", returned: "Completed" };
             document.getElementById('grid-title-text').innerText = titles[cat];
             renderGrid(cat);
         }
 
+        // --- RENDER DASHBOARD ---
         function renderDashboard() {
             const counts = { complaints:0, ready:0, parts:0, progress:0, returned:0 };
             fleetData.forEach(v => {
@@ -234,6 +329,7 @@
             });
         }
 
+        // --- RENDER GRID ---
         function renderGrid(category) {
             const container = document.getElementById('grid-container');
             container.innerHTML = '';
@@ -246,9 +342,11 @@
                 if (!merged[id]) merged[id] = { ...v, tickets: [] };
                 merged[id].tickets.push(v);
                 
+                // Priority Escalation
                 if (v.priority === 'Urgent') merged[id].priority = 'Urgent';
                 else if (v.priority === 'High' && merged[id].priority !== 'Urgent') merged[id].priority = 'High';
                 
+                // Status Escalation
                 if (v.status === 'Down') merged[id].status = 'Down';
                 else if (v.status === 'Warning' && merged[id].status !== 'Down') merged[id].status = 'Warning';
             });
@@ -279,6 +377,7 @@
             });
         }
 
+        // --- DETAIL VIEW ---
         function openDetail(mergedVeh) {
             document.getElementById('detailModal').classList.add('open');
             document.getElementById('modal-id').innerText = mergedVeh.id;
@@ -286,71 +385,201 @@
             list.innerHTML = '';
 
             mergedVeh.tickets.forEach(t => {
+                // Parse History
+                let histHtml = '';
+                try {
+                    const hArr = JSON.parse(t.history || '[]');
+                    if(hArr.length > 0) {
+                        const last = hArr[hArr.length-1];
+                        histHtml = `<div class="history-block">
+                            <div class="h-item"><span class="h-user">${last.user}:</span> ${last.desc}</div>
+                            <div style="font-size:0.6rem;color:#666;text-align:right">Total logs: ${hArr.length}</div>
+                        </div>`;
+                    }
+                } catch(e) {}
+
+                const reqHtml = t.requestedBy ? `<span class="td-label">Req By:</span> ${t.requestedBy}` : '';
+
                 const card = document.createElement('div');
-                card.className = 'ticket-card';
+                card.className = 'ticket-detail';
                 card.innerHTML = `
-                    <h3 style="color:#fff;font-size:0.9rem;margin-bottom:4px">${t.issue}</h3>
-                    <div style="font-size:0.75rem;color:#888;margin-bottom:8px">${t.date} • ${t.shopStatus}</div>
-                    <button class="btn-action" onclick="openEdit(${t.rowIndex}, '${t.shopStatus}')">MOVE STATUS</button>
+                    <div class="td-header">
+                        <span style="color:#${t.priority==='Urgent'?'ef4444':'fff'}">${t.shopStatus}</span>
+                        <span style="color:#666">${t.date}</span>
+                    </div>
+                    <div class="td-issue">${t.issue}</div>
+                    <div class="td-meta">
+                        <div>${reqHtml}</div>
+                        <div><span class="td-label">Loc:</span> ${t.location || '-'}</div>
+                    </div>
+                    ${histHtml}
+                    <div class="action-grid">
+                        <button class="btn-act btn-note" onclick="openEditMode('note', ${t.rowIndex})">NOTE</button>
+                        <button class="btn-act btn-status" onclick="openEditMode('status', ${t.rowIndex})">MOVE</button>
+                    </div>
                 `;
                 list.appendChild(card);
             });
         }
+        
+        function closeDetail() {
+            document.getElementById('detailModal').classList.remove('open');
+        }
 
-        function openEdit(ri, currentStatus) {
+        // --- EDIT / ADD LOGIC ---
+        function openEditMode(mode, ri) {
             document.getElementById('editOverlay').classList.add('show');
-            document.getElementById('targetRowIndex').value = ri;
-            document.getElementById('vShopStatus').value = currentStatus;
+            document.getElementById('editMode').value = mode;
+            document.getElementById('editRowIndex').value = ri || '';
+            document.getElementById('editNotes').value = '';
+
+            const statusSel = document.getElementById('editStatus');
+            const addFields = document.getElementById('addFields');
+            const title = document.getElementById('editTitle');
+
+            if(mode === 'add') {
+                title.innerText = "New Ticket";
+                addFields.style.display = 'block';
+                statusSel.value = 'Reported';
+            } else {
+                addFields.style.display = 'none';
+                // Pre-populate status if possible
+                const v = fleetData.find(f => f.rowIndex == ri);
+                if(v) statusSel.value = v.shopStatus;
+
+                if(mode === 'note') {
+                    title.innerText = "Add Note / Log";
+                    statusSel.style.display = 'none';
+                } else {
+                    title.innerText = "Update Status";
+                    statusSel.style.display = 'block';
+                }
+            }
         }
 
         function closeEdit() {
             document.getElementById('editOverlay').classList.remove('show');
         }
 
-        function closeModal() {
-            document.getElementById('detailModal').classList.remove('open');
-            closeEdit();
+        function saveData() {
+            const btn = document.getElementById('saveBtn');
+            const mode = document.getElementById('editMode').value;
+            const ri = document.getElementById('editRowIndex').value;
+            const status = document.getElementById('editStatus').value;
+            const note = document.getElementById('editNotes').value;
+            
+            // Construct Log Entry
+            const logEntry = {
+                ts: Date.now(),
+                user: currentUser,
+                action: mode === 'add' ? 'Created' : mode === 'note' ? 'Note' : 'Status',
+                desc: mode === 'add' ? 'Ticket created' : (mode === 'note' ? note : `Status: ${status} ${note ? '('+note+')' : ''}`)
+            };
+
+            let payload = {};
+
+            if(mode === 'add') {
+                const id = document.getElementById('newId').value;
+                const issue = document.getElementById('newIssue').value;
+                const req = document.getElementById('newReq').value;
+                if(!id || !issue) { alert("ID and Issue required"); return; }
+                
+                payload = {
+                    action: 'add', id, issue, 
+                    date: new Date().toISOString().split('T')[0],
+                    shopStatus: status,
+                    requestedBy: req,
+                    history: JSON.stringify([logEntry])
+                };
+            } else {
+                // Update Existing
+                const v = fleetData.find(f => f.rowIndex == ri);
+                if(!v) return;
+                
+                // Append History
+                let hArr = [];
+                try { hArr = JSON.parse(v.history || '[]'); } catch(e){}
+                hArr.push(logEntry);
+
+                payload = {
+                    action: 'update', rowIndex: ri, id: v.id, status: v.status,
+                    issue: v.issue, date: v.date, location: v.location, priority: v.priority,
+                    partsOrdered: v.partsOrdered, partsEta: v.partsEta, requestedBy: v.requestedBy,
+                    homeLocation: v.homeLocation, notes: v.notes, // keep old static notes or overwrite if you prefer
+                    shopStatus: mode === 'status' ? status : v.shopStatus,
+                    history: JSON.stringify(hArr)
+                };
+            }
+
+            btn.innerText = "SAVING...";
+            fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) }).then(() => {
+                closeEdit();
+                if(mode === 'add') alert("Added");
+                btn.innerText = "SAVE";
+                // Clear add fields
+                document.getElementById('newId').value = '';
+                document.getElementById('newIssue').value = '';
+                document.getElementById('newReq').value = '';
+                
+                if(document.getElementById('detailModal').classList.contains('open')) closeDetail();
+                fetchSheetData();
+            });
         }
 
-        function saveStatus() {
-            const btn = document.querySelector('.btn-save');
-            btn.innerText = "UPDATING...";
-            const ri = document.getElementById('targetRowIndex').value;
-            const ns = document.getElementById('vShopStatus').value;
+        // --- BULLETIN BOARD ---
+        let bulletins = [];
+        function loadBulletin() {
+            try { bulletins = JSON.parse(localStorage.getItem('dlx_bulletin_messages')) || []; } catch(e) { bulletins = []; }
+            updateInboxPreview();
+        }
+
+        function updateInboxPreview() {
+            const count = bulletins.length;
+            const badge = document.getElementById('inboxBadge');
+            const prev = document.getElementById('inboxPreview');
             
-            // We need full object to update safely, simplified here for speed
-            // In production, you'd fetch the specific row or pass full data
-            const v = fleetData.find(f => f.rowIndex == ri);
-            if(v) {
-                const p = { 
-                    action: 'update', rowIndex: ri, id: v.id, status: v.status, 
-                    issue: v.issue, date: v.date, shopStatus: ns, location: v.location, 
-                    priority: v.priority, notes: v.notes, homeLocation: v.homeLocation,
-                    partsOrdered: v.partsOrdered, partsEta: v.partsEta
-                };
-                fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(p) }).then(() => {
-                    closeModal();
-                    btn.innerText = "UPDATE STATUS";
-                    alert("Updated");
-                    fetchSheetData();
-                });
+            if(count > 0) {
+                badge.innerText = count;
+                badge.style.display = 'inline-block';
+                prev.innerText = `${bulletins[0].author}: ${bulletins[0].body}`;
+                prev.style.color = '#fff';
+            } else {
+                badge.style.display = 'none';
+                prev.innerText = "No messages";
+                prev.style.color = '#666';
             }
         }
+
+        function openBulletin() { document.getElementById('bulletinModal').classList.add('open'); renderMessages(); }
+        function closeBulletin() { document.getElementById('bulletinModal').classList.remove('open'); }
         
-        function openForm(mode) {
-             if(mode === 'add') {
-                 const id = prompt("Vehicle ID:");
-                 if(id) {
-                     const issue = prompt("Issue:");
-                     if(issue) {
-                         const p = { action:'add', id:id, issue:issue, date: new Date().toISOString().split('T')[0], status:'Operational', shopStatus:'Reported', priority:'Normal' };
-                         fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(p) }).then(() => { alert("Added!"); fetchSheetData(); });
-                     }
-                 }
-             }
+        function renderMessages() {
+            const list = document.getElementById('msgList');
+            if(bulletins.length === 0) { list.innerHTML = '<div style="color:#666;text-align:center;margin-top:20px">No messages</div>'; return; }
+            list.innerHTML = bulletins.map(b => `
+                <div class="msg-card">
+                    <div class="msg-top">
+                        <span style="color:#fff;font-weight:700">${b.author}</span>
+                        <span>${new Date(b.time).toLocaleDateString()}</span>
+                    </div>
+                    <div class="msg-body">${b.body}</div>
+                </div>
+            `).join('');
         }
 
-        fetchSheetData();
+        function postMessage() {
+            const txt = document.getElementById('newMsgInput').value;
+            if(!txt) return;
+            bulletins.unshift({
+                id: Date.now(), author: currentUser, body: txt, time: new Date().toISOString()
+            });
+            localStorage.setItem('dlx_bulletin_messages', JSON.stringify(bulletins));
+            document.getElementById('newMsgInput').value = '';
+            renderMessages();
+            updateInboxPreview();
+        }
+
+        init();
     </script>
 </body>
 </html>
