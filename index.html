@@ -144,7 +144,7 @@
         .collapse-toggle:hover { color: var(--text-main); opacity: 1; background: rgba(255,255,255,0.06); }
         .collapse-toggle svg { width: 14px; height: 14px; transition: transform var(--transition); }
         .vehicle-card.collapsed .collapse-toggle svg { transform: rotate(-90deg); }
-        .card-body { padding: 0 0.8rem 0.6rem; overflow: hidden; max-height: 300px; transition: max-height 0.3s ease, padding 0.3s ease, opacity 0.2s ease; opacity: 1; }
+        .card-body { padding: 0 0.8rem 0.6rem; overflow: hidden; max-height: 500px; transition: max-height 0.3s ease, padding 0.3s ease, opacity 0.2s ease; opacity: 1; }
         .vehicle-card.collapsed .card-body { max-height: 0; padding: 0 0.8rem; opacity: 0; }
         .card-issue { font-size: 0.85rem; color: #9ca3af; font-weight: 500; line-height: 1.4; margin-bottom: 0.5rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .card-meta { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; }
@@ -169,7 +169,7 @@
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--modal-bg); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(12px); animation: fadeIn 0.2s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .modal-content { background: var(--bg-column); padding: 1.5rem; border-radius: var(--radius); width: 90%; max-width: 460px; max-height: 85vh; overflow-y: auto; box-shadow: var(--shadow-lg); border: 1px solid var(--border); animation: slideUp 0.3s cubic-bezier(0.16,1,0.3,1); }
+        .modal-content { background: var(--bg-column); padding: 1.5rem; border-radius: var(--radius); width: 90%; max-width: 500px; max-height: 85vh; overflow-y: auto; box-shadow: var(--shadow-lg); border: 1px solid var(--border); animation: slideUp 0.3s cubic-bezier(0.16,1,0.3,1); }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         .modal-content h2 { font-family: 'JetBrains Mono', monospace; font-size: 1rem; letter-spacing: 2px; margin-bottom: 1.2rem; color: var(--text-main); }
         .form-group { margin-bottom: 1rem; }
@@ -305,6 +305,52 @@
 #vPriority option[value="Urgent"] { color: #ef4444; font-weight: bold; }
 #vPriority option[value="High"] { color: #f59e0b; font-weight: bold; }
 #vPriority option[value="Oil Change / Bulb Replacement"] { color: #22d3ee; }
+
+/* ===== HISTORY LOG ===== */
+.history-section {
+    margin-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    padding-top: 1rem;
+}
+.history-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.8rem;
+    letter-spacing: 1px;
+    display: flex;
+    justify-content: space-between;
+}
+.history-list {
+    max-height: 150px;
+    overflow-y: auto;
+    background: #0d0e10;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.5rem;
+    font-size: 0.7rem;
+}
+.history-item {
+    display: flex;
+    gap: 0.5rem;
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.history-item:last-child { border-bottom: none; }
+.h-time { color: var(--text-muted); font-family: 'JetBrains Mono', monospace; flex-shrink: 0; }
+.h-user { color: var(--c-shop); font-weight: 700; flex-shrink: 0; }
+.h-desc { color: var(--text-main); word-break: break-word; }
+
+.req-line {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    margin-bottom: 0.2rem;
+    display: flex;
+    gap: 4px;
+}
+.req-val { color: var(--text-main); font-weight: 600; }
+
         @media (max-width: 1200px) {
             header { padding: 0.6rem 0.8rem; flex-wrap: wrap; gap: 0.5rem; }
             h1 { font-size: 1rem; letter-spacing: 1px; }
@@ -467,7 +513,6 @@
         <div class="kpi-card kpi-done"><div class="kpi-text"><span class="kpi-value" id="kpi-complete" style="color:var(--c-done)">0</span><span class="kpi-label">Complete</span></div></div>
     </div>
     
-    <!-- Mobile Swiper Nav -->
     <div class="swiper-nav" id="swiperNav">
         <button class="swiper-arrow" id="swiperPrev" onclick="swiperGo(-1)">‹</button>
         <div class="swiper-dots" id="swiperDots"></div>
@@ -556,26 +601,36 @@
         </div>
         <div class="bulletin-feed" id="bulletinFeed"></div>
     </div>
+    
     <div id="entryModal" class="modal-overlay" onclick="if(event.target===this)closeModal()">
         <div class="modal-content">
             <h2 id="modalTitle">EDIT UNIT</h2>
             <form id="vehicleForm" onsubmit="saveVehicle(event)">
-                <input type="hidden" id="mode" value="add"><input type="hidden" id="targetRowIndex" value="">
+                <input type="hidden" id="mode" value="add"><input type="hidden" id="targetRowIndex" value=""><input type="hidden" id="vHistory" value="">
+                
+                <div class="form-group" style="background:rgba(255,255,255,0.03); padding:0.5rem; border-radius:6px;">
+                    <label style="color:var(--c-shop);">Who are you? (For Logs)</label>
+                    <input type="text" id="currentUser" placeholder="Enter your name..." onchange="localStorage.setItem('dlx_username', this.value)" required>
+                </div>
+                <hr style="border:0; border-top:1px solid var(--border); margin:1rem 0;">
+
                 <div class="form-row">
                     <div class="form-group"><label>Vehicle ID</label><input type="text" id="vID" required></div>
-<div class="form-group"><label>Priority</label>
-    <select id="vPriority">
-        <option value="Urgent">🔴 Urgent</option>
-        <option value="High">⚠ High</option>
-        <option value="Oil Change / Bulb Replacement">🔧 Oil Change / Bulb</option>
-        <option value="Normal" selected>Normal Priority</option>
-    </select>
-</div>
+                    <div class="form-group"><label>Priority</label>
+                        <select id="vPriority">
+                            <option value="Urgent">🔴 Urgent</option>
+                            <option value="High">⚠ High</option>
+                            <option value="Oil Change / Bulb Replacement">🔧 Oil Change / Bulb</option>
+                            <option value="Normal" selected>Normal Priority</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group"><label>Condition</label><select id="vStatus"><option value="Operational">Operational</option><option value="Warning">Warning</option><option value="Down">Down</option></select></div>
                     <div class="form-group"><label>Home Location</label><input type="text" id="vHomeLocation" placeholder="e.g. Bend, Salem…"></div>
                 </div>
+                <div class="form-group"><label>Requested By / Dispatcher</label><input type="text" id="vRequestedBy" placeholder="Who asked for this?"></div>
+                
                 <div class="form-group"><label>Issue</label><input type="text" id="vIssue" required></div>
                 
                 <div class="form-group"><label>Notes / Updates</label><textarea id="vNotes" rows="3" placeholder="Enter updates here…"></textarea></div>
@@ -598,6 +653,12 @@
                 </div>
                 <div id="partsSection"><div class="form-group"><label>Date Parts Ordered</label><input type="date" id="vPartsOrdered"></div><div class="form-group" style="margin-bottom:0;"><label>Estimated Delivery (ETA)</label><input type="date" id="vPartsEta"></div></div>
                 <div class="form-group"><label>Date In</label><input type="date" id="vDate" required></div>
+                
+                <div class="history-section" id="historySection">
+                    <div class="history-title"><span>Activity Log</span> <span id="lastUpdatedBy" style="color:var(--text-main)"></span></div>
+                    <div class="history-list" id="historyList"></div>
+                </div>
+
                 <div class="modal-actions">
                     <button type="button" id="deleteBtn" class="controls btn-danger" style="display:none;" onclick="deleteCurrent()">DELETE</button>
                     <button type="button" class="btn-outline" onclick="closeModal()">CANCEL</button>
@@ -626,6 +687,45 @@
             return 'complaints'; 
         }
 
+        // ==================== HISTORY LOGIC ====================
+        function getUsername() {
+            return document.getElementById('currentUser').value.trim() || "Unknown";
+        }
+
+        function createLogEntry(action, desc) {
+            return {
+                ts: Date.now(),
+                user: getUsername(),
+                action: action,
+                desc: desc
+            };
+        }
+
+        function parseHistory(jsonStr) {
+            try { return jsonStr ? JSON.parse(jsonStr) : []; } catch(e) { return []; }
+        }
+
+        function renderHistoryLog(historyArray) {
+            const list = document.getElementById('historyList');
+            if(!historyArray || historyArray.length === 0) {
+                list.innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:10px;">No history recorded</div>';
+                return;
+            }
+            // Sort newest first
+            const sorted = [...historyArray].sort((a,b) => b.ts - a.ts);
+            
+            list.innerHTML = sorted.map(h => {
+                const date = new Date(h.ts);
+                const timeStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                return `
+                <div class="history-item">
+                    <div class="h-time">${timeStr}</div>
+                    <div class="h-user">${h.user}:</div>
+                    <div class="h-desc">${h.desc}</div>
+                </div>`;
+            }).join('');
+        }
+
         // ==================== MOBILE SWIPER ====================
         const COLUMN_NAMES = ['Complaints', 'Ready', 'Parts', 'In Progress', 'Returned'];
         const COLUMN_COLORS = ['var(--c-intake)', 'var(--c-ready)', 'var(--c-parts)', 'var(--c-shop)', 'var(--c-done)'];
@@ -652,31 +752,29 @@
         }
 
         function updateSwiperUI() {
-    if (!isMobile()) return;
-    const dots = document.querySelectorAll('.swiper-dot');
-    const columns = document.querySelectorAll('.kanban-column');
-    const counts = [
-        document.getElementById('count-col-1').textContent,
-        document.getElementById('count-col-2').textContent,
-        document.getElementById('count-col-3').textContent,
-        document.getElementById('count-col-4').textContent,
-        document.getElementById('count-col-5').textContent,
-    ];
+            if (!isMobile()) return;
+            const dots = document.querySelectorAll('.swiper-dot');
+            const columns = document.querySelectorAll('.kanban-column');
+            const counts = [
+                document.getElementById('count-col-1').textContent,
+                document.getElementById('count-col-2').textContent,
+                document.getElementById('count-col-3').textContent,
+                document.getElementById('count-col-4').textContent,
+                document.getElementById('count-col-5').textContent,
+            ];
 
-    dots.forEach((dot, i) => {
-        dot.classList.toggle('active', i === swiperIndex);
-        dot.dataset.count = counts[i];
-    });
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === swiperIndex);
+                dot.dataset.count = counts[i];
+            });
 
-    columns.forEach((col, i) => {
-        // FIXED: Removed 'i' from the calculation. 
-        // We shift the whole flex row left by the swiperIndex.
-        col.style.transform = `translateX(${-swiperIndex * 100}%)`;
-    });
+            columns.forEach((col, i) => {
+                col.style.transform = `translateX(${-swiperIndex * 100}%)`;
+            });
 
-    document.getElementById('swiperPrev').disabled = swiperIndex === 0;
-    document.getElementById('swiperNext').disabled = swiperIndex === 4;
-}
+            document.getElementById('swiperPrev').disabled = swiperIndex === 0;
+            document.getElementById('swiperNext').disabled = swiperIndex === 4;
+        }
 
         function swiperGo(dir) {
             const next = swiperIndex + dir;
@@ -692,7 +790,6 @@
         // Touch handlers for swipe
         function onTouchStart(e) {
             if (!isMobile()) return;
-            // Don't intercept scrolling within column content
             const touch = e.touches[0];
             touchStartX = touch.clientX;
             touchStartY = touch.clientY;
@@ -702,45 +799,39 @@
         }
 
         function onTouchMove(e) {
-    if (!isMobile()) return;
-    const touch = e.touches[0];
-    const deltaX = touch.clientX - touchStartX;
-    const deltaY = touch.clientY - touchStartY;
+            if (!isMobile()) return;
+            const touch = e.touches[0];
+            const deltaX = touch.clientX - touchStartX;
+            const deltaY = touch.clientY - touchStartY;
 
-    // Determine swipe direction: if horizontal motion > vertical, it's a swipe
-    if (!isSwiping && Math.abs(deltaX) > 10) {
-        if (Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
-            isSwiping = true;
+            if (!isSwiping && Math.abs(deltaX) > 10) {
+                if (Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
+                    isSwiping = true;
+                }
+            }
+
+            if (isSwiping) {
+                e.preventDefault();
+                touchDeltaX = deltaX;
+                const columns = document.querySelectorAll('.kanban-column');
+                const pct = (touchDeltaX / window.innerWidth) * 100;
+                columns.forEach((col, i) => {
+                    col.style.transition = 'none';
+                    col.style.transform = `translateX(${-swiperIndex * 100 + pct}%)`;
+                });
+            }
         }
-    }
-
-    if (isSwiping) {
-        e.preventDefault();
-        touchDeltaX = deltaX;
-
-        // Visual feedback: translate columns with finger
-        const columns = document.querySelectorAll('.kanban-column');
-        const pct = (touchDeltaX / window.innerWidth) * 100;
-        columns.forEach((col, i) => {
-            col.style.transition = 'none';
-            // FIXED: Removed 'i' from calculation here as well
-            col.style.transform = `translateX(${-swiperIndex * 100 + pct}%)`;
-        });
-    }
-}
         function onTouchEnd(e) {
             if (!isMobile() || !isSwiping) return;
 
             const elapsed = Date.now() - swipeStartTime;
             const velocity = Math.abs(touchDeltaX) / elapsed;
 
-            // Restore transitions
             const columns = document.querySelectorAll('.kanban-column');
             columns.forEach(col => {
                 col.style.transition = 'transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
             });
 
-            // Determine if swipe is valid
             if (Math.abs(touchDeltaX) > SWIPE_THRESHOLD || velocity > SWIPE_VELOCITY_THRESHOLD) {
                 if (touchDeltaX > 0 && swiperIndex > 0) {
                     swiperIndex--;
@@ -754,13 +845,11 @@
             touchDeltaX = 0;
         }
 
-        // Attach swipe listeners to board
         const kanbanBoard = document.getElementById('kanbanBoard');
         kanbanBoard.addEventListener('touchstart', onTouchStart, { passive: true });
         kanbanBoard.addEventListener('touchmove', onTouchMove, { passive: false });
         kanbanBoard.addEventListener('touchend', onTouchEnd, { passive: true });
 
-        // Re-init on resize
         let resizeTimer;
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimer);
@@ -768,7 +857,6 @@
                 if (isMobile()) {
                     updateSwiperUI();
                 } else {
-                    // Reset transforms for desktop
                     document.querySelectorAll('.kanban-column').forEach(col => {
                         col.style.transform = '';
                         col.style.transition = '';
@@ -781,137 +869,119 @@
         let draggedRowIndex = null, draggedEl = null, currentIndicator = null;
         function clearIndicators() { document.querySelectorAll('.drop-indicator').forEach(e=>e.remove()); document.querySelectorAll('.drag-over-column').forEach(e=>e.classList.remove('drag-over-column')); currentIndicator = null; }
         function onDragStart(e, rowIndexes) {
-    if (isMobile()) { e.preventDefault(); return; }
-    // Store array of indexes as JSON string
-    const indexes = Array.isArray(rowIndexes) ? rowIndexes : [rowIndexes];
-    e.dataTransfer.setData('text/plain', JSON.stringify(indexes));
-    
-    draggedEl = e.target.closest('.vehicle-card');
-    draggedEl.classList.add('dragging');
-    e.dataTransfer.effectAllowed = 'move';
-    
-    // Ghost image
-    const g = document.createElement('div');
-    g.style.cssText = 'position:absolute;top:-1000px;';
-    document.body.appendChild(g);
-    e.dataTransfer.setDragImage(g, 0, 0);
-    setTimeout(() => g.remove(), 0);
-}
+            if (isMobile()) { e.preventDefault(); return; }
+            const indexes = Array.isArray(rowIndexes) ? rowIndexes : [rowIndexes];
+            e.dataTransfer.setData('text/plain', JSON.stringify(indexes));
+            draggedEl = e.target.closest('.vehicle-card');
+            draggedEl.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            const g = document.createElement('div');
+            g.style.cssText = 'position:absolute;top:-1000px;';
+            document.body.appendChild(g);
+            e.dataTransfer.setDragImage(g, 0, 0);
+            setTimeout(() => g.remove(), 0);
+        }
         function onDragEnd() { if (draggedEl) { draggedEl.classList.remove('dragging'); draggedEl.style.opacity = ''; } draggedRowIndex = null; draggedEl = null; clearIndicators(); }
         function getClosestCard(col, y) { const cards = [...col.querySelectorAll('.vehicle-card:not(.dragging)')]; let closest = null, co = Number.NEGATIVE_INFINITY; for (const c of cards) { const b = c.getBoundingClientRect(), o = y - b.top - b.height / 2; if (o < 0 && o > co) { co = o; closest = c; } } return closest; }
         function onDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; const cc = e.target.closest('.column-content'); if (!cc) return; document.querySelectorAll('.drag-over-column').forEach(e => e.classList.remove('drag-over-column')); cc.closest('.kanban-column').classList.add('drag-over-column'); const cl = getClosestCard(cc, e.clientY); if (currentIndicator) currentIndicator.remove(); const ind = document.createElement('div'); ind.className = 'drop-indicator'; currentIndicator = ind; if (cl) cc.insertBefore(ind, cl); else cc.appendChild(ind); }
         function onDrop(e) {
-    e.preventDefault();
-    const cc = e.target.closest('.column-content');
-    
-    // Parse the list of indexes
-    let draggedIndexes;
-    try {
-        draggedIndexes = JSON.parse(e.dataTransfer.getData('text/plain'));
-    } catch (err) {
-        clearIndicators(); return;
-    }
+            e.preventDefault();
+            const cc = e.target.closest('.column-content');
+            let draggedIndexes;
+            try { draggedIndexes = JSON.parse(e.dataTransfer.getData('text/plain')); } catch (err) { clearIndicators(); return; }
+            if (!cc || !draggedIndexes || draggedIndexes.length === 0) { clearIndicators(); return; }
 
-    if (!cc || !draggedIndexes || draggedIndexes.length === 0) {
-        clearIndicators(); return;
-    }
+            const targetColType = cc.dataset.col;
+            const firstVeh = fleetData.find(v => v.rowIndex == draggedIndexes[0]);
+            if (!firstVeh) { clearIndicators(); return; }
+            const sc = statusToCol(firstVeh.shopStatus || "Reported");
 
-    const targetColType = cc.dataset.col;
-    // We use the first vehicle in the group to determine current validity
-    const firstVeh = fleetData.find(v => v.rowIndex == draggedIndexes[0]);
-    
-    if (!firstVeh) { clearIndicators(); return; }
-
-    const sc = statusToCol(firstVeh.shopStatus || "Reported");
-
-    // 1. If dropping in the SAME column (Reordering)
-    if (sc === targetColType) {
-        if (draggedEl && currentIndicator) cc.insertBefore(draggedEl, currentIndicator);
-        else if (draggedEl) cc.appendChild(draggedEl);
-        
-        if (draggedEl) {
-            draggedEl.classList.remove('dragging');
-            draggedEl.style.opacity = '';
-        }
-        clearIndicators();
-        // Save order (implementation relies on first index usually)
-        persistColumnOrder(cc);
-        
-    } else {
-        // 2. If dropping in a NEW column (Status Change)
-        clearIndicators();
-        const possibleStatuses = COLUMN_STATUSES[targetColType];
-        
-        // Helper to update ALL merged tickets
-        const applyStatusToAll = (newStatus) => {
-            showToast(`⟳ Moving ${draggedIndexes.length} tickets to ${newStatus}...`);
-            
-            // Create array of fetch promises
-            const updates = draggedIndexes.map(idx => {
-                const v = fleetData.find(f => f.rowIndex === idx);
-                if (!v) return Promise.resolve();
+            if (sc === targetColType) {
+                if (draggedEl && currentIndicator) cc.insertBefore(draggedEl, currentIndicator);
+                else if (draggedEl) cc.appendChild(draggedEl);
+                if (draggedEl) { draggedEl.classList.remove('dragging'); draggedEl.style.opacity = ''; }
+                clearIndicators();
+                persistColumnOrder(cc);
+            } else {
+                clearIndicators();
+                const possibleStatuses = COLUMN_STATUSES[targetColType];
                 
-                v.shopStatus = newStatus; // Optimistic update
+                // --- LOGGING THE MOVE ---
+                const moveUser = getUsername();
                 
-                const payload = {
-                    action: 'update',
-                    rowIndex: v.rowIndex,
-                    id: v.id,
-                    status: v.status,
-                    issue: v.issue,
-                    date: v.date,
-                    shopStatus: newStatus,
-                    location: v.location,
-                    partsOrdered: v.partsOrdered || '',
-                    partsEta: v.partsEta || '',
-                    priority: v.priority || 'Normal',
-                    homeLocation: v.homeLocation || '',
-                    notes: v.notes || ''
+                const applyStatusToAll = (newStatus) => {
+                    showToast(`⟳ Moving ${draggedIndexes.length} tickets to ${newStatus}...`);
+                    const updates = draggedIndexes.map(idx => {
+                        const v = fleetData.find(f => f.rowIndex === idx);
+                        if (!v) return Promise.resolve();
+                        
+                        v.shopStatus = newStatus; 
+                        
+                        // Add Log Entry
+                        let hist = parseHistory(v.history);
+                        hist.push(createLogEntry('Moved', `Status changed to ${newStatus}`));
+                        v.history = JSON.stringify(hist); // Optimistic update
+
+                        const payload = {
+                            action: 'update',
+                            rowIndex: v.rowIndex,
+                            id: v.id,
+                            status: v.status,
+                            issue: v.issue,
+                            date: v.date,
+                            shopStatus: newStatus,
+                            location: v.location,
+                            partsOrdered: v.partsOrdered || '',
+                            partsEta: v.partsEta || '',
+                            priority: v.priority || 'Normal',
+                            homeLocation: v.homeLocation || '',
+                            notes: v.notes || '',
+                            requestedBy: v.requestedBy || '',
+                            history: v.history
+                        };
+                        return fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
+                    });
+
+                    Promise.all(updates).then(() => {
+                        showToast(`✓ All tickets updated`);
+                        setTimeout(fetchSheetData, 800);
+                    });
+                    renderBoard(); 
                 };
-                return fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
-            });
 
-            Promise.all(updates).then(() => {
-                showToast(`✓ All tickets updated`);
-                setTimeout(fetchSheetData, 800);
-            });
-            renderBoard(); // Re-render immediately for UI feedback
-        };
-
-        if (possibleStatuses.length === 1) {
-            applyStatusToAll(possibleStatuses[0]);
-        } else {
-            // Show picker, but pass the bulk update function
-            showStatusPickerMulti(firstVeh.id, possibleStatuses, applyStatusToAll);
+                if (possibleStatuses.length === 1) {
+                    applyStatusToAll(possibleStatuses[0]);
+                } else {
+                    showStatusPickerMulti(firstVeh.id, possibleStatuses, applyStatusToAll);
+                }
+            }
         }
-    }
-}
         function persistColumnOrder(cc) { const cards = cc.querySelectorAll('.vehicle-card'), items = []; cards.forEach((c, i) => { const ri = parseInt(c.dataset.rowIndex); if (!ri) return; items.push({ rowIndex: ri, sortOrder: i + 1 }); const veh = fleetData.find(v => v.rowIndex === ri); if (veh) veh.sortOrder = i + 1; }); if (!items.length) return; showToast("↕ Saving order…"); fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ action: "reorder", items }) }).then(() => showToast("✓ Order saved")); }
-        function showStatusPicker(v, statuses) { document.querySelectorAll('.status-picker-overlay').forEach(e => e.remove()); const ol = document.createElement('div'); ol.className = 'status-picker-overlay'; ol.onclick = e => { if (e.target === ol) ol.remove(); }; const pk = document.createElement('div'); pk.className = 'status-picker'; pk.innerHTML = `<h3>Set status for ${v.id}</h3>`; statuses.forEach(s => { const b = document.createElement('button'); b.className = 'status-picker-btn'; b.textContent = s; b.onclick = () => { ol.remove(); updateVehicleStatus(v, s); }; pk.appendChild(b); }); const c = document.createElement('button'); c.className = 'status-picker-cancel'; c.textContent = 'Cancel'; c.onclick = () => ol.remove(); pk.appendChild(c); ol.appendChild(pk); document.body.appendChild(ol); }
-function showStatusPickerMulti(vehId, statuses, callback) {
-    document.querySelectorAll('.status-picker-overlay').forEach(e => e.remove());
-    const ol = document.createElement('div');
-    ol.className = 'status-picker-overlay';
-    ol.onclick = e => { if (e.target === ol) ol.remove(); };
-    const pk = document.createElement('div');
-    pk.className = 'status-picker';
-    pk.innerHTML = `<h3>Set status for ${vehId}</h3>`;
-    statuses.forEach(s => {
-        const b = document.createElement('button');
-        b.className = 'status-picker-btn';
-        b.textContent = s;
-        b.onclick = () => { ol.remove(); callback(s); };
-        pk.appendChild(b);
-    });
-    const c = document.createElement('button');
-    c.className = 'status-picker-cancel';
-    c.textContent = 'Cancel';
-    c.onclick = () => ol.remove();
-    pk.appendChild(c);
-    ol.appendChild(pk);
-    document.body.appendChild(ol);
-}
-        function updateVehicleStatus(v, ns) { v.shopStatus = ns; const p = { action: 'update', rowIndex: v.rowIndex, id: v.id, status: v.status, issue: v.issue, date: v.date, shopStatus: ns, location: v.location, partsOrdered: v.partsOrdered || '', partsEta: v.partsEta || '', priority: v.priority || 'Normal', homeLocation: v.homeLocation || '', notes: v.notes || '' }; showToast(`⟳ ${v.id} → ${ns}`); fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(p) }).then(() => { showToast(`✓ ${v.id} updated`); setTimeout(fetchSheetData, 800); }); renderBoard(); }
+        
+        function showStatusPickerMulti(vehId, statuses, callback) {
+            document.querySelectorAll('.status-picker-overlay').forEach(e => e.remove());
+            const ol = document.createElement('div');
+            ol.className = 'status-picker-overlay';
+            ol.onclick = e => { if (e.target === ol) ol.remove(); };
+            const pk = document.createElement('div');
+            pk.className = 'status-picker';
+            pk.innerHTML = `<h3>Set status for ${vehId}</h3>`;
+            statuses.forEach(s => {
+                const b = document.createElement('button');
+                b.className = 'status-picker-btn';
+                b.textContent = s;
+                b.onclick = () => { ol.remove(); callback(s); };
+                pk.appendChild(b);
+            });
+            const c = document.createElement('button');
+            c.className = 'status-picker-cancel';
+            c.textContent = 'Cancel';
+            c.onclick = () => ol.remove();
+            pk.appendChild(c);
+            ol.appendChild(pk);
+            document.body.appendChild(ol);
+        }
+
         document.querySelectorAll('.column-content').forEach(col => { col.addEventListener('dragover', onDragOver); col.addEventListener('dragleave', e => { if (!col.contains(e.relatedTarget)) { col.closest('.kanban-column').classList.remove('drag-over-column'); if (currentIndicator && col.contains(currentIndicator)) { currentIndicator.remove(); currentIndicator = null; } } }); col.addEventListener('drop', onDrop); });
 
         // ==================== DATA ====================
@@ -924,233 +994,198 @@ function showStatusPickerMulti(vehId, statuses, callback) {
         const CHEV = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
 
         function renderBoard() {
-    const st = document.getElementById('searchInput').value.toLowerCase();
-    
-    const cols = {
-        complaints: document.getElementById('col-complaints'),
-        ready:      document.getElementById('col-ready'),
-        parts:      document.getElementById('col-parts'),
-        progress:   document.getElementById('col-progress'),
-        returned:   document.getElementById('col-returned')
-    };
-
-    Object.values(cols).forEach(c => c.innerHTML = '');
-
-    // 1. Grouping Logic
-    const groups = { complaints: [], ready: [], parts: [], progress: [], returned: [] };
-    
-    // Helper to calculate numeric priority
-    const getPrioVal = (p) => {
-        if (p === 'Urgent') return 0;
-        if (p === 'High') return 1;
-        if (p === 'Oil Change / Bulb Replacement') return 2;
-        return 3;
-    };
-
-    // Helper to calculate numeric condition (Down is worst)
-    const getCondVal = (c) => {
-        if (c === 'Down') return 0;
-        if (c === 'Warning') return 1;
-        return 2;
-    };
-
-    // MERGE STEP: Group by ID within each column category
-    const mergedData = {}; // structure: { 'complaints': { 'VAN101': { ...masterObj, tickets: [] } } }
-
-    fleetData.forEach(v => {
-        if (!v.id) return;
-        
-        // Filter by search term strictly on ID or Issue
-        if (st && !v.id.toLowerCase().includes(st) && !(v.issue || '').toLowerCase().includes(st)) return;
-
-        const colKey = statusToCol(v.shopStatus || "Reported");
-        const idKey = v.id.trim().toUpperCase();
-
-        if (!mergedData[colKey]) mergedData[colKey] = {};
-
-        if (!mergedData[colKey][idKey]) {
-            // Initialize Master Card
-            mergedData[colKey][idKey] = {
-                ...v, // Copy first ticket properties as default
-                tickets: [v] // Start ticket list
+            const st = document.getElementById('searchInput').value.toLowerCase();
+            const cols = {
+                complaints: document.getElementById('col-complaints'),
+                ready:      document.getElementById('col-ready'),
+                parts:      document.getElementById('col-parts'),
+                progress:   document.getElementById('col-progress'),
+                returned:   document.getElementById('col-returned')
             };
-        } else {
-            // Merge into existing Master Card
-            const master = mergedData[colKey][idKey];
-            master.tickets.push(v);
 
-            // Escalation Logic: Master card takes the HIGHEST priority and WORST condition
-            if (getPrioVal(v.priority) < getPrioVal(master.priority)) {
-                master.priority = v.priority;
-            }
-            if (getCondVal(v.status) < getCondVal(master.status)) {
-                master.status = v.status;
-            }
-            // Use the earliest date
-            if (v.date < master.date) master.date = v.date;
-        }
-    });
+            Object.values(cols).forEach(c => c.innerHTML = '');
 
-    // Flatten back to arrays for sorting and rendering
-    for (const [colKey, vehicleMap] of Object.entries(mergedData)) {
-        groups[colKey] = Object.values(vehicleMap);
-    }
-
-    // 2. Sorting Logic
-    for (const col of Object.keys(groups)) {
-        groups[col].sort((a, b) => {
-            const pa = getPrioVal(a.priority);
-            const pb = getPrioVal(b.priority);
-            if (pa !== pb) return pa - pb; // Priority first
+            const groups = { complaints: [], ready: [], parts: [], progress: [], returned: [] };
             
-            // Then Sort Order (using the master card's sort order)
-            const aHas = a.sortOrder && a.sortOrder > 0;
-            const bHas = b.sortOrder && b.sortOrder > 0;
-            if (aHas && bHas) return a.sortOrder - b.sortOrder;
-            if (aHas && !bHas) return -1;
-            if (!aHas && bHas) return 1;
-            
-            return (b.rowIndex || 0) - (a.rowIndex || 0); // Fallback to newest
-        });
-    }
+            const getPrioVal = (p) => {
+                if (p === 'Urgent') return 0;
+                if (p === 'High') return 1;
+                if (p === 'Oil Change / Bulb Replacement') return 2;
+                return 3;
+            };
+            const getCondVal = (c) => {
+                if (c === 'Down') return 0;
+                if (c === 'Warning') return 1;
+                return 2;
+            };
 
-    // 3. Render
-    let animIdx = 0;
-    for (const [colKey, vehicles] of Object.entries(groups)) {
-        vehicles.forEach(v => {
-            const tc = cols[colKey];
-            let bc = 'border-' + colKey;
-            let pc = 'pill-' + colKey;
-            let sp = (colKey === 'parts');
+            const mergedData = {};
 
-            // Badge Logic (Master)
-            const prio = v.priority || 'Normal';
-            let prioBadge = '';
-            let prioClass = '';
-            if (prio === 'Urgent') {
-                prioBadge = '<span class="priority-badge pb-urgent">🔴 URGENT</span>';
-                prioClass = ' priority-urgent';
-            } else if (prio === 'High') {
-                prioBadge = '<span class="priority-badge pb-high">⚠ HIGH</span>';
-                prioClass = ' priority-high';
-            } else if (prio === 'Oil Change / Bulb Replacement') {
-                prioBadge = '<span class="priority-badge pb-maint">🔧 MAINT</span>';
-            }
+            fleetData.forEach(v => {
+                if (!v.id) return;
+                if (st && !v.id.toLowerCase().includes(st) && !(v.issue || '').toLowerCase().includes(st)) return;
 
-            // Condition Logic (Master)
-            const cc = v.status === 'Down' ? 'cond-down' : v.status === 'Warning' ? 'cond-warning' : 'cond-operational';
-            
-            // Date Logic
-            const days = daysElapsed(v.date); 
-            let db = '';
-            if (days !== null && v.shopStatus !== "Complete") db = `<span class="days-badge ${days > 14 ? 'crit' : days > 7 ? 'warn' : ''}">${days}d</span>`;
+                const colKey = statusToCol(v.shopStatus || "Reported");
+                const idKey = v.id.trim().toUpperCase();
 
-            // Home Location
-            const homeLoc = v.homeLocation ? `<span class="card-location">🏠 ${v.homeLocation}</span>` : '';
+                if (!mergedData[colKey]) mergedData[colKey] = {};
 
-            // GENERATE TICKET LIST HTML
-            let ticketsHtml = '<div class="ticket-list">';
-            v.tickets.forEach(t => {
-                // Determine styling for this specific ticket row
-                let trClass = '';
-                if(t.priority === 'Urgent') trClass = 'tr-urgent';
-                else if(t.priority === 'High') trClass = 'tr-high';
-                else if(t.priority === 'Oil Change / Bulb Replacement') trClass = 'tr-maint';
-
-                ticketsHtml += `
-                    <div class="ticket-row ${trClass}" onclick="event.stopPropagation(); openModal('edit', ${t.rowIndex})">
-                        <div class="ticket-header">
-                            <span class="ticket-issue">${t.issue}</span>
-                        </div>
-                        <div class="ticket-meta">
-                            <span>📅 ${formatDate(t.date)}</span>
-                            ${t.notes ? '<span>📝 Note</span>' : ''}
-                        </div>
-                    </div>
-                `;
+                if (!mergedData[colKey][idKey]) {
+                    mergedData[colKey][idKey] = {
+                        ...v, 
+                        tickets: [v] 
+                    };
+                } else {
+                    const master = mergedData[colKey][idKey];
+                    master.tickets.push(v);
+                    if (getPrioVal(v.priority) < getPrioVal(master.priority)) { master.priority = v.priority; }
+                    if (getCondVal(v.status) < getCondVal(master.status)) { master.status = v.status; }
+                    if (v.date < master.date) master.date = v.date;
+                }
             });
-            ticketsHtml += '</div>';
 
-            // Parts info (only if master is in parts, or if any ticket has parts info)
-            // For simplicity, we show the master card's parts info if valid
-            let ph = '';
-            if (sp) { 
-                ph = `<div class="parts-info-block"><div class="parts-row"><span class="parts-label">Ordered</span><span class="parts-val">${formatDate(v.partsOrdered) || '—'}</span></div><div class="parts-row"><span class="parts-label">ETA</span><span class="parts-val eta">${formatDate(v.partsEta) || '—'}</span></div></div>`; 
+            for (const [colKey, vehicleMap] of Object.entries(mergedData)) {
+                groups[colKey] = Object.values(vehicleMap);
+            }
+
+            for (const col of Object.keys(groups)) {
+                groups[col].sort((a, b) => {
+                    const pa = getPrioVal(a.priority);
+                    const pb = getPrioVal(b.priority);
+                    if (pa !== pb) return pa - pb; 
+                    const aHas = a.sortOrder && a.sortOrder > 0;
+                    const bHas = b.sortOrder && b.sortOrder > 0;
+                    if (aHas && bHas) return a.sortOrder - b.sortOrder;
+                    if (aHas && !bHas) return -1;
+                    if (!aHas && bHas) return 1;
+                    return (b.rowIndex || 0) - (a.rowIndex || 0);
+                });
+            }
+
+            let animIdx = 0;
+            for (const [colKey, vehicles] of Object.entries(groups)) {
+                vehicles.forEach(v => {
+                    const tc = cols[colKey];
+                    let bc = 'border-' + colKey;
+                    let pc = 'pill-' + colKey;
+                    let sp = (colKey === 'parts');
+
+                    const prio = v.priority || 'Normal';
+                    let prioBadge = '';
+                    let prioClass = '';
+                    if (prio === 'Urgent') {
+                        prioBadge = '<span class="priority-badge pb-urgent">🔴 URGENT</span>';
+                        prioClass = ' priority-urgent';
+                    } else if (prio === 'High') {
+                        prioBadge = '<span class="priority-badge pb-high">⚠ HIGH</span>';
+                        prioClass = ' priority-high';
+                    } else if (prio === 'Oil Change / Bulb Replacement') {
+                        prioBadge = '<span class="priority-badge pb-maint">🔧 MAINT</span>';
+                    }
+
+                    const cc = v.status === 'Down' ? 'cond-down' : v.status === 'Warning' ? 'cond-warning' : 'cond-operational';
+                    
+                    const days = daysElapsed(v.date); 
+                    let db = '';
+                    if (days !== null && v.shopStatus !== "Complete") db = `<span class="days-badge ${days > 14 ? 'crit' : days > 7 ? 'warn' : ''}">${days}d</span>`;
+
+                    const homeLoc = v.homeLocation ? `<span class="card-location">🏠 ${v.homeLocation}</span>` : '';
+
+                    let ticketsHtml = '<div class="ticket-list">';
+                    v.tickets.forEach(t => {
+                        let trClass = '';
+                        if(t.priority === 'Urgent') trClass = 'tr-urgent';
+                        else if(t.priority === 'High') trClass = 'tr-high';
+                        else if(t.priority === 'Oil Change / Bulb Replacement') trClass = 'tr-maint';
+
+                        // REQUESTED BY LINE
+                        let reqHtml = '';
+                        if(t.requestedBy) {
+                            reqHtml = `<div class="req-line"><span>👤 Req:</span><span class="req-val">${t.requestedBy}</span></div>`;
+                        }
+
+                        ticketsHtml += `
+                            <div class="ticket-row ${trClass}" onclick="event.stopPropagation(); openModal('edit', ${t.rowIndex})">
+                                <div class="ticket-header">
+                                    <span class="ticket-issue">${t.issue}</span>
+                                </div>
+                                ${reqHtml}
+                                <div class="ticket-meta">
+                                    <span>📅 ${formatDate(t.date)}</span>
+                                    ${t.notes ? '<span>📝 Note</span>' : ''}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    ticketsHtml += '</div>';
+
+                    let ph = '';
+                    if (sp) { 
+                        ph = `<div class="parts-info-block"><div class="parts-row"><span class="parts-label">Ordered</span><span class="parts-val">${formatDate(v.partsOrdered) || '—'}</span></div><div class="parts-row"><span class="parts-label">ETA</span><span class="parts-val eta">${formatDate(v.partsEta) || '—'}</span></div></div>`; 
+                    }
+                    
+                    const allRowIndexes = v.tickets.map(t => t.rowIndex);
+                    const ck = String(v.id + '-' + colKey + '-' + animIdx), ic = collapsedCards.has(ck);
+                    const card = document.createElement('div');
+                    card.className = `vehicle-card ${bc}${prioClass} ${ic ? 'collapsed' : ''}`;
+                    card.style.animationDelay = `${Math.min(animIdx * 0.025, 0.3)}s`;
+                    card.dataset.cardKey = ck; 
+                    card.draggable = !isMobile();
+                    card.addEventListener('dragstart', e => onDragStart(e, allRowIndexes));
+                    card.addEventListener('dragend', onDragEnd);
+                    
+                    let countBadge = v.tickets.length > 1 ? `<span class="multi-tag">${v.tickets.length} Tickets</span>` : '';
+
+                    card.innerHTML = `
+                        <div class="card-top-bar" onclick="toggleCard('${ck}',this.querySelector('.collapse-toggle'))">
+                            <div class="card-id-group">
+                                <div class="drag-handle" title="Drag">${GRIP}</div>
+                                <span class="card-id">${v.id}</span>
+                                ${countBadge}
+                                <span class="card-condition ${cc}">${v.status || ''}</span>
+                                ${prioBadge}
+                                ${db}
+                            </div>
+                            <div class="card-right">
+                                <button class="collapse-toggle" onclick="event.stopPropagation();toggleCard('${ck}',this);">${CHEV}</button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-meta">
+                                <span class="card-pill ${pc}">${v.shopStatus || ''}</span>
+                                <div class="card-location">📍 ${v.location || 'Dispatch Lot'}</div>
+                            </div>
+                            <div class="card-location-row">${homeLoc}</div>
+                            ${ticketsHtml}
+                            ${ph}
+                        </div>`;
+                    
+                    tc.appendChild(card);
+                    animIdx++;
+                });
             }
             
-            // Row Indexes array for Drag and Drop
-            const allRowIndexes = v.tickets.map(t => t.rowIndex);
+            Object.entries(cols).forEach(([key, el]) => {
+                if (!el.children.length) el.innerHTML = `<div class="empty-state"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg><span>No units</span></div>`; 
+            });
 
-            const ck = String(v.id + '-' + colKey + '-' + animIdx), ic = collapsedCards.has(ck);
-            const card = document.createElement('div');
-            card.className = `vehicle-card ${bc}${prioClass} ${ic ? 'collapsed' : ''}`;
-            card.style.animationDelay = `${Math.min(animIdx * 0.025, 0.3)}s`;
-            card.dataset.cardKey = ck; 
+            document.getElementById('count-col-1').innerText = groups.complaints.length; 
+            document.getElementById('count-col-2').innerText = groups.ready.length;
+            document.getElementById('count-col-3').innerText = groups.parts.length; 
+            document.getElementById('count-col-4').innerText = groups.progress.length;
+            document.getElementById('count-col-5').innerText = groups.returned.length;
             
-            // IMPORTANT: Drag logic needs all indexes
-            card.draggable = !isMobile();
-            card.addEventListener('dragstart', e => onDragStart(e, allRowIndexes));
-            card.addEventListener('dragend', onDragEnd);
-            
-            // Multi-ticket count badge
-            let countBadge = v.tickets.length > 1 ? `<span class="multi-tag">${v.tickets.length} Tickets</span>` : '';
+            document.getElementById('kpi-total').innerText = fleetData.length;
+            document.getElementById('kpi-parts').innerText = groups.parts.length;
+            document.getElementById('kpi-complete').innerText = groups.returned.length;
+            document.getElementById('kpi-ready').innerText = groups.ready.length;
 
-            // Card HTML
-            // Note: The main card click no longer opens modal directly, 
-            // you must click a specific ticket inside the list.
-            card.innerHTML = `
-                <div class="card-top-bar" onclick="toggleCard('${ck}',this.querySelector('.collapse-toggle'))">
-                    <div class="card-id-group">
-                        <div class="drag-handle" title="Drag">${GRIP}</div>
-                        <span class="card-id">${v.id}</span>
-                        ${countBadge}
-                        <span class="card-condition ${cc}">${v.status || ''}</span>
-                        ${prioBadge}
-                        ${db}
-                    </div>
-                    <div class="card-right">
-                        <button class="collapse-toggle" onclick="event.stopPropagation();toggleCard('${ck}',this);">${CHEV}</button>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="card-meta">
-                        <span class="card-pill ${pc}">${v.shopStatus || ''}</span>
-                        <div class="card-location">📍 ${v.location || 'Dispatch Lot'}</div>
-                    </div>
-                    <div class="card-location-row">${homeLoc}</div>
-                    ${ticketsHtml}
-                    ${ph}
-                </div>`;
-            
-            tc.appendChild(card);
-            animIdx++;
-        });
-    }
-    
-    // Empty states and Counters
-    Object.entries(cols).forEach(([key, el]) => {
-        if (!el.children.length) el.innerHTML = `<div class="empty-state"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg><span>No units</span></div>`; 
-    });
+            if (isMobile()) updateSwiperUI();
+        }
 
-    document.getElementById('count-col-1').innerText = groups.complaints.length; 
-    document.getElementById('count-col-2').innerText = groups.ready.length;
-    document.getElementById('count-col-3').innerText = groups.parts.length; 
-    document.getElementById('count-col-4').innerText = groups.progress.length;
-    document.getElementById('count-col-5').innerText = groups.returned.length;
-    
-    document.getElementById('kpi-total').innerText = fleetData.length;
-    document.getElementById('kpi-parts').innerText = groups.parts.length;
-    document.getElementById('kpi-complete').innerText = groups.returned.length;
-    document.getElementById('kpi-ready').innerText = groups.ready.length;
-
-    if (isMobile()) updateSwiperUI();
-}
-
-        // ==================== COLLAPSE ====================
         function toggleCard(k, b) { const c = b.closest('.vehicle-card'); if (collapsedCards.has(k)) { collapsedCards.delete(k); c.classList.remove('collapsed'); } else { collapsedCards.add(k); c.classList.add('collapsed'); } }
         function toggleCollapseAll(id) { const c = document.getElementById(id), cards = c.querySelectorAll('.vehicle-card'), all = [...cards].every(c => c.classList.contains('collapsed')); cards.forEach(card => { const k = card.dataset.cardKey; if (all) { collapsedCards.delete(k); card.classList.remove('collapsed'); } else { collapsedCards.add(k); card.classList.add('collapsed'); } }); }
 
-        // ==================== FORM ====================
         function togglePartsFields() { 
             const s = document.getElementById('vShopStatus').value;
             const sec = document.getElementById('partsSection');
@@ -1169,20 +1204,39 @@ function showStatusPickerMulti(vehId, statuses, callback) {
         }
 
         function openModal(mode, ri = null) {
-            document.getElementById('entryModal').style.display = 'flex'; document.getElementById('mode').value = mode; const d = document.getElementById('deleteBtn');
+            document.getElementById('entryModal').style.display = 'flex'; 
+            document.getElementById('mode').value = mode; 
+            const d = document.getElementById('deleteBtn');
+            
+            // Set User name from storage
+            const storedUser = localStorage.getItem('dlx_username');
+            if(storedUser) document.getElementById('currentUser').value = storedUser;
+
             if (mode === 'add') {
-                document.getElementById('modalTitle').innerText = "ADD NEW UNIT"; document.getElementById('vehicleForm').reset();
-                document.getElementById('vID').readOnly = false; document.getElementById('vDate').valueAsDate = new Date();
-                document.getElementById('vPriority').value = 'Normal'; document.getElementById('vHomeLocation').value = '';
+                document.getElementById('modalTitle').innerText = "ADD NEW UNIT"; 
+                document.getElementById('vehicleForm').reset();
+                if(storedUser) document.getElementById('currentUser').value = storedUser; // re-set after reset
+
+                document.getElementById('vID').readOnly = false; 
+                document.getElementById('vDate').valueAsDate = new Date();
+                document.getElementById('vPriority').value = 'Normal'; 
+                document.getElementById('vHomeLocation').value = '';
                 document.getElementById('vNotes').value = '';
-                d.style.display = 'none'; togglePartsFields();
+                document.getElementById('vRequestedBy').value = '';
+                document.getElementById('vHistory').value = '';
+                document.getElementById('historyList').innerHTML = '<div style="color:var(--text-muted);text-align:center;">New ticket - no history</div>';
+                d.style.display = 'none'; 
+                togglePartsFields();
             } else {
-                document.getElementById('modalTitle').innerText = "EDIT UNIT"; d.style.display = 'block';
+                document.getElementById('modalTitle').innerText = "EDIT UNIT"; 
+                d.style.display = 'block';
                 const v = fleetData.find(v => v.rowIndex === ri);
                 if (v) {
                     document.getElementById('targetRowIndex').value = v.rowIndex;
-                    document.getElementById('vID').value = v.id; document.getElementById('vStatus').value = v.status;
-                    document.getElementById('vIssue').value = v.issue; document.getElementById('vDate').value = v.date;
+                    document.getElementById('vID').value = v.id; 
+                    document.getElementById('vStatus').value = v.status;
+                    document.getElementById('vIssue').value = v.issue; 
+                    document.getElementById('vDate').value = v.date;
                     document.getElementById('vShopStatus').value = v.shopStatus;
                     document.getElementById('vLocation').value = v.location || "Dispatch Lot";
                     document.getElementById('vPartsOrdered').value = v.partsOrdered || "";
@@ -1190,30 +1244,79 @@ function showStatusPickerMulti(vehId, statuses, callback) {
                     document.getElementById('vPriority').value = v.priority || "Normal";
                     document.getElementById('vHomeLocation').value = v.homeLocation || "";
                     document.getElementById('vNotes').value = v.notes || "";
+                    document.getElementById('vRequestedBy').value = v.requestedBy || "";
+                    
+                    document.getElementById('vHistory').value = v.history || "";
+                    const hist = parseHistory(v.history);
+                    renderHistoryLog(hist);
+                    
+                    // Show last updated info
+                    if(hist.length > 0) {
+                        const last = hist[hist.length-1];
+                        document.getElementById('lastUpdatedBy').textContent = `Last: ${last.user}`;
+                    } else {
+                        document.getElementById('lastUpdatedBy').textContent = '';
+                    }
+
                     togglePartsFields();
                 }
             }
         }
         function closeModal() { document.getElementById('entryModal').style.display = 'none'; }
-        function saveVehicle(e) { e.preventDefault(); const b = document.getElementById('saveBtn'), m = document.getElementById('mode').value; 
+        
+        function saveVehicle(e) { 
+            e.preventDefault(); 
+            const b = document.getElementById('saveBtn'), m = document.getElementById('mode').value;
+            const oldRi = document.getElementById('targetRowIndex').value;
+            
+            // Gather Form Data
+            const id = document.getElementById('vID').value;
+            const status = document.getElementById('vStatus').value;
+            const issue = document.getElementById('vIssue').value;
+            const date = document.getElementById('vDate').value;
+            const shopStatus = document.getElementById('vShopStatus').value;
+            const location = document.getElementById('vLocation').value;
+            const partsOrdered = document.getElementById('vPartsOrdered').value;
+            const partsEta = document.getElementById('vPartsEta').value;
+            const priority = document.getElementById('vPriority').value;
+            const homeLocation = document.getElementById('vHomeLocation').value;
+            const notes = document.getElementById('vNotes').value;
+            const requestedBy = document.getElementById('vRequestedBy').value;
+            const rawHist = document.getElementById('vHistory').value;
+
+            // --- AUDIT LOGIC ---
+            let historyArr = parseHistory(rawHist);
+            
+            if (m === 'add') {
+                historyArr.push(createLogEntry('Created', 'Ticket created'));
+            } else {
+                // Find old data to compare
+                const oldV = fleetData.find(v => v.rowIndex == oldRi);
+                if(oldV) {
+                    if(oldV.shopStatus !== shopStatus) historyArr.push(createLogEntry('Status', `Changed to ${shopStatus}`));
+                    if(oldV.priority !== priority) historyArr.push(createLogEntry('Priority', `Changed to ${priority}`));
+                    if(oldV.notes !== notes && notes.length > (oldV.notes||'').length) historyArr.push(createLogEntry('Note', 'Note added/updated'));
+                    if(oldV.partsEta !== partsEta) historyArr.push(createLogEntry('ETA', `ETA: ${partsEta}`));
+                }
+            }
+
             const p = { 
                 action: m === 'edit' ? 'update' : 'add', 
-                rowIndex: document.getElementById('targetRowIndex').value, 
-                id: document.getElementById('vID').value, 
-                status: document.getElementById('vStatus').value, 
-                issue: document.getElementById('vIssue').value, 
-                date: document.getElementById('vDate').value, 
-                shopStatus: document.getElementById('vShopStatus').value, 
-                location: document.getElementById('vLocation').value, 
-                partsOrdered: document.getElementById('vPartsOrdered').value, 
-                partsEta: document.getElementById('vPartsEta').value, 
-                priority: document.getElementById('vPriority').value, 
-                homeLocation: document.getElementById('vHomeLocation').value,
-                notes: document.getElementById('vNotes').value
+                rowIndex: oldRi, 
+                id, status, issue, date, shopStatus, location, partsOrdered, partsEta, priority, homeLocation, notes, requestedBy,
+                history: JSON.stringify(historyArr)
             }; 
+
             b.innerText = "SAVING…"; b.disabled = true; 
-            fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(p) }).then(() => { closeModal(); b.innerText = "SAVE"; b.disabled = false; showToast("✓ Saved"); setTimeout(fetchSheetData, 1000); }); 
+            fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(p) }).then(() => { 
+                closeModal(); 
+                b.innerText = "SAVE"; 
+                b.disabled = false; 
+                showToast("✓ Saved"); 
+                setTimeout(fetchSheetData, 1000); 
+            }); 
         }
+
         function deleteCurrent() { if (!confirm("Delete this vehicle?")) return; const ri = document.getElementById('targetRowIndex').value, b = document.getElementById('deleteBtn'); b.innerText = "DELETING…"; fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ action: "delete", rowIndex: ri }) }).then(() => { closeModal(); b.innerText = "DELETE"; showToast("🗑 Deleted"); setTimeout(fetchSheetData, 1000); }); }
 
         // ==================== BULLETIN ====================
@@ -1237,7 +1340,6 @@ function showStatusPickerMulti(vehId, statuses, callback) {
         function toggleWallboardMode() { document.body.classList.toggle('wallboard-mode'); }
         document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); if (document.getElementById('bulletinPanel').classList.contains('open')) toggleBulletin(); } });
 
-        // Init
         initSwiperDots();
         fetchSheetData(); setInterval(fetchSheetData, 30000); loadBulletin();
     </script>
