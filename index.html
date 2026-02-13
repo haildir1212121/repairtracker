@@ -715,11 +715,12 @@
         let fleetData = [], collapsedCards = new Set();
         
         const COLUMN_STATUSES = { 
-                complaints: ["Reported"], 
-                ready:      ["Ready for Pickup"],
-                 parts:      ["Awaiting part order", "Assessment"],
-                progress:   ["Received", "Parts Received - Waiting for Technician", "Repair in Progress"], 
-                 returned:   ["Complete"] 
+
+    complaints: ["Reported", "On the Road"],  // ← ADD "On the Road" here
+    ready:      ["Ready for Pickup"],
+    parts:      ["Awaiting part order", "Assessment"],
+    progress:   ["Received", "Parts Received - Waiting for Technician", "Repair in Progress"], 
+    returned:   ["Complete"] 
         };
 
         function statusToCol(s) { 
@@ -1461,4 +1462,5 @@
     </script>
 </body>
 </html>
+
 
