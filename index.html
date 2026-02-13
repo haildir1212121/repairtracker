@@ -968,21 +968,18 @@
                 const moveUser = getUsername();
                 
                 const applyStatusToAll = (newStatus) => {
+                    const user = getUsername();
                     showToast(`⟳ Moving ${draggedIndexes.length} tickets to ${newStatus}...`);
                     const updates = draggedIndexes.map(idx => {
                         const v = fleetData.find(f => f.rowIndex === idx);
                         if (!v) return Promise.resolve();
                         
                         v.shopStatus = newStatus; 
-                        
-                        // Add Log Entry
-                        let hist = parseHistory(v.history);
-                        hist.push(createLogEntry('Moved', `Status changed to ${newStatus}`));
-                        v.history = JSON.stringify(hist); // Optimistic update
 
                         const payload = {
                             action: 'update',
                             rowIndex: v.rowIndex,
+                            user: user,
                             id: v.id,
                             status: v.status,
                             issue: v.issue,
@@ -995,16 +992,19 @@
                             homeLocation: v.homeLocation || '',
                             notes: v.notes || '',
                             requestedBy: v.requestedBy || '',
-                            history: v.history,
                             vehicleType: v.vehicleType || ''
                         };
-                        return fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
+                        return fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) })
+                            .catch(err => {
+                                console.error("Drag update failed:", err);
+                                showToast("❌ Failed to update - check connection");
+                            });
                     });
 
                     Promise.all(updates).then(() => {
-                        showToast(`✓ All tickets updated`);
+                        showToast(`✓ Moved by ${user}`);
                         setTimeout(fetchSheetData, 800);
-                    });
+                    }).catch(err => console.error("Promise.all error:", err));
                     renderBoard(); 
                 };
 
@@ -1015,7 +1015,21 @@
                 }
             }
         }
-        function persistColumnOrder(cc) { const cards = cc.querySelectorAll('.vehicle-card'), items = []; cards.forEach((c, i) => { const ri = parseInt(c.dataset.rowIndex); if (!ri) return; items.push({ rowIndex: ri, sortOrder: i + 1 }); const veh = fleetData.find(v => v.rowIndex === ri); if (veh) veh.sortOrder = i + 1; }); if (!items.length) return; showToast("↕ Saving order…"); fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ action: "reorder", items }) }).then(() => showToast("✓ Order saved")); }
+        function persistColumnOrder(cc) { 
+            const cards = cc.querySelectorAll('.vehicle-card'), items = []; 
+            cards.forEach((c, i) => { 
+                const ri = parseInt(c.dataset.rowIndex); 
+                if (!ri) return; 
+                items.push({ rowIndex: ri, sortOrder: i + 1 }); 
+                const veh = fleetData.find(v => v.rowIndex === ri); 
+                if (veh) veh.sortOrder = i + 1; 
+            }); 
+            if (!items.length) return; 
+            showToast("↕ Saving order…"); 
+            fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "reorder", items, user: getUsername() }) })
+                .then(() => showToast("✓ Order saved"))
+                .catch(err => console.error("Reorder failed:", err)); 
+        }
         
         function showStatusPickerMulti(vehId, statuses, callback) {
             document.querySelectorAll('.status-picker-overlay').forEach(e => e.remove());
@@ -1044,7 +1058,7 @@
         document.querySelectorAll('.column-content').forEach(col => { col.addEventListener('dragover', onDragOver); col.addEventListener('dragleave', e => { if (!col.contains(e.relatedTarget)) { col.closest('.kanban-column').classList.remove('drag-over-column'); if (currentIndicator && col.contains(currentIndicator)) { currentIndicator.remove(); currentIndicator = null; } } }); col.addEventListener('drop', onDrop); });
 
         // ==================== DATA ====================
-        async function fetchSheetData() { if (SCRIPT_URL.includes("PASTE_YOUR")) { document.querySelector('.kanban-board').innerHTML = `<div style="grid-column:1/-1;display:flex;align-items:center;justify-content:center;color:#f87171;">⚠️ Paste your Apps Script URL</div>`; return; } try { const r = await fetch(SCRIPT_URL); const d = await r.json(); if (Array.isArray(d) && d.length > 0 && Array.isArray(d[0])) { showToast("⚠️ Script mismatch — redeploy"); return; } fleetData = d; renderBoard(); } catch (e) { console.error(e); } }
+        async function fetchSheetData() { if (SCRIPT_URL.includes("PASTE_YOUR")) { document.querySelector('.kanban-board').innerHTML = `<div style="grid-column:1/-1;display:flex;align-items:center;justify-content:center;color:#f87171;">⚠️ Paste your Apps Script URL</div>`; return; } try { const r = await fetch(SCRIPT_URL); const d = await r.json(); if (Array.isArray(d) && d.length > 0 && Array.isArray(d[0])) { showToast("⚠️ Script mismatch — redeploy"); return; } fleetData = d; renderBoard(); } catch (e) { console.error(e); showToast("❌ Failed to load data"); } }
         function formatDate(s) { if (!s) return ''; const p = s.split('-'); return p.length === 3 ? `${p[1]}/${p[2]}/${p[0]}` : s; }
         function daysElapsed(s) { if (!s) return null; const d = new Date(s + 'T00:00:00'), n = new Date(); n.setHours(0, 0, 0, 0); return Math.floor((n - d) / 864e5); }
 
@@ -1373,24 +1387,53 @@
                 }
             }
 
+            const user = getUsername();
+            
             const p = { 
                 action: m === 'edit' ? 'update' : 'add', 
                 rowIndex: oldRi, 
+                user: user,
                 id, status, issue, date, shopStatus, location, partsOrdered, partsEta, priority, homeLocation, notes, requestedBy, vehicleType,
                 history: JSON.stringify(historyArr)
             }; 
 
             b.innerText = "SAVING…"; b.disabled = true; 
-            fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(p) }).then(() => { 
-                closeModal(); 
-                b.innerText = "SAVE"; 
-                b.disabled = false; 
-                showToast("✓ Saved"); 
-                setTimeout(fetchSheetData, 1000); 
-            }); 
+            fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(p) })
+                .then(() => { 
+                    closeModal(); 
+                    b.innerText = "SAVE"; 
+                    b.disabled = false; 
+                    showToast("✓ Saved by " + user); 
+                    setTimeout(fetchSheetData, 1000); 
+                })
+                .catch(err => {
+                    console.error("Save failed:", err);
+                    b.innerText = "SAVE"; 
+                    b.disabled = false;
+                    showToast("❌ Failed to save - check connection");
+                });
         }
 
-        function deleteCurrent() { if (!confirm("Delete this vehicle?")) return; const ri = document.getElementById('targetRowIndex').value, b = document.getElementById('deleteBtn'); b.innerText = "DELETING…"; fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ action: "delete", rowIndex: ri }) }).then(() => { closeModal(); b.innerText = "DELETE"; showToast("🗑 Deleted"); setTimeout(fetchSheetData, 1000); }); }
+        function deleteCurrent() { 
+            if (!confirm("Delete this vehicle?")) return; 
+            const ri = document.getElementById('targetRowIndex').value;
+            const b = document.getElementById('deleteBtn');
+            const user = getUsername();
+            
+            b.innerText = "DELETING…"; 
+            fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "delete", rowIndex: ri, user: user }) })
+                .then(() => { 
+                    closeModal(); 
+                    b.innerText = "DELETE"; 
+                    showToast("🗑 Deleted by " + user); 
+                    setTimeout(fetchSheetData, 1000); 
+                })
+                .catch(err => { 
+                    console.error("Delete failed:", err); 
+                    b.innerText = "DELETE"; 
+                    showToast("❌ Failed to delete"); 
+                }); 
+        }
 
         // ==================== BULLETIN ====================
         let bulletinMessages = [];
