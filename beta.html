@@ -48,7 +48,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', 'Outfit', sans-serif; background-color: var(--bg-app); color: var(--text-main); height: 100vh; overflow: hidden; }
 
-        /* Global Drag State to prevent flickering */
+        /* Global Drag State */
         body.is-dragging * { pointer-events: none; }
         body.is-dragging .kanban-column { pointer-events: auto; }
 
@@ -83,48 +83,28 @@
         .avatar { width: 24px; height: 24px; background: #444; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: #fff; font-weight: 600;}
 
         /* ===== VIEWS & CRISP FILTERS ===== */
-        .view-area { display: none; flex-direction: column; flex-grow: 1; overflow: hidden; background: var(--bg-board); }
+        .view-area { display: none; flex-direction: column; flex-grow: 1; overflow: hidden; background: var(--bg-board); position: relative;}
         .view-area.active { display: flex; }
 
         .board-header { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 2rem; border-bottom: 1px solid var(--border); flex-shrink: 0;}
         .board-header h1 { font-family: 'Outfit', sans-serif; font-size: 1.2rem; font-weight: 600; color: var(--text-main); }
         
-        .board-filters { display: flex; gap: 0.6rem; align-items: center; }
+        .board-filters { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; }
         .filter-btn { 
-            background: #111; 
-            border: 1px solid var(--border); 
-            color: var(--text-muted); 
-            font-size: 0.75rem; 
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 600; 
-            cursor: pointer; 
-            display: flex; 
-            align-items: center; 
-            gap: 0.4rem; 
-            padding: 0.5rem 0.8rem; 
-            border-radius: 6px; 
-            transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            background: #111; border: 1px solid var(--border); color: var(--text-muted); 
+            font-size: 0.75rem; font-family: 'JetBrains Mono', monospace; font-weight: 600; 
+            cursor: pointer; display: flex; align-items: center; gap: 0.4rem; padding: 0.5rem 0.8rem; 
+            border-radius: 6px; transition: all 0.2s cubic-bezier(0.4,0,0.2,1); box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            text-transform: uppercase; letter-spacing: 0.5px;
         }
-        .filter-btn:hover:not(:disabled) { 
-            color: var(--text-main); 
-            border-color: #555;
-            background: #1a1a1a;
-            transform: translateY(-1px);
-        }
-        .filter-btn.active { 
-            background: var(--c-shop); 
-            color: #000; 
-            border-color: var(--c-shop); 
-            box-shadow: 0 0 12px rgba(96,165,250,0.3);
-        }
+        .filter-btn:hover:not(:disabled) { color: var(--text-main); border-color: #555; background: #1a1a1a; transform: translateY(-1px); }
+        .filter-btn.active { background: var(--c-shop); color: #000; border-color: var(--c-shop); box-shadow: 0 0 12px rgba(96,165,250,0.3); }
+        .filter-btn.bulk-active { background: var(--accent); color: #000; border-color: var(--accent); box-shadow: 0 0 12px rgba(74, 222, 128, 0.3); }
         .filter-btn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; transform: none; }
 
         /* ===== KANBAN ===== */
         .kanban-board { flex: 1; display: flex; gap: 1.2rem; overflow-x: auto; overflow-y: hidden; padding: 1.5rem 2rem; }
-        .kanban-column { display: flex; flex-direction: column; height: 100%; min-width: 320px; width: 320px; flex-shrink: 0; transition: background 0.2s, box-shadow 0.2s; border-radius: var(--radius-lg); border: 2px solid transparent;}
+        .kanban-column { display: flex; flex-direction: column; height: 100%; min-width: 320px; flex: 1; transition: background 0.2s, box-shadow 0.2s; border-radius: var(--radius-lg); border: 2px solid transparent; position: relative;}
         
         .kanban-column.drag-over-column { background: rgba(255,255,255,0.02); border-color: var(--border-hover); box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
         
@@ -136,7 +116,9 @@
         .column-content { flex: 1; overflow-y: auto; padding: 0 0.5rem 1rem 0.5rem; scrollbar-width: none; }
         .column-content::-webkit-scrollbar { display: none; }
 
-        /* ===== SLEEK VEHICLE CARDS (Click to Collapse) ===== */
+        .drop-indicator { height: 4px; background: var(--c-shop); border-radius: 2px; margin: 4px 0; box-shadow: 0 0 8px var(--c-shop); transition: all 0.1s; pointer-events: none; }
+
+        /* ===== SLEEK VEHICLE CARDS ===== */
         .vehicle-card { background: var(--bg-card); border: 1px solid transparent; border-left: 3px solid transparent; border-radius: var(--radius-md); padding: 1rem; margin-bottom: 0.8rem; display: flex; flex-direction: column; transition: all var(--transition); cursor: pointer; overflow: hidden; }
         .vehicle-card:hover { background: var(--bg-card-hover); transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.3); border-color: #333;}
         .vehicle-card.dragging { opacity: 0.4; border: 1px dashed #666; transform: scale(0.95); }
@@ -151,8 +133,13 @@
         .vehicle-card.inspect-crit { border-color: rgba(239, 68, 68, 0.8); box-shadow: 0 4px 20px rgba(239, 68, 68, 0.3); }
         .vehicle-card.inspect-crit:hover { border-color: rgba(239, 68, 68, 1); box-shadow: 0 6px 25px rgba(239, 68, 68, 0.4); }
 
+        /* Multi-Select Styles */
+        .vehicle-card.selectable { cursor: crosshair; }
+        .vehicle-card.selected { border-color: var(--c-shop); background: rgba(96,165,250,0.08); box-shadow: 0 0 0 2px var(--c-shop); transform: translateY(0); }
+        .vehicle-card.selected .card-title { color: var(--c-shop); }
+
         .card-header-main { font-size: 1.15rem; font-weight: 600; display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 0.5rem; pointer-events: none;}
-        .card-req-by { font-size: .95rem; font-weight: 600; color:var(--text-main);  display: flex; justify-content: space-between; align-items: center;  flex: 1;}
+        .card-req-by { font-size: .95rem; font-weight: 600; color:var(--text-main); display: flex; justify-content: space-between; align-items: center; flex: 1;}
         .card-avatar { width: 22px; height: 22px; border-radius: 50%; background: #333; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; color: #ddd; font-weight: 700; border: 1px solid #444;}
         
         .collapse-indicator { display: flex; align-items: center; justify-content: center; opacity: 1; pointer-events: auto; padding: 0.2rem; border-radius: 4px; transition: background 0.2s;}
@@ -175,6 +162,36 @@
         .progress-seg.active { background: var(--accent); box-shadow: 0 0 5px var(--accent); }
         .progress-seg.active-warn { background: var(--c-parts); }
 
+        /* SUB TICKETS */
+        .sub-ticket { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.03); border-left: 3px solid var(--border); padding: 0.6rem; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s; pointer-events: auto;}
+        .sub-ticket:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
+        .sub-ticket.st-urgent { border-left-color: var(--c-urgent); }
+        .sub-ticket.st-high { border-left-color: var(--c-high); }
+        .sub-ticket.st-maint { border-left-color: var(--c-maint); }
+        .sub-ticket.selected { background: rgba(96,165,250,0.15); border-color: var(--c-shop); }
+
+        /* ===== BULK ACTION BAR ===== */
+        .bulk-action-bar { 
+            position: absolute; bottom: -100px; left: 50%; transform: translateX(-50%); 
+            background: #1a1a1a; border: 1px solid var(--border); padding: 1rem 2rem; 
+            border-radius: 50px; display: flex; gap: 1rem; align-items: center; 
+            z-index: 1000; transition: bottom 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow: 0 10px 40px rgba(0,0,0,0.8); 
+        }
+        .bulk-action-bar.visible { bottom: 2rem; }
+
+        /* ===== ANALYTICS DASHBOARD ===== */
+        .analytics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; padding: 1.5rem 2rem; overflow-y: auto; align-content: flex-start; }
+        .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; position: relative; overflow: hidden;}
+        .stat-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: var(--accent); }
+        .stat-card.sc-red::before { background: var(--c-urgent); }
+        .stat-card.sc-orange::before { background: var(--c-high); }
+        .stat-card.sc-blue::before { background: var(--c-shop); }
+        .stat-val { font-size: 2.8rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--text-main); line-height: 1;}
+        .stat-label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600;}
+        .chart-container { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; grid-column: 1 / -1; }
+        .location-bar { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.8rem; font-size: 0.85rem; font-family: 'JetBrains Mono', monospace;}
+        .loc-bar-fill { height: 12px; background: var(--c-shop); border-radius: 6px; }
+
         /* ===== DATABASE / USERS TABLE ===== */
         .db-container { padding: 1.5rem 2rem; overflow-y: auto; flex: 1; }
         .db-table { width: 100%; border-collapse: collapse; text-align: left; }
@@ -184,13 +201,23 @@
         .db-table tr:hover { background: rgba(255,255,255,0.02); }
         .db-badge { padding: 0.25rem 0.6rem; border-radius: 4px; font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; background: rgba(255,255,255,0.05); }
         
-        .role-select { background: #111; color: var(--text-main); border: 1px solid var(--border); padding: 0.3rem; border-radius: 4px; font-size: 0.8rem; }
+        .role-select { background: #111; color: var(--text-main); border: 1px solid var(--border); padding: 0.4rem 0.8rem; border-radius: 4px; font-size: 0.8rem; font-family: 'Inter', sans-serif;}
+        .role-select:focus { outline: none; border-color: var(--c-shop); }
+
+        /* ===== PREFERENCES CHECKBOXES ===== */
+        .pref-section-title { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin: 1.5rem 0 0.8rem 0; border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
+        .pref-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+        .column-checkbox { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem; background: #111; border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; transition: background 0.2s; }
+        .column-checkbox:hover { background: #1a1a1a; border-color: #444; }
+        .column-checkbox input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--c-shop); cursor: pointer; }
+        .column-checkbox label { margin: 0; font-size: 0.8rem; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; flex: 1; color: var(--text-main); font-weight: 500;}
 
         /* ===== MODALS & FORMS ===== */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(5px); }
         .modal-content { background: var(--bg-sidebar); padding: 2rem; border-radius: var(--radius-lg); width: 90%; max-width: 550px; max-height: 85vh; overflow-y: auto; box-shadow: var(--shadow-lg); border: 1px solid var(--border); }
+        .modal-content.wide-modal { max-width: 700px; }
         .modal-content::-webkit-scrollbar { width: 6px; } .modal-content::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
-        .modal-content h2 { font-family: 'Outfit', sans-serif; font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-main); }
+        .modal-content h2 { font-family: 'Outfit', sans-serif; font-size: 1.2rem; margin-bottom: 0.5rem; color: var(--text-main); }
         
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;}
         .form-group { margin-bottom: 1rem; }
@@ -200,9 +227,9 @@
         input::-webkit-calendar-picker-indicator { display: none !important; }
         input:disabled, select:disabled, textarea:disabled { opacity: 0.6; cursor: not-allowed; }
         
-        .btn-primary { background: var(--text-main); color: #000; padding: 0.8rem 1.5rem; border: none; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; transition: transform 0.2s; }
+        .btn-primary { background: var(--text-main); color: #000; padding: 0.8rem 1.5rem; border: none; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; transition: transform 0.2s; white-space: nowrap;}
         .btn-primary:hover:not(:disabled) { background: #fff; transform: translateY(-1px); }
-        .btn-outline { background: transparent; color: var(--text-main); padding: 0.8rem 1.5rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-weight: 500; cursor: pointer; transition: background 0.2s; }
+        .btn-outline { background: transparent; color: var(--text-main); padding: 0.8rem 1.5rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-weight: 500; cursor: pointer; transition: background 0.2s; white-space: nowrap;}
         .btn-outline:hover { background: rgba(255,255,255,0.05); }
         .btn-danger { background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); padding: 0.8rem 1.5rem; border-radius: var(--radius-sm); cursor: pointer; transition: background 0.2s; }
         .btn-danger:hover { background: rgba(239, 68, 68, 0.2); }
@@ -263,6 +290,9 @@
                 <a class="nav-item active" id="nav-workboard" onclick="switchView('workboard')">
                     <span class="icon">📋</span> Workboard
                 </a>
+                <a class="nav-item" id="nav-analytics" onclick="switchView('analytics')">
+                    <span class="icon">📈</span> Analytics
+                </a>
                 <a class="nav-item" id="nav-database" onclick="switchView('database')">
                     <span class="icon">🗄️</span> Vehicle Database
                 </a>
@@ -272,8 +302,7 @@
 
                 <div class="nav-section">
                     <div class="submenu-label">HOME LOCATIONS</div>
-                    <div id="locationSubmenu" class="nav-submenu">
-                        </div>
+                    <div id="locationSubmenu" class="nav-submenu"></div>
                 </div>
 
                 <div class="nav-section">
@@ -300,31 +329,73 @@
             <header class="board-header">
                 <h1 id="boardTitle">Active Workboard</h1>
                 <div class="board-filters">
+                    <button class="filter-btn" id="btn-bulk" onclick="toggleBulkMode()" style="display:none;">☑️ Bulk Edit</button>
+                    <div style="width: 1px; height: 20px; background: var(--border); margin: 0 0.2rem;" id="bulk-divider"></div>
                     <button class="filter-btn" id="btn-collapse-all" onclick="toggleGlobalCollapse()">⊟ Collapse All</button>
+                    <button class="filter-btn" onclick="openPreferences()">👁 Display Prefs</button>
+                    <div style="width: 1px; height: 20px; background: var(--border); margin: 0 0.2rem;"></div>
                     <button class="filter-btn" id="btn-sort-date" onclick="setSort('date')">🗓 Date</button>
                     <button class="filter-btn active" id="btn-sort-priority" onclick="setSort('priority')">⚠ Priority</button>
                     <button class="filter-btn" id="btn-sort-id" onclick="setSort('id')">🔢 A-Z</button>
+                    <button class="filter-btn" id="btn-sort-freeform" onclick="setSort('freeform')">🤚 Freeform</button>
                 </div>
             </header>
 
             <div class="kanban-board" id="kanbanBoard">
-                <div class="kanban-column">
+                <div class="kanban-column" id="col-wrapper-road">
                     <div class="column-header"><div class="col-header-left"><span class="status-dot" style="color: var(--c-road);"></span><span>On the Road</span><span class="column-count" id="count-road">0</span></div></div>
                     <div class="column-content" id="col-road" data-col="on_the_road"></div>
                 </div>
-                <div class="kanban-column">
+                <div class="kanban-column" id="col-wrapper-complaints">
                     <div class="column-header"><div class="col-header-left"><span class="status-dot" style="color: var(--c-intake);"></span><span>Repair Complaints</span><span class="column-count" id="count-complaints">0</span></div></div>
                     <div class="column-content" id="col-complaints" data-col="complaints"></div>
                 </div>
-                <div class="kanban-column">
+                <div class="kanban-column" id="col-wrapper-ready">
                     <div class="column-header"><div class="col-header-left"><span class="status-dot" style="color: var(--c-ready);"></span><span>Ready for Pickup</span><span class="column-count" id="count-ready">0</span></div></div>
                     <div class="column-content" id="col-ready" data-col="ready"></div>
                 </div>
-                <div class="kanban-column" style="min-width: 360px;">
+                <div class="kanban-column" id="col-wrapper-progress" style="min-width: 360px;">
                     <div class="column-header"><div class="col-header-left"><span class="status-dot" style="color: var(--c-shop);"></span><span>In Progress / Parts</span><span class="column-count" id="count-progress">0</span></div></div>
                     <div class="column-content" id="col-progress" data-col="progress"></div>
                 </div>
             </div>
+
+            <div id="bulkActionBar" class="bulk-action-bar">
+                <span id="bulkCount" style="font-family: 'JetBrains Mono'; font-weight: bold; color: var(--c-shop); font-size: 0.9rem; min-width: 100px;">0 Selected</span>
+                
+                <select id="bulkStatus" class="role-select">
+                    <option value="">-- Move Status To --</option>
+                    <option value="On the road">On the Road</option>
+                    <option value="Reported">Repair Complaints</option>
+                    <option value="Ready for Pickup">Ready for Pickup</option>
+                    <option value="Repair in Progress">In Progress</option>
+                    <option value="Complete">Complete (Archive)</option>
+                </select>
+
+                <select id="bulkPriority" class="role-select">
+                    <option value="">-- Set Priority --</option>
+                    <option value="Urgent">🔴 Urgent</option>
+                    <option value="High">⚠ High</option>
+                    <option value="Oil Change / Bulb Replacement">🔧 Maintenance</option>
+                    <option value="Normal">Normal</option>
+                </select>
+
+                <input type="text" id="bulkLocation" class="role-select" placeholder="Assign Location..." style="width: 150px;">
+
+                <button class="btn-primary" onclick="applyBulkActions()">Apply Action</button>
+                <button class="btn-outline" onclick="toggleBulkMode()">Cancel</button>
+            </div>
+        </main>
+
+        <main class="view-area" id="view-analytics">
+            <header class="board-header">
+                <h1>Analytics Dashboard</h1>
+                <div class="board-filters">
+                    <button class="filter-btn active">Live Metrics</button>
+                </div>
+            </header>
+            <div class="analytics-grid" id="analyticsGrid">
+                </div>
         </main>
 
         <main class="view-area" id="view-database">
@@ -332,7 +403,7 @@
                 <h1>Fleet Database</h1>
                 <div class="board-filters">
                     <button class="filter-btn active">All Vehicles</button>
-                    <button class="filter-btn" id="fleetioSyncBtn" onclick="syncFleetioMileage()" style="color: var(--text-main); border-color: var(--c-shop);">
+                    <button class="filter-btn" id="fleetioSyncBtn" onclick="syncFleetioData()" style="color: var(--text-main); border-color: var(--c-shop);">
                         🔄 Sync Fleetio
                     </button>
                 </div>
@@ -349,8 +420,7 @@
                             <th>Status</th>
                         </tr>
                     </thead>
-                    <tbody id="dbTableBody">
-                        </tbody>
+                    <tbody id="dbTableBody"></tbody>
                 </table>
             </div>
         </main>
@@ -364,15 +434,8 @@
             </header>
             <div class="db-container">
                 <table class="db-table">
-                    <thead>
-                        <tr>
-                            <th>Email Address</th>
-                            <th>User UID</th>
-                            <th>Assigned Role</th>
-                        </tr>
-                    </thead>
-                    <tbody id="usersTableBody">
-                        </tbody>
+                    <thead><tr><th>Email Address</th><th>User UID</th><th>Assigned Role</th></tr></thead>
+                    <tbody id="usersTableBody"></tbody>
                 </table>
             </div>
         </main>
@@ -385,6 +448,7 @@
                 <input type="hidden" id="mode" value="add">
                 <input type="hidden" id="targetDocId">
                 <input type="hidden" id="vHistory">
+                <input type="hidden" id="vStatusUpdatedAt">
                 
                 <div class="form-group" style="background: rgba(255,255,255,0.03); padding: 0.8rem; border-radius: 6px;">
                     <label style="color: var(--text-main);">Who are you? (For Logs)</label>
@@ -471,12 +535,10 @@
             <h2>DATABASE RECORD</h2>
             <form onsubmit="saveDbRecord(event)">
                 <input type="hidden" id="dbTargetDocId">
-                
                 <div class="form-row">
                     <div class="form-group"><label>Vehicle ID</label><input type="text" id="dbID" required></div>
                     <div class="form-group"><label>Current Mileage</label><input type="number" id="dbMileage" placeholder="e.g. 150000"></div>
                 </div>
-
                 <div class="form-group"><label>Last Oil Change (Date)</label><input type="date" id="dbOilChange"></div>
                 <div class="form-group"><label>Accident History</label><textarea id="dbAccident" rows="3" placeholder="Log any major collisions or body damage..."></textarea></div>
                 <div class="form-group"><label>Major Repair History</label><textarea id="dbRepairs" rows="4" placeholder="Engine replacements, transmission rebuilds, etc..."></textarea></div>
@@ -490,13 +552,33 @@
         </div>
     </div>
 
-    <div id="syncLogModal" class="modal-overlay" onclick="if(event.target===this)closeModal('syncLogModal')">
-        <div class="modal-content" style="max-width: 700px;">
-            <h2 style="color: var(--c-shop);">FLEETIO SYNC LOGBOOK</h2>
-            <div id="syncLogStats" style="display:flex; flex-wrap:wrap; gap:1.5rem; margin-bottom: 1rem; padding: 1rem; background: #000; border-radius: var(--radius-sm); font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; border: 1px solid var(--border);"></div>
-            <div id="syncLogDetails" style="max-height: 400px; overflow-y: auto; background: #111; padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; white-space: pre-wrap; color: #ccc; line-height: 1.6;"></div>
-            <div style="display:flex; justify-content:flex-end; margin-top:1.5rem;">
-                <button type="button" class="btn-primary" onclick="closeModal('syncLogModal')">Close Logbook</button>
+    <div id="preferencesModal" class="modal-overlay" onclick="if(event.target===this)closeModal('preferencesModal')">
+        <div class="modal-content wide-modal">
+            <h2>DISPLAY PREFERENCES</h2>
+            <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 2rem;">Customize your terminal view. These settings are saved to your account.</p>
+            
+            <div class="pref-section-title">Board Columns</div>
+            <div class="pref-grid" style="margin-bottom: 2rem;">
+                <div class="column-checkbox"><input type="checkbox" id="pref-col-road"><label for="pref-col-road"><span class="status-dot" style="color: var(--c-road);"></span> On the Road</label></div>
+                <div class="column-checkbox"><input type="checkbox" id="pref-col-complaints"><label for="pref-col-complaints"><span class="status-dot" style="color: var(--c-intake);"></span> Repair Complaints</label></div>
+                <div class="column-checkbox"><input type="checkbox" id="pref-col-ready"><label for="pref-col-ready"><span class="status-dot" style="color: var(--c-ready);"></span> Ready for Pickup</label></div>
+                <div class="column-checkbox"><input type="checkbox" id="pref-col-progress"><label for="pref-col-progress"><span class="status-dot" style="color: var(--c-shop);"></span> In Progress / Parts</label></div>
+            </div>
+
+            <div class="pref-section-title">Card Data Toggles</div>
+            <div class="pref-grid" style="margin-bottom: 2.5rem;">
+                <div class="column-checkbox"><input type="checkbox" id="pref-card-issue"><label for="pref-card-issue">Issue Description</label></div>
+                <div class="column-checkbox"><input type="checkbox" id="pref-card-location"><label for="pref-card-location">Home Location 🏠</label></div>
+                <div class="column-checkbox"><input type="checkbox" id="pref-card-status"><label for="pref-card-status">Shop Status</label></div>
+                <div class="column-checkbox"><input type="checkbox" id="pref-card-mileage"><label for="pref-card-mileage">Mileage 🛣️</label></div>
+                <div class="column-checkbox"><input type="checkbox" id="pref-card-age"><label for="pref-card-age">Time in Shop ⏳</label></div>
+                <div class="column-checkbox"><input type="checkbox" id="pref-card-inspection"><label for="pref-card-inspection">Inspection Date 🔍</label></div>
+                <div class="column-checkbox"><input type="checkbox" id="pref-card-progress"><label for="pref-card-progress">Visual Progress Bar</label></div>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; gap:1rem;">
+                <button class="btn-outline" onclick="closeModal('preferencesModal')">Cancel</button>
+                <button class="btn-primary" onclick="savePreferences()">Save Settings</button>
             </div>
         </div>
     </div>
@@ -523,8 +605,18 @@
         </div>
     </div>
 
+    <div id="syncLogModal" class="modal-overlay" onclick="if(event.target===this)closeModal('syncLogModal')">
+        <div class="modal-content" style="max-width: 700px;">
+            <h2 style="color: var(--c-shop);">FLEETIO SYNC LOGBOOK</h2>
+            <div id="syncLogStats" style="display:flex; flex-wrap:wrap; gap:1.5rem; margin-bottom: 1rem; padding: 1rem; background: #000; border-radius: var(--radius-sm); font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; border: 1px solid var(--border);"></div>
+            <div id="syncLogDetails" style="max-height: 400px; overflow-y: auto; background: #111; padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; white-space: pre-wrap; color: #ccc; line-height: 1.6;"></div>
+            <div style="display:flex; justify-content:flex-end; margin-top:1.5rem;">
+                <button type="button" class="btn-primary" onclick="closeModal('syncLogModal')">Close Logbook</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // --- FLEETIO CONFIG ---
         const FLEETIO_API_KEY = 'fa387224226d63ffa24676b5576793283d70fef4';
         const FLEETIO_ACCOUNT_TOKEN = '82be379dc8';
 
@@ -539,22 +631,26 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
-
         const secondaryApp = firebase.initializeApp(firebaseConfig, "Secondary");
 
-        // --- STATE & ROLES ---
         let fleetData = [];
         let systemUsers = [];
         let locationFilter = null;
-        let activeSort = 'priority';
+        let activeSort = 'priority'; 
         let currentView = 'workboard';
         let collapsedCards = new Set(); 
         let allCollapsed = false;
-        
         let currentUserRole = 'viewer';
         let currentUserId = null;
+        
+        let userPrefs = {
+            columns: { road: true, complaints: true, ready: true, progress: true },
+            cards: { issue: true, location: true, status: true, mileage: true, age: true, inspection: true, progress: true }
+        };
 
-        // --- MAPPING ---
+        let isMultiSelectMode = false;
+        let selectedCards = new Set();
+
         const STATUS_MAP = {
             "Reported": "complaints", "Ready for Pickup": "ready",
             "Received": "progress", "Assessment": "progress", "Awaiting part order": "progress",
@@ -567,7 +663,77 @@
             "Parts Received": 4, "Repair in Progress": 4, "Awaiting delivery": 4, "Complete": 5
         };
 
-        // --- AUTH & ROLES ---
+        // --- PREFERENCES ---
+        function loadPreferences() {
+            if(!currentUserId) return;
+            const saved = localStorage.getItem(`dlx_prefs_${currentUserId}`);
+            if (saved) { 
+                try { 
+                    const parsed = JSON.parse(saved); 
+                    userPrefs = { ...userPrefs, ...parsed };
+                    if(parsed.columns) userPrefs.columns = { ...userPrefs.columns, ...parsed.columns };
+                    if(parsed.cards) userPrefs.cards = { ...userPrefs.cards, ...parsed.cards };
+                } catch(e){} 
+            }
+            applyColumnVisibility();
+        }
+
+        function openPreferences() {
+            document.getElementById('pref-col-road').checked = userPrefs.columns.road;
+            document.getElementById('pref-col-complaints').checked = userPrefs.columns.complaints;
+            document.getElementById('pref-col-ready').checked = userPrefs.columns.ready;
+            document.getElementById('pref-col-progress').checked = userPrefs.columns.progress;
+            
+            document.getElementById('pref-card-issue').checked = userPrefs.cards.issue;
+            document.getElementById('pref-card-location').checked = userPrefs.cards.location;
+            document.getElementById('pref-card-status').checked = userPrefs.cards.status;
+            document.getElementById('pref-card-mileage').checked = userPrefs.cards.mileage;
+            document.getElementById('pref-card-age').checked = userPrefs.cards.age;
+            document.getElementById('pref-card-inspection').checked = userPrefs.cards.inspection;
+            document.getElementById('pref-card-progress').checked = userPrefs.cards.progress;
+
+            document.getElementById('preferencesModal').style.display = 'flex';
+        }
+
+        function savePreferences() {
+            userPrefs.columns = {
+                road: document.getElementById('pref-col-road').checked,
+                complaints: document.getElementById('pref-col-complaints').checked,
+                ready: document.getElementById('pref-col-ready').checked,
+                progress: document.getElementById('pref-col-progress').checked
+            };
+            userPrefs.cards = {
+                issue: document.getElementById('pref-card-issue').checked,
+                location: document.getElementById('pref-card-location').checked,
+                status: document.getElementById('pref-card-status').checked,
+                mileage: document.getElementById('pref-card-mileage').checked,
+                age: document.getElementById('pref-card-age').checked,
+                inspection: document.getElementById('pref-card-inspection').checked,
+                progress: document.getElementById('pref-card-progress').checked
+            };
+
+            if(currentUserId) localStorage.setItem(`dlx_prefs_${currentUserId}`, JSON.stringify(userPrefs));
+            
+            applyColumnVisibility();
+            renderBoard(); 
+            closeModal('preferencesModal');
+            showToast('✓ Preferences Saved');
+        }
+
+        function applyColumnVisibility() {
+            const map = {
+                'col-wrapper-road': userPrefs.columns.road,
+                'col-wrapper-complaints': userPrefs.columns.complaints,
+                'col-wrapper-ready': userPrefs.columns.ready,
+                'col-wrapper-progress': userPrefs.columns.progress
+            };
+            for (const [id, vis] of Object.entries(map)) {
+                const el = document.getElementById(id);
+                if (el) el.style.display = vis ? 'flex' : 'none';
+            }
+        }
+
+        // --- AUTH ---
         function toggleLoginSignup() {
             const login = document.getElementById('loginFormDiv'), signup = document.getElementById('signupFormDiv');
             login.style.display = login.style.display === 'none' ? 'flex' : 'none';
@@ -607,8 +773,9 @@
                 document.getElementById('displayUserRole').innerText = currentUserRole;
 
                 applyRoleRestrictions();
+                loadPreferences();
                 loadData();
-                setupDragAndDrop();
+                setTimeout(setupDragAndDrop, 500); 
             } else { 
                 document.getElementById('loginOverlay').style.display = 'flex'; 
             } 
@@ -618,11 +785,14 @@
             if (currentUserRole === 'viewer') {
                 document.getElementById('nav-add-unit').style.display = 'none';
                 document.getElementById('fleetioSyncBtn').style.display = 'none';
+                document.getElementById('btn-bulk').style.display = 'none';
+                document.getElementById('bulk-divider').style.display = 'none';
             } else {
                 document.getElementById('nav-add-unit').style.display = 'flex';
                 document.getElementById('fleetioSyncBtn').style.display = 'flex';
+                document.getElementById('btn-bulk').style.display = 'flex';
+                document.getElementById('bulk-divider').style.display = 'block';
             }
-
             if (currentUserRole === 'admin') {
                 document.getElementById('nav-users').style.display = 'flex';
                 loadUsersData(); 
@@ -644,19 +814,98 @@
         function updateDatalist() {
             const dl = document.getElementById('syncedVehiclesList');
             dl.innerHTML = '';
-            const ids = [...new Set(fleetData.map(v => v.id).filter(id => id))].sort();
+            const ids = [...new Set(fleetData.map(v => String(v.id || '')))].sort();
             ids.forEach(id => { const opt = document.createElement('option'); opt.value = id; dl.appendChild(opt); });
         }
 
         document.getElementById('vID').addEventListener('input', function(e) {
             if(document.getElementById('mode').value === 'add') {
-                const existing = fleetData.find(v => (v.id||'').toLowerCase() === e.target.value.toLowerCase());
+                const existing = fleetData.find(v => String(v.id||'').toLowerCase() === String(e.target.value).toLowerCase());
                 if(existing) {
                     if(existing.vehicleType) document.getElementById('vType').value = existing.vehicleType;
                     if(existing.homeLocation) document.getElementById('vHomeLocation').value = existing.homeLocation;
                 }
             }
         });
+
+        // --- BULK ACTIONS ---
+        function toggleBulkMode() {
+            if (currentUserRole === 'viewer') return;
+            isMultiSelectMode = !isMultiSelectMode;
+            selectedCards.clear();
+            const btn = document.getElementById('btn-bulk');
+            
+            if (isMultiSelectMode) {
+                btn.classList.add('bulk-active');
+                btn.innerText = "Cancel Bulk";
+                document.getElementById('bulkActionBar').classList.add('visible');
+            } else {
+                btn.classList.remove('bulk-active');
+                btn.innerText = "☑️ Bulk Edit";
+                document.getElementById('bulkActionBar').classList.remove('visible');
+            }
+            updateBulkCount();
+            renderBoard(); 
+        }
+
+        function updateBulkCount() {
+            document.getElementById('bulkCount').innerText = `${selectedCards.size} Selected`;
+        }
+
+        function applyBulkActions() {
+            if (selectedCards.size === 0) return showToast("No vehicles selected");
+            
+            const newStatus = document.getElementById('bulkStatus').value;
+            const newPriority = document.getElementById('bulkPriority').value;
+            const newLocation = document.getElementById('bulkLocation').value.trim();
+            
+            if (!newStatus && !newPriority && !newLocation) return showToast("Select an action to apply");
+
+            let updatePromises = [];
+            const user = getUsername();
+
+            selectedCards.forEach(docId => {
+                const v = fleetData.find(v => v.docId === docId);
+                if (!v) return;
+
+                let changes = {};
+                let histArr = parseHistory(v.history);
+
+                if (newStatus) {
+                    if (newStatus === "On the road") {
+                        changes.onTheRoad = true;
+                    } else {
+                        changes.onTheRoad = false;
+                        changes.shopStatus = newStatus;
+                        changes.statusUpdatedAt = new Date().toISOString();
+                    }
+                    histArr.push(createLogEntry('Status', `Moved to ${newStatus} (Bulk)`));
+                }
+                
+                if (newPriority) {
+                    changes.priority = newPriority;
+                    histArr.push(createLogEntry('Priority', `Changed to ${newPriority} (Bulk)`));
+                }
+
+                if (newLocation) {
+                    changes.homeLocation = newLocation;
+                    histArr.push(createLogEntry('Location', `Changed to ${newLocation} (Bulk)`));
+                }
+
+                changes.history = JSON.stringify(histArr);
+                changes.lastUpdated = new Date().toISOString();
+
+                updatePromises.push(db.collection('vehicles').doc(docId).update(changes));
+            });
+
+            Promise.all(updatePromises).then(() => {
+                showToast(`✓ Updated ${selectedCards.size} tickets`);
+                document.getElementById('bulkStatus').value = '';
+                document.getElementById('bulkPriority').value = '';
+                document.getElementById('bulkLocation').value = '';
+                toggleBulkMode(); 
+            }).catch(() => showToast("❌ Error applying bulk updates"));
+        }
 
         // --- USER MANAGEMENT ---
         function loadUsersData() {
@@ -666,73 +915,51 @@
                 if(currentView === 'users') renderUsersTable();
             });
         }
-
         function renderUsersTable() {
             const tbody = document.getElementById('usersTableBody');
+            if(!tbody) return;
             tbody.innerHTML = systemUsers.map(u => `
-                <tr>
-                    <td>${u.email}</td>
-                    <td style="font-family:'JetBrains Mono'; font-size:0.7rem; color:#666;">${u.uid}</td>
-                    <td>
-                        <select class="role-select" onchange="updateUserRole('${u.uid}', this.value)" ${u.uid === currentUserId ? 'disabled' : ''}>
-                            <option value="viewer" ${u.role === 'viewer' ? 'selected' : ''}>Viewer</option>
-                            <option value="standard" ${u.role === 'standard' ? 'selected' : ''}>Standard</option>
-                            <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
-                        </select>
-                    </td>
-                </tr>
-            `).join('');
+                <tr><td>${u.email}</td><td style="font-family:'JetBrains Mono'; font-size:0.7rem; color:#666;">${u.uid}</td>
+                <td><select class="role-select" onchange="updateUserRole('${u.uid}', this.value)" ${u.uid === currentUserId ? 'disabled' : ''}>
+                <option value="viewer" ${u.role === 'viewer' ? 'selected' : ''}>Viewer</option><option value="standard" ${u.role === 'standard' ? 'selected' : ''}>Standard</option><option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option></select></td></tr>`).join('');
         }
-
-        function updateUserRole(uid, newRole) {
-            db.collection('users').doc(uid).update({ role: newRole }).then(() => showToast("✓ User role updated")).catch(() => showToast("❌ Failed to update role"));
-        }
-
-        function openUserModal() {
-            document.getElementById('newAccEmail').value = '';
-            document.getElementById('newAccPassword').value = '';
-            document.getElementById('newAccRole').value = 'viewer';
-            document.getElementById('userModal').style.display = 'flex';
-        }
-
+        function updateUserRole(uid, newRole) { db.collection('users').doc(uid).update({ role: newRole }).then(() => showToast("✓ User role updated")).catch(() => showToast("❌ Failed to update role")); }
+        function openUserModal() { document.getElementById('newAccEmail').value = ''; document.getElementById('newAccPassword').value = ''; document.getElementById('newAccRole').value = 'viewer'; document.getElementById('userModal').style.display = 'flex'; }
         function createNewUser(e) {
             e.preventDefault();
             const email = document.getElementById('newAccEmail').value, pass = document.getElementById('newAccPassword').value, role = document.getElementById('newAccRole').value, btn = document.getElementById('createUserBtn');
             btn.innerText = "Creating..."; btn.disabled = true;
             secondaryApp.auth().createUserWithEmailAndPassword(email, pass).then(cred => {
-                db.collection('users').doc(cred.user.uid).set({ email, role }).then(() => {
-                    btn.innerText = "Create User"; btn.disabled = false;
-                    closeModal('userModal'); showToast("✓ Account Created");
-                    secondaryApp.auth().signOut(); 
-                });
+                db.collection('users').doc(cred.user.uid).set({ email, role }).then(() => { btn.innerText = "Create User"; btn.disabled = false; closeModal('userModal'); showToast("✓ Account Created"); secondaryApp.auth().signOut(); });
             }).catch(err => { btn.innerText = "Create User"; btn.disabled = false; alert(err.message); });
         }
 
         // --- FLEETIO SYNC ---
-        async function syncFleetioMileage() {
+        async function syncFleetioData() {
             if (!FLEETIO_API_KEY || FLEETIO_API_KEY === 'YOUR_FLEETIO_API_KEY_HERE') return alert("Please add your Fleetio API Key.");
             const btn = document.getElementById('fleetioSyncBtn');
-            btn.innerHTML = "⏳ Syncing..."; btn.disabled = true;
+            btn.innerHTML = "⏳ Syncing Vehicles..."; btn.disabled = true;
             let logbook = [];
+            let updateCount = 0, skipCount = 0, createdCount = 0, noMeterCount = 0, updatePromises = [];
 
             try {
-                const response = await fetch('https://secure.fleetio.com/api/v1/vehicles?per_page=100', {
+                // 1. SYNC VEHICLES & MILEAGE
+                const vehResponse = await fetch('https://secure.fleetio.com/api/v1/vehicles?per_page=100', {
                     method: 'GET', headers: { 'Authorization': `Token token="${FLEETIO_API_KEY}"`, 'Account-Token': FLEETIO_ACCOUNT_TOKEN, 'Content-Type': 'application/json', 'Accept': 'application/json' }
                 });
-                if (!response.ok) throw new Error(`Fleetio API Error: ${response.status}`);
+                if (!vehResponse.ok) throw new Error(`Fleetio Vehicle API Error: ${vehResponse.status}`);
                 
-                const fleetioResponse = await response.json();
+                const fleetioResponse = await vehResponse.json();
                 let fleetioVehicles = Array.isArray(fleetioResponse) ? fleetioResponse : (fleetioResponse.records || fleetioResponse.data || []);
-                let updateCount = 0, skipCount = 0, createdCount = 0, noMeterCount = 0, updatePromises = [];
 
-                logbook.push(`📡 Fetched ${fleetioVehicles.length} vehicles from Fleetio API.\n`);
+                logbook.push(`📡 Fetched ${fleetioVehicles.length} vehicles from Fleetio API.`);
 
                 fleetioVehicles.forEach(fVehicle => {
-                    const cleanFleetioName = (fVehicle.name || '').replace(/[^0-9]/g, '');
-                    const finalDocId = cleanFleetioName !== '' ? cleanFleetioName : fVehicle.name.trim();
+                    const cleanFleetioName = String(fVehicle.name || '').replace(/[^0-9]/g, '');
+                    const finalDocId = cleanFleetioName !== '' ? cleanFleetioName : String(fVehicle.name).trim();
                     
                     const localVehicle = fleetData.find(v => {
-                        const cleanLocalId = (v.id || '').replace(/[^0-9]/g, '');
+                        const cleanLocalId = String(v.id || '').replace(/[^0-9]/g, '');
                         return (cleanLocalId === cleanFleetioName && cleanLocalId !== '') || v.docId === finalDocId;
                     });
 
@@ -740,26 +967,79 @@
                         if (fVehicle.primary_meter_value) {
                             const updatedMileage = Math.round(parseFloat(fVehicle.primary_meter_value));
                             if ((parseInt(localVehicle.mileage) || 0) !== updatedMileage) {
-                                updateCount++;
-                                logbook.push(`✅ UPDATED: ${localVehicle.id} | ${localVehicle.mileage || 0} -> ${updatedMileage}`);
+                                updateCount++; logbook.push(`✅ UPDATED VEHICLE: ${localVehicle.id} | ${localVehicle.mileage || 0} -> ${updatedMileage}`);
                                 updatePromises.push(db.collection('vehicles').doc(localVehicle.docId).update({ mileage: updatedMileage }));
-                            } else { skipCount++; logbook.push(`⏭️ SKIPPED: ${localVehicle.id} | Mileage identical (${updatedMileage})`); }
-                        } else { noMeterCount++; logbook.push(`⚠️ NO METER: Found ${localVehicle.id}, but no mileage data.`); }
+                            } else { skipCount++; }
+                        } else { noMeterCount++; }
                     } else {
                         const newMileage = fVehicle.primary_meter_value ? Math.round(parseFloat(fVehicle.primary_meter_value)) : 0;
+                        createdCount++; logbook.push(`✨ CREATED VEHICLE: ${fVehicle.name} added as Doc ID "${finalDocId}" (Mileage: ${newMileage})`);
+                        updatePromises.push(db.collection('vehicles').doc(finalDocId).set({ 
+                            id: finalDocId || '', mileage: newMileage || 0, shopStatus: 'Database Only', onTheRoad: false, priority: 'Normal', status: 'Operational', homeLocation: '', vehicleType: '', date: new Date().toISOString().split('T')[0], lastUpdated: new Date().toISOString(), history: JSON.stringify([createLogEntry('System', 'Imported from Fleetio')]), sortOrder: Date.now(), isTicket: false, isBaseVehicle: true 
+                        }));
+                    }
+                });
+                
+                // 2. SYNC ISSUES
+                btn.innerHTML = "⏳ Syncing Issues...";
+                const issueResponse = await fetch('https://secure.fleetio.com/api/v1/issues?per_page=100', {
+                    method: 'GET', headers: { 'Authorization': `Token token="${FLEETIO_API_KEY}"`, 'Account-Token': FLEETIO_ACCOUNT_TOKEN, 'Content-Type': 'application/json', 'Accept': 'application/json' }
+                });
+                if (!issueResponse.ok) throw new Error(`Fleetio Issue API Error: ${issueResponse.status}`);
+                
+                const fleetioIssueRes = await issueResponse.json();
+                let fleetioIssues = Array.isArray(fleetioIssueRes) ? fleetioIssueRes : (fleetioIssueRes.records || fleetioIssueRes.data || []);
+                
+                // Filter only open/reported issues
+                fleetioIssues = fleetioIssues.filter(i => String(i.state).toLowerCase() === 'open' || !i.resolved_at);
+                
+                logbook.push(`\n📡 Fetched ${fleetioIssues.length} open issues from Fleetio API.`);
+
+                fleetioIssues.forEach(fIssue => {
+                    const existingTicket = fleetData.find(v => v.fleetioIssueId == fIssue.id);
+                    const vehicleName = String(fIssue.vehicle_name || '').replace(/[^0-9]/g, '') || fIssue.vehicle_name;
+                    const issueText = fIssue.title + (fIssue.description ? ` - ${fIssue.description}` : '');
+                    
+                    let prio = "Normal";
+                    if(fIssue.priority) {
+                        const fp = String(fIssue.priority).toLowerCase();
+                        if(fp === 'critical') prio = 'Urgent';
+                        if(fp === 'high') prio = 'High';
+                        if(fp === 'low') prio = 'Normal'; 
+                    }
+
+                    if (existingTicket) {
+                        if (existingTicket.issue !== issueText || existingTicket.priority !== prio) {
+                            updateCount++;
+                            logbook.push(`✅ UPDATED ISSUE: ${vehicleName} | ${fIssue.title}`);
+                            let histArr = parseHistory(existingTicket.history);
+                            histArr.push(createLogEntry('System', 'Issue updated from Fleetio'));
+                            updatePromises.push(db.collection('vehicles').doc(existingTicket.docId).update({
+                                issue: issueText || '', priority: prio || 'Normal', history: JSON.stringify(histArr), lastUpdated: new Date().toISOString()
+                            }));
+                        } else { skipCount++; }
+                    } else {
+                        const baseVeh = fleetData.find(v => String(v.id).toLowerCase() === String(vehicleName).toLowerCase() && !v.isTicket);
+                        const vType = baseVeh?.vehicleType || '';
+                        const hLoc = baseVeh?.homeLocation || '';
+
                         createdCount++;
-                        logbook.push(`✨ CREATED: ${fVehicle.name} added as Doc ID "${finalDocId}" (Mileage: ${newMileage})`);
-                        updatePromises.push(db.collection('vehicles').doc(finalDocId).set({
-                            id: finalDocId, mileage: newMileage, shopStatus: 'Database Only', onTheRoad: false, priority: 'Normal', status: 'Operational', homeLocation: '', vehicleType: '', date: new Date().toISOString().split('T')[0], lastUpdated: new Date().toISOString(), history: JSON.stringify([createLogEntry('System', 'Imported from Fleetio')])
+                        logbook.push(`✨ NEW TICKET: ${vehicleName} | ${fIssue.title}`);
+                        updatePromises.push(db.collection('vehicles').add({
+                            id: vehicleName || '', baseVehicleId: vehicleName || '', vehicleType: vType || '', issue: issueText || '', fleetioIssueId: fIssue.id || '', isTicket: true, shopStatus: 'Reported', onTheRoad: false, priority: prio || 'Normal', status: 'Operational', homeLocation: hLoc || '', date: new Date().toISOString().split('T')[0], statusUpdatedAt: new Date().toISOString(), lastUpdated: new Date().toISOString(), history: JSON.stringify([createLogEntry('System', 'Issue imported from Fleetio')]), sortOrder: Date.now()
                         }));
                     }
                 });
 
                 await Promise.all(updatePromises);
                 showSyncLogbook(updateCount, skipCount, createdCount, noMeterCount, logbook);
-                showToast(`✓ Synced ${updateCount}, Created ${createdCount}`);
-            } catch (error) { showToast("❌ Failed to sync. Check console."); } 
-            finally { btn.innerHTML = "🔄 Sync Fleetio"; btn.disabled = false; }
+                showToast(`✓ Synced successfully`);
+            } catch (error) { 
+                console.error(error);
+                showToast("❌ Failed to sync."); 
+            } finally { 
+                btn.innerHTML = "🔄 Sync Fleetio"; btn.disabled = false; 
+            }
         }
 
         function showSyncLogbook(updated, skipped, created, noMeter, logLines) {
@@ -775,13 +1055,16 @@
             document.querySelectorAll('.nav-item').forEach(v => v.classList.remove('active'));
             document.getElementById(`view-${view}`).classList.add('active');
             document.getElementById(`nav-${view}`).classList.add('active');
+            
             if(view === 'users') renderUsersTable();
+            else if(view === 'analytics') renderAnalytics();
             else renderCurrentView();
         }
 
         function renderCurrentView() {
             if (currentView === 'workboard') renderBoard();
             else if (currentView === 'database') renderDatabase();
+            else if (currentView === 'analytics') renderAnalytics();
         }
 
         function setFilter(loc) { locationFilter = loc; document.getElementById('boardTitle').innerText = loc ? `${loc} Units` : "Active Workboard"; renderSidebarLocations(); renderCurrentView(); }
@@ -794,43 +1077,52 @@
             renderCurrentView(); 
         }
 
-        function formatDate(s) { if (!s) return ''; const p = s.split('-'); return p.length===3 ? `${p[1]}/${p[2]}/${p[0]}` : s; }
+        function renderSidebarLocations() {
+            const locs = [...new Set(fleetData.map(v => String(v.homeLocation || '')))].sort();
+            const container = document.getElementById('locationSubmenu');
+            container.innerHTML = locs.filter(l=>l).map(l => `<a class="submenu-item ${locationFilter === l ? 'active' : ''}" onclick="setFilter('${l}')">${l}</a>`).join('');
+            if(locationFilter) container.innerHTML = `<a class="submenu-item" onclick="setFilter(null)">← All Locations</a>` + container.innerHTML;
+        }
 
-        function toggleCard(docId, btn) {
+        function formatDate(s) { if (!s) return ''; const p = String(s).split('-'); return p.length===3 ? `${p[1]}/${p[2]}/${p[0]}` : s; }
+
+        function toggleCard(vid, btn) {
             const card = btn.closest('.vehicle-card');
-            if (collapsedCards.has(docId)) { 
-                collapsedCards.delete(docId); 
-                card.classList.remove('collapsed'); 
-            } else { 
-                collapsedCards.add(docId); 
-                card.classList.add('collapsed'); 
-            }
+            if (collapsedCards.has(vid)) { collapsedCards.delete(vid); card.classList.remove('collapsed'); } 
+            else { collapsedCards.add(vid); card.classList.add('collapsed'); }
         }
 
         function toggleGlobalCollapse() {
             allCollapsed = !allCollapsed;
-            const btn = document.getElementById('btn-collapse-all');
-            btn.innerHTML = allCollapsed ? '⊞ Expand All' : '⊟ Collapse All';
-            
+            document.getElementById('btn-collapse-all').innerHTML = allCollapsed ? '⊞ Expand All' : '⊟ Collapse All';
             document.querySelectorAll('.vehicle-card').forEach(card => {
-                const docId = card.dataset.docId;
-                if (!docId) return;
-
-                if (allCollapsed) {
-                    collapsedCards.add(docId);
-                    card.classList.add('collapsed');
-                } else {
-                    collapsedCards.delete(docId);
-                    card.classList.remove('collapsed');
-                }
+                const vid = card.dataset.vid;
+                if (!vid) return;
+                if (allCollapsed) { collapsedCards.add(vid); card.classList.add('collapsed'); } 
+                else { collapsedCards.delete(vid); card.classList.remove('collapsed'); }
             });
         }
 
-        function renderBoard() {
-            ['road', 'complaints', 'ready', 'progress'].forEach(c => { document.getElementById(`col-${c}`).innerHTML = ''; document.getElementById(`count-${c}`).innerText = '0'; });
-            const search = document.getElementById('searchInput').value.toLowerCase();
+        function getAgeTags(v) {
+            let tags = [];
+            const today = new Date();
+            today.setHours(0,0,0,0);
             
-            const groups = { road: [], complaints: [], ready: [], progress: [] };
+            if (v.date && !v.onTheRoad && v.shopStatus !== 'Database Only' && v.shopStatus !== 'Complete') {
+                const inDate = new Date(v.date);
+                const totalDays = Math.max(0, Math.floor((today - inDate) / 864e5));
+                const statusDate = new Date(v.statusUpdatedAt || v.lastUpdated || v.date || Date.now());
+                const colDays = Math.max(0, Math.floor((today - statusDate) / 864e5));
+                tags.push(`⏳ ${totalDays}d total • ${colDays}d here`);
+            }
+            return tags.length ? `<span class="card-meta-tag">${tags.join('')}</span>` : '';
+        }
+
+        function renderBoard() {
+            ['road', 'complaints', 'ready', 'progress'].forEach(c => { const el = document.getElementById(`col-${c}`); if(el) el.innerHTML = ''; const countEl = document.getElementById(`count-${c}`); if(countEl) countEl.innerText = '0'; });
+            const search = String(document.getElementById('searchInput').value).toLowerCase();
+            
+            const groupsRaw = { road: {}, complaints: {}, ready: {}, progress: {} };
             
             fleetData.forEach(v => {
                 if (locationFilter && v.homeLocation !== locationFilter) return;
@@ -842,26 +1134,63 @@
                 else if (STATUS_MAP[v.shopStatus]) colId = STATUS_MAP[v.shopStatus];
                 else if (!v.shopStatus) colId = 'complaints';
                 
-                if (colId && groups[colId]) groups[colId].push(v);
+                if (colId) {
+                    if (v.isTicket !== false) {
+                        const vid = String(v.baseVehicleId || v.id || 'Unknown').toUpperCase();
+                        if (!groupsRaw[colId][vid]) groupsRaw[colId][vid] = [];
+                        groupsRaw[colId][vid].push(v);
+                    } else if (v.isTicket === false && v.shopStatus !== 'Database Only') {
+                        const vid = String(v.id || 'Unknown').toUpperCase();
+                        if (!groupsRaw[colId][vid]) groupsRaw[colId][vid] = [];
+                        groupsRaw[colId][vid].push(v);
+                    }
+                }
+            });
+
+            const groups = { road: [], complaints: [], ready: [], progress: [] };
+
+            Object.keys(groupsRaw).forEach(colId => {
+                Object.keys(groupsRaw[colId]).forEach(vid => {
+                    const tickets = groupsRaw[colId][vid];
+                    
+                    let highestPrio = 'Normal';
+                    let latestDate = 0;
+                    let minInsp = 9999999999999;
+                    let maxOrder = 0;
+
+                    tickets.forEach(t => {
+                        const pLevels = { 'Urgent': 4, 'High': 3, 'Oil Change / Bulb Replacement': 2, 'Normal': 1 };
+                        if ((pLevels[t.priority] || 1) > (pLevels[highestPrio] || 1)) highestPrio = t.priority;
+                        const tDate = new Date(t.lastUpdated || 0).getTime();
+                        if (tDate > latestDate) latestDate = tDate;
+                        if (t.inspectionDate) {
+                            const insD = new Date(t.inspectionDate).getTime();
+                            if (insD < minInsp) minInsp = insD;
+                        }
+                        if (t.sortOrder > maxOrder) maxOrder = t.sortOrder;
+                    });
+
+                    groups[colId].push({
+                        vid, displayTickets: tickets, highestPrio, latestDate, minInsp, maxOrder,
+                        vehicleType: tickets[0].vehicleType, homeLocation: tickets[0].homeLocation,
+                        mileage: tickets[0].mileage, shopStatus: tickets[0].shopStatus, requestedBy: tickets[0].requestedBy,
+                        inspectionDate: minInsp !== 9999999999999 ? new Date(minInsp).toISOString() : null
+                    });
+                });
             });
 
             Object.keys(groups).forEach(colId => {
                 groups[colId].sort((a, b) => {
-                    if (colId === 'road') {
-                        const dA = a.inspectionDate ? new Date(a.inspectionDate).getTime() : 9999999999999;
-                        const dB = b.inspectionDate ? new Date(b.inspectionDate).getTime() : 9999999999999;
-                        return dA - dB;
-                    } 
+                    if (colId === 'road' && activeSort !== 'freeform') return a.minInsp - b.minInsp;
                     else {
-                        if (activeSort === 'id') {
-                            return (a.id || '').localeCompare(b.id || '', undefined, {numeric: true, sensitivity: 'base'});
+                        if (activeSort === 'id') return a.vid.localeCompare(b.vid, undefined, {numeric: true, sensitivity: 'base'});
+                        if (activeSort === 'freeform') return a.maxOrder - b.maxOrder;
+                        if (activeSort === 'priority') {
+                            const pL = { 'Urgent': 4, 'High': 3, 'Oil Change / Bulb Replacement': 2, 'Normal': 1 };
+                            const diff = (pL[b.highestPrio]||1) - (pL[a.highestPrio]||1);
+                            if (diff !== 0) return diff;
                         }
-                        const getPrio = (p) => p === 'Urgent' ? 0 : p === 'High' ? 1 : p === 'Oil Change / Bulb Replacement' ? 2 : 3;
-                        if(activeSort === 'priority') { 
-                            const pa = getPrio(a.priority), pb = getPrio(b.priority); 
-                            if(pa !== pb) return pa - pb; 
-                        }
-                        return (b.lastUpdated || '').localeCompare(a.lastUpdated || '');
+                        return b.latestDate - a.latestDate;
                     }
                 });
             });
@@ -869,141 +1198,337 @@
             const CHEV_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
 
             Object.keys(groups).forEach(colId => {
-                groups[colId].forEach(v => {
-                    const isCollapsed = collapsedCards.has(v.docId) ? 'collapsed' : '';
-                    const prioClass = v.priority === 'Urgent' ? 'prio-Urgent' : v.priority === 'High' ? 'prio-High' : v.priority === 'Oil Change / Bulb Replacement' ? 'prio-Maint' : 'prio-Normal';
+                groups[colId].forEach(g => {
+                    const { vid, displayTickets, highestPrio, minInsp, vehicleType, homeLocation, mileage, shopStatus, requestedBy, inspectionDate } = g;
                     
-                    let inspectClass = '';
-                    let inspectTag = '';
+                    const isCollapsed = collapsedCards.has(vid) ? 'collapsed' : '';
+                    const allSelected = displayTickets.length > 0 && displayTickets.every(t => selectedCards.has(t.docId));
+                    const isSelected = allSelected ? 'selected' : '';
+                    const isSelectable = isMultiSelectMode ? 'selectable' : '';
+                    const prioClass = highestPrio === 'Urgent' ? 'prio-Urgent' : highestPrio === 'High' ? 'prio-High' : highestPrio === 'Oil Change / Bulb Replacement' ? 'prio-Maint' : 'prio-Normal';
                     
-                    if (colId === 'road' && v.inspectionDate) {
-                        const today = new Date();
-                        today.setHours(0,0,0,0);
-                        const insDate = new Date(v.inspectionDate);
-                        const diffTime = insDate.getTime() - today.getTime();
-                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                        
-                        if (diffDays <= 7) {
-                            inspectClass = 'inspect-crit';
-                            inspectTag = `<span class="card-meta-tag tag-danger">🔍 Insp: ${formatDate(v.inspectionDate)} (${diffDays < 0 ? Math.abs(diffDays) + 'd past due' : diffDays + 'd left'})</span>`;
-                        } else if (diffDays <= 30) {
-                            inspectClass = 'inspect-warn';
-                            inspectTag = `<span class="card-meta-tag tag-warn">🔍 Insp: ${formatDate(v.inspectionDate)} (${diffDays}d left)</span>`;
-                        } else {
-                            inspectTag = `<span class="card-meta-tag">🔍 Insp: ${formatDate(v.inspectionDate)}</span>`;
-                        }
+                    let inspectClass = '', inspectTag = '';
+                    if (colId === 'road' && inspectionDate) {
+                        const diffDays = Math.ceil((new Date(inspectionDate).getTime() - new Date().setHours(0,0,0,0)) / 864e5);
+                        if (diffDays <= 7) { inspectClass = 'inspect-crit'; inspectTag = `<span class="card-meta-tag tag-danger">🔍 Insp: ${formatDate(inspectionDate)} (${diffDays < 0 ? Math.abs(diffDays) + 'd past due' : diffDays + 'd left'})</span>`; } 
+                        else if (diffDays <= 30) { inspectClass = 'inspect-warn'; inspectTag = `<span class="card-meta-tag tag-warn">🔍 Insp: ${formatDate(inspectionDate)} (${diffDays}d left)</span>`; } 
+                        else { inspectTag = `<span class="card-meta-tag">🔍 Insp: ${formatDate(inspectionDate)}</span>`; }
+                    } else if (inspectionDate) {
+                        inspectTag = `<span class="card-meta-tag">🔍 Insp: ${formatDate(inspectionDate)}</span>`;
                     }
 
                     const card = document.createElement('div');
-                    card.className = `vehicle-card ${prioClass} ${inspectClass} ${isCollapsed}`;
-                    card.draggable = currentUserRole !== 'viewer';
-                    card.dataset.docId = v.docId; // For global collapse targeting
+                    card.className = `vehicle-card ${prioClass} ${inspectClass} ${isCollapsed} ${isSelected} ${isSelectable}`;
+                    card.draggable = !isMultiSelectMode && currentUserRole !== 'viewer';
+                    card.dataset.vid = vid; 
+                    card.dataset.order = g.maxOrder;
                     
                     let isDragging = false;
                     card.ondragstart = (e) => { 
-                        isDragging = true;
-                        e.dataTransfer.effectAllowed = 'move';
-                        e.dataTransfer.setData('text/plain', v.docId); 
+                        if(isMultiSelectMode) { e.preventDefault(); return; }
+                        isDragging = true; e.dataTransfer.effectAllowed = 'move'; 
+                        e.dataTransfer.setData('text/plain', JSON.stringify(displayTickets.map(t=>t.docId))); 
                         setTimeout(() => card.classList.add('dragging'), 0); 
                     };
-                    card.ondragend = () => { 
-                        card.classList.remove('dragging'); 
-                        setTimeout(() => isDragging = false, 50); 
-                    };
+                    card.ondragend = () => { card.classList.remove('dragging'); clearDragIndicator(); setTimeout(() => isDragging = false, 50); };
 
                     card.onclick = (e) => {
                         if(isDragging) return;
-                        if(e.target.closest('.collapse-indicator')) {
-                            toggleCard(v.docId, e.target.closest('.collapse-indicator'));
-                        } else {
-                            openModal('edit', v.docId);
+                        const subTicketEl = e.target.closest('.sub-ticket');
+
+                        if(isMultiSelectMode) {
+                            if(subTicketEl) {
+                                const tid = subTicketEl.dataset.docId;
+                                if(selectedCards.has(tid)) selectedCards.delete(tid);
+                                else selectedCards.add(tid);
+                            } else {
+                                if(allSelected) displayTickets.forEach(t => selectedCards.delete(t.docId));
+                                else displayTickets.forEach(t => selectedCards.add(t.docId));
+                            }
+                            updateBulkCount();
+                            renderBoard();
+                            return;
                         }
+
+                        if(e.target.closest('.collapse-indicator')) toggleCard(vid, e.target.closest('.collapse-indicator'));
+                        else if(subTicketEl) openModal('edit', subTicketEl.dataset.docId);
+                        else openModal('edit', displayTickets[0].docId);
                     };
 
-                    const pLevel = PROGRESS_LEVELS[v.shopStatus] || 1;
+                    let maxPLevel = 1;
+                    displayTickets.forEach(t => {
+                        const p = PROGRESS_LEVELS[t.shopStatus] || 1;
+                        if(p > maxPLevel) maxPLevel = p;
+                    });
+                    
                     let segs = '';
                     for(let i=1; i<=5; i++) {
-                        let activeClass = (i <= pLevel) ? 'active' : '';
-                        if(i <= pLevel && v.priority === 'Urgent') activeClass = 'active-warn';
+                        let activeClass = (i <= maxPLevel) ? 'active' : '';
+                        if(i <= maxPLevel && highestPrio === 'Urgent') activeClass = 'active-warn';
                         segs += `<div class="progress-seg ${activeClass}"></div>`;
                     }
 
-                    const avatar = v.requestedBy ? v.requestedBy.charAt(0).toUpperCase() : 'U';
-                    const mileageTag = v.mileage ? `<span class="card-meta-tag">🛣️ ${Number(v.mileage).toLocaleString()} mi</span>` : '';
+                    const subTicketsHtml = displayTickets.map(t => {
+                        const pClass = t.priority === 'Urgent' ? 'st-urgent' : t.priority === 'High' ? 'st-high' : t.priority === 'Oil Change / Bulb Replacement' ? 'st-maint' : '';
+                        const issueHtml = userPrefs.cards.issue ? `<div style="font-size:0.85rem; font-weight:600; color:var(--text-main); margin-bottom:0.4rem;">${t.issue || 'No issue provided'}</div>` : '';
+                        const ageHtml = userPrefs.cards.age ? getAgeTags(t) : '';
+                        const statusHtml = userPrefs.cards.status ? `<span style="font-size:0.65rem; color:var(--text-muted); font-family:'JetBrains Mono', monospace;">${t.shopStatus || 'Reported'}</span>` : '';
+                        const isSubSelected = selectedCards.has(t.docId) ? 'selected' : '';
+                        
+                        return `
+                            <div class="sub-ticket ${pClass} ${isSubSelected}" data-doc-id="${t.docId}">
+                                ${issueHtml}
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    ${statusHtml}
+                                    ${ageHtml}
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+
+                    let row1 = [];
+                    if (userPrefs.cards.location && homeLocation) row1.push(`<span class="card-meta-tag">🏠 ${homeLocation}</span>`);
+                    if (userPrefs.cards.mileage && mileage) row1.push(`<span class="card-meta-tag">🛣️ ${Number(mileage).toLocaleString()} mi</span>`);
+                    const row1Html = row1.length ? `<div class="card-footer-row">${row1.join('')}</div>` : '';
+
+                    let row2 = [];
+                    if (userPrefs.cards.inspection && inspectTag) row2.push(inspectTag);
+                    const row2Html = row2.length ? `<div class="card-footer-row" style="margin-top:-0.2rem;">${row2.join('')}</div>` : '';
+
+                    const progressHtml = userPrefs.cards.progress ? `<div class="card-progress-container">${segs}</div>` : '';
+
+                    const avatar = requestedBy ? String(requestedBy).charAt(0).toUpperCase() : 'U';
                     
                     card.innerHTML = `
                         <div class="card-header-main">
-                            <div class="card-req-by"><span>${v.id} • ${v.vehicleType || 'Unit'}</span><div class="card-avatar">${avatar}</div></div>
+                            <div class="card-req-by"><span>${vid} • ${vehicleType || 'Unit'}</span><div class="card-avatar">${avatar}</div></div>
                             <div class="collapse-indicator">${CHEV_ICON}</div>
                         </div>
                         <div class="card-body-wrapper">
                             <div class="card-body">
-                                <div class="card-title">${v.issue || 'No issue provided'}</div>
-                                <div class="card-footer-row">
-                                    <span class="card-meta-tag">🏠 ${v.homeLocation || 'N/A'}</span>
-                                    <span class="card-meta-tag">${v.shopStatus || 'Reported'}</span>
-                                    ${mileageTag}
-                                    ${inspectTag}
+                                ${row1Html}
+                                ${row2Html}
+                                <div style="display:flex; flex-direction:column; gap:0.4rem; margin:0.4rem 0;">
+                                    ${subTicketsHtml}
                                 </div>
-                                <div class="card-progress-container">${segs}</div>
+                                ${progressHtml}
                             </div>
                         </div>
                     `;
-                    document.getElementById(`col-${colId}`).appendChild(card);
+                    const targetCol = document.getElementById(`col-${colId}`);
+                    if(targetCol) targetCol.appendChild(card);
                 });
-                
-                if (document.getElementById(`count-${colId}`)) {
-                    document.getElementById(`count-${colId}`).innerText = groups[colId].length;
-                }
+                if (document.getElementById(`count-${colId}`)) document.getElementById(`count-${colId}`).innerText = groups[colId].length;
             });
         }
 
-        // --- NEW SECURE DRAG ENGINE ---
+        function getClosestCard(container, y) {
+            const draggableElements = [...container.querySelectorAll('.vehicle-card:not(.dragging)')];
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+
+        let currentIndicator = null;
+        function clearDragIndicator() {
+            if(currentIndicator) { currentIndicator.remove(); currentIndicator = null; }
+            document.querySelectorAll('.drag-over-column').forEach(el => el.classList.remove('drag-over-column'));
+        }
+
         function setupDragAndDrop() {
             document.querySelectorAll('.kanban-column').forEach(col => {
                 const content = col.querySelector('.column-content');
                 if(!content) return;
                 
+                col.addEventListener('dragenter', e => e.preventDefault());
+                
                 col.addEventListener('dragover', e => {
                     e.preventDefault(); 
-                    if (currentUserRole !== 'viewer') {
+                    if (currentUserRole !== 'viewer' && !isMultiSelectMode) {
                         e.dataTransfer.dropEffect = 'move';
-                        col.classList.add('drag-over-column');
+                        
+                        if (activeSort === 'freeform') {
+                            const closest = getClosestCard(content, e.clientY);
+                            if (!currentIndicator) {
+                                currentIndicator = document.createElement('div');
+                                currentIndicator.className = 'drop-indicator';
+                            }
+                            if (closest) {
+                                if (closest.previousElementSibling !== currentIndicator) {
+                                    content.insertBefore(currentIndicator, closest);
+                                }
+                            } else {
+                                if (content.lastElementChild !== currentIndicator) {
+                                    content.appendChild(currentIndicator);
+                                }
+                            }
+                        } else {
+                            col.classList.add('drag-over-column');
+                        }
                     }
                 });
                 
                 col.addEventListener('dragleave', e => {
-                    if (!col.contains(e.relatedTarget)) col.classList.remove('drag-over-column');
+                    if (!col.contains(e.relatedTarget)) clearDragIndicator();
                 });
                 
                 col.addEventListener('drop', e => {
                     e.preventDefault();
                     col.classList.remove('drag-over-column');
-                    if (currentUserRole === 'viewer') return;
+                    if (currentUserRole === 'viewer' || isMultiSelectMode) {
+                        clearDragIndicator();
+                        return;
+                    }
                     
-                    const docId = e.dataTransfer.getData('text/plain');
-                    if (!docId) return;
+                    const payload = e.dataTransfer.getData('text/plain');
+                    if (!payload) {
+                        clearDragIndicator();
+                        return;
+                    }
+
+                    let docIds = [];
+                    try { docIds = JSON.parse(payload); } 
+                    catch(err) { docIds = [payload]; }
                     
                     const colType = content.getAttribute('data-col');
-                    let changes = { onTheRoad: false };
+                    let changes = { statusUpdatedAt: new Date().toISOString() };
                     
                     if (colType === 'on_the_road') changes.onTheRoad = true;
-                    else if (colType === 'complaints') changes.shopStatus = "Reported";
-                    else if (colType === 'ready') changes.shopStatus = "Ready for Pickup";
-                    else if (colType === 'progress') changes.shopStatus = "Repair in Progress"; 
+                    else if (colType === 'complaints') { changes.onTheRoad = false; changes.shopStatus = "Reported"; }
+                    else if (colType === 'ready') { changes.onTheRoad = false; changes.shopStatus = "Ready for Pickup"; }
+                    else if (colType === 'progress') { changes.onTheRoad = false; changes.shopStatus = "Repair in Progress"; }
                     
-                    db.collection('vehicles').doc(docId).update(changes)
-                      .then(() => showToast("✓ Status Updated"))
-                      .catch(() => showToast("❌ Failed to move unit"));
+                    if (activeSort === 'freeform') {
+                        const closest = getClosestCard(content, e.clientY);
+                        let prevOrder = null, nextOrder = null;
+                        
+                        if (closest) {
+                            nextOrder = parseFloat(closest.dataset.order);
+                            let prev = closest.previousElementSibling;
+                            while (prev && (prev.classList.contains('dragging') || prev.classList.contains('drop-indicator'))) {
+                                prev = prev.previousElementSibling;
+                            }
+                            if (prev && prev.classList.contains('vehicle-card')) {
+                                prevOrder = parseFloat(prev.dataset.order);
+                            }
+                        } else {
+                            const cards = Array.from(content.querySelectorAll('.vehicle-card:not(.dragging)'));
+                            if (cards.length > 0) {
+                                prevOrder = parseFloat(cards[cards.length - 1].dataset.order);
+                            }
+                        }
+                        
+                        let newOrder = Date.now();
+                        if (prevOrder !== null && nextOrder !== null) {
+                            newOrder = (prevOrder + nextOrder) / 2.0;
+                        } else if (prevOrder !== null) {
+                            newOrder = prevOrder + 10000;
+                        } else if (nextOrder !== null) {
+                            newOrder = nextOrder - 10000;
+                        }
+                        changes.sortOrder = newOrder;
+                    }
+
+                    clearDragIndicator();
+                    docIds.forEach(docId => {
+                        db.collection('vehicles').doc(docId).update(changes).catch(() => showToast("❌ Failed to move unit"));
+                    });
                 });
             });
         }
 
+        // --- ANALYTICS DASHBOARD ---
+        function renderAnalytics() {
+            const grid = document.getElementById('analyticsGrid');
+            if(!grid) return;
+
+            const today = new Date();
+            today.setHours(0,0,0,0);
+
+            let unitsDown = 0, urgentCount = 0, totalRepairDays = 0, activeRepairsCount = 0, inspectionsNearing = 0;
+            let locCounts = {};
+
+            fleetData.forEach(v => {
+                if (!v.isTicket && v.status === 'Down') unitsDown++;
+                
+                if(v.shopStatus === 'Database Only' || v.shopStatus === 'Complete') return;
+
+                if(v.isTicket && v.status === 'Down') unitsDown++;
+                if(v.priority === 'Urgent') urgentCount++;
+                
+                if(v.date && !v.onTheRoad) {
+                    const dIn = new Date(v.date);
+                    const days = Math.floor((today - dIn) / 864e5);
+                    if(days >= 0) { totalRepairDays += days; activeRepairsCount++; }
+                }
+
+                if(v.inspectionDate) {
+                    const diffDays = Math.ceil((new Date(v.inspectionDate).getTime() - today.getTime()) / 864e5);
+                    if (diffDays >= 0 && diffDays <= 30) inspectionsNearing++;
+                }
+
+                const loc = v.location || 'Unknown Shop';
+                locCounts[loc] = (locCounts[loc] || 0) + 1;
+            });
+
+            const avgRepairTime = activeRepairsCount > 0 ? Math.round(totalRepairDays / activeRepairsCount) : 0;
+            
+            let locationHtml = '';
+            const maxLoc = Math.max(...Object.values(locCounts), 1);
+            for (const [loc, count] of Object.entries(locCounts).sort((a,b)=>b[1]-a[1])) {
+                const width = (count / maxLoc) * 100;
+                locationHtml += `<div class="location-bar"><div style="width: 120px; flex-shrink: 0; color: var(--text-muted);">${loc}</div><div style="flex: 1; background: #111; border-radius: 6px; overflow: hidden; border: 1px solid var(--border);"><div class="loc-bar-fill" style="width: ${width}%;"></div></div><div style="width: 30px; text-align: right;">${count}</div></div>`;
+            }
+
+            grid.innerHTML = `
+                <div class="stat-card sc-red"><div class="stat-label">Units Down Today</div><div class="stat-val">${unitsDown}</div></div>
+                <div class="stat-card sc-orange"><div class="stat-label">Urgent Repairs</div><div class="stat-val">${urgentCount}</div></div>
+                <div class="stat-card sc-blue"><div class="stat-label">Avg Repair Time (Active)</div><div class="stat-val">${avgRepairTime} <span style="font-size:1rem; color:var(--text-muted)">Days</span></div></div>
+                <div class="stat-card"><div class="stat-label">Inspections Nearing (30d)</div><div class="stat-val" style="color: var(--c-ready);">${inspectionsNearing}</div></div>
+                <div class="chart-container"><div class="stat-label" style="margin-bottom: 1.5rem;">Active Repairs by Current Location</div>${locationHtml || '<div style="color:var(--text-muted); font-size:0.8rem;">No active units with location data.</div>'}</div>
+            `;
+        }
+
+        // --- DATABASE VIEW ---
         function renderDatabase() {
             const tbody = document.getElementById('dbTableBody');
+            if(!tbody) return;
             tbody.innerHTML = '';
             const search = document.getElementById('searchInput').value.toLowerCase();
-            const sortedDB = [...fleetData].sort((a,b) => (a.id || '').localeCompare(b.id || '', undefined, {numeric: true, sensitivity: 'base'}));
+            
+            const vehicleMap = {};
+            
+            fleetData.forEach(v => {
+                const vid = String(v.baseVehicleId || v.id || '').toUpperCase();
+                if (!vid) return;
+                
+                if (!vehicleMap[vid]) {
+                    vehicleMap[vid] = { ...v, activeTickets: 0 }; 
+                }
+                
+                if (v.isTicket === false || v.isBaseVehicle === true) {
+                    vehicleMap[vid].mileage = v.mileage || vehicleMap[vid].mileage;
+                    vehicleMap[vid].lastOilChange = v.lastOilChange || vehicleMap[vid].lastOilChange;
+                    vehicleMap[vid].accidentHistory = v.accidentHistory || vehicleMap[vid].accidentHistory;
+                    vehicleMap[vid].longTermRepairs = v.longTermRepairs || vehicleMap[vid].longTermRepairs;
+                    vehicleMap[vid].docId = v.docId; 
+                    vehicleMap[vid].isTicket = false;
+                }
+                
+                if (v.isTicket && v.shopStatus !== 'Complete' && v.shopStatus !== 'Database Only') {
+                    vehicleMap[vid].shopStatus = v.shopStatus; 
+                    vehicleMap[vid].onTheRoad = v.onTheRoad;
+                    vehicleMap[vid].activeTickets = (vehicleMap[vid].activeTickets || 0) + 1;
+                }
+            });
+
+            const sortedDB = Object.values(vehicleMap).sort((a,b) => String(a.id || '').localeCompare(String(b.id || ''), undefined, {numeric: true, sensitivity: 'base'}));
 
             sortedDB.forEach(v => {
                 if (locationFilter && v.homeLocation !== locationFilter) return;
@@ -1011,7 +1536,12 @@
 
                 const tr = document.createElement('tr');
                 tr.onclick = () => openDbModal(v.docId);
+                
                 let dispStatus = v.onTheRoad ? 'On the road' : (v.shopStatus === 'Database Only' ? 'Inactive / Synced' : v.shopStatus);
+                
+                if (v.activeTickets > 1) {
+                    dispStatus += ` <span style="background:var(--accent); color:#000; padding: 2px 6px; border-radius:10px; font-size:0.6rem; font-weight:bold; margin-left:5px;">${v.activeTickets} TICKETS</span>`;
+                }
 
                 tr.innerHTML = `<td><strong>${v.id || 'N/A'}</strong></td><td><span class="db-badge">${v.vehicleType || 'Unknown'}</span></td><td>${v.homeLocation || '—'}</td><td style="font-family: 'JetBrains Mono';">${v.mileage ? v.mileage.toLocaleString() : '—'}</td><td>${formatDate(v.lastOilChange) || '—'}</td><td><span style="color:var(--text-muted);">${dispStatus || '—'}</span></td>`;
                 tbody.appendChild(tr);
@@ -1040,7 +1570,6 @@
 
         function openModal(mode, id) {
             if (mode === 'add' && currentUserRole === 'viewer') return;
-
             document.getElementById('entryModal').style.display = 'flex';
             document.getElementById('mode').value = mode;
             
@@ -1063,7 +1592,7 @@
                 const v = fleetData.find(v => v.docId === id);
                 if (v) {
                     document.getElementById('targetDocId').value = id;
-                    document.getElementById('vID').value = v.id || '';
+                    document.getElementById('vID').value = v.baseVehicleId || v.id || '';
                     document.getElementById('vType').value = v.vehicleType || '';
                     document.getElementById('vPriority').value = v.priority || 'Normal';
                     document.getElementById('vStatus').value = v.status || 'Operational';
@@ -1079,6 +1608,7 @@
                     document.getElementById('vDate').value = v.date || '';
                     document.getElementById('vInspectionDate').value = v.inspectionDate || '';
                     document.getElementById('vHistory').value = v.history || '';
+                    document.getElementById('vStatusUpdatedAt').value = v.statusUpdatedAt || '';
 
                     const hist = parseHistory(v.history);
                     renderHistoryLog(hist);
@@ -1093,7 +1623,6 @@
         function saveVehicle(e) {
             e.preventDefault();
             if(currentUserRole === 'viewer') return;
-
             const mode = document.getElementById('mode').value, docId = document.getElementById('targetDocId').value, btn = document.getElementById('saveBtn');
             const data = {
                 id: document.getElementById('vID').value.trim(), vehicleType: document.getElementById('vType').value,
@@ -1106,33 +1635,39 @@
                 inspectionDate: document.getElementById('vInspectionDate').value, lastUpdated: new Date().toISOString()
             };
 
+            const oldTime = document.getElementById('vStatusUpdatedAt').value;
+            const oldData = fleetData.find(v => v.docId === docId);
+            if(mode === 'add' || (oldData && oldData.shopStatus !== data.shopStatus)) data.statusUpdatedAt = new Date().toISOString();
+            else data.statusUpdatedAt = oldTime || new Date().toISOString();
+
             let histArr = parseHistory(document.getElementById('vHistory').value);
             let request;
 
             if (mode === 'add') {
-                const existing = fleetData.find(v => (v.id||'').toLowerCase() === data.id.toLowerCase() || v.docId === data.id);
+                const existing = fleetData.find(v => String(v.id||'').toLowerCase() === String(data.id).toLowerCase() || v.docId === data.id);
                 if (existing) {
                     histArr = parseHistory(existing.history);
                     histArr.push(createLogEntry('Ticket Created', 'Moved vehicle to active workboard'));
                     data.history = JSON.stringify(histArr);
+                    data.sortOrder = Date.now(); 
                     request = db.collection('vehicles').doc(existing.docId).update(data);
                 } else {
                     histArr.push(createLogEntry('Created', 'Ticket generated'));
                     data.history = JSON.stringify(histArr);
+                    data.sortOrder = Date.now();
                     request = db.collection('vehicles').doc(data.id).set(data);
                 }
             } else {
-                const old = fleetData.find(v => v.docId === docId);
-                if(old) {
-                    if(old.shopStatus !== data.shopStatus) histArr.push(createLogEntry('Status', `Moved to ${data.shopStatus}`));
-                    if(old.priority !== data.priority) histArr.push(createLogEntry('Priority', `Changed to ${data.priority}`));
-                    if(old.notes !== data.notes && data.notes.length > (old.notes||'').length) histArr.push(createLogEntry('Note', 'Note added/updated'));
+                if(oldData) {
+                    if(oldData.shopStatus !== data.shopStatus) histArr.push(createLogEntry('Status', `Moved to ${data.shopStatus}`));
+                    if(oldData.priority !== data.priority) histArr.push(createLogEntry('Priority', `Changed to ${data.priority}`));
+                    if(oldData.notes !== data.notes && String(data.notes).length > String(oldData.notes||'').length) histArr.push(createLogEntry('Note', 'Note added/updated'));
                 }
                 
                 if (data.id !== docId) {
                     histArr.push(createLogEntry('ID Changed', `Changed ID from ${docId} to ${data.id}`));
                     data.history = JSON.stringify(histArr);
-                    const newData = { ...(old || {}), ...data };
+                    const newData = { ...(oldData || {}), ...data };
                     delete newData.docId;
                     request = db.collection('vehicles').doc(data.id).set(newData).then(() => db.collection('vehicles').doc(docId).delete());
                 } else {
@@ -1154,7 +1689,6 @@
         function openDbModal(id) {
             document.getElementById('dbModal').style.display = 'flex';
             const v = fleetData.find(v => v.docId === id);
-            
             const isViewer = currentUserRole === 'viewer';
             const form = document.querySelector('#dbModal form');
             form.querySelectorAll('input, textarea').forEach(el => el.disabled = isViewer);
@@ -1174,19 +1708,14 @@
         function startRepairFromDb() {
             const docId = document.getElementById('dbTargetDocId').value;
             closeModal('dbModal');
-            openModal('edit', docId);
-            
+            openModal('add'); 
             const statusSelect = document.getElementById('vShopStatus');
-            if (statusSelect.value === 'Database Only' || statusSelect.value === 'Complete') {
-                statusSelect.value = 'Reported';
-            }
-            
+            if (statusSelect.value === 'Database Only' || statusSelect.value === 'Complete') statusSelect.value = 'Reported';
             document.getElementById('vIssue').value = '';
             document.getElementById('vNotes').value = '';
             document.getElementById('vDate').valueAsDate = new Date();
             document.getElementById('vPartsOrdered').value = '';
             document.getElementById('vPartsEta').value = '';
-            
             showToast("Ready to create ticket. Fill in the issue and save.");
             setTimeout(() => document.getElementById('vIssue').focus(), 100);
         }
@@ -1196,21 +1725,19 @@
             if (currentUserRole === 'viewer') return;
             const docId = document.getElementById('dbTargetDocId').value, btn = document.getElementById('dbSaveBtn'), newId = document.getElementById('dbID').value.trim();
             const data = { id: newId, mileage: document.getElementById('dbMileage').value, lastOilChange: document.getElementById('dbOilChange').value, accidentHistory: document.getElementById('dbAccident').value, longTermRepairs: document.getElementById('dbRepairs').value };
-            
             btn.innerText = "Saving..."; btn.disabled = true;
             let request = (newId !== docId) ? db.collection('vehicles').doc(newId).set({ ...(fleetData.find(v => v.docId === docId) || {}), ...data }).then(() => db.collection('vehicles').doc(docId).delete()) : db.collection('vehicles').doc(docId).update(data);
-            
             request.then(() => { btn.innerText = "Save Record"; btn.disabled = false; closeModal('dbModal'); showToast("✓ Database Record Updated"); })
                    .catch(() => { btn.innerText = "Save Record"; btn.disabled = false; showToast("❌ Error updating record"); });
         }
 
-        // --- UTILS ---
         function showToast(msg) { 
             document.querySelectorAll('.toast').forEach(e => e.remove()); 
             const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; 
             document.body.appendChild(t); setTimeout(() => t.remove(), 3000); 
         }
-        document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal('entryModal'); closeModal('dbModal'); closeModal('syncLogModal'); closeModal('userModal'); } });
+        
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal('entryModal'); closeModal('dbModal'); closeModal('syncLogModal'); closeModal('userModal'); closeModal('preferencesModal');} });
     </script>
 </body>
 </html>
