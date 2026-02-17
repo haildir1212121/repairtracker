@@ -118,7 +118,7 @@
 
         .drop-indicator { height: 4px; background: var(--c-shop); border-radius: 2px; margin: 4px 0; box-shadow: 0 0 8px var(--c-shop); transition: all 0.1s; pointer-events: none; }
 
-        /* ===== SLEEK VEHICLE CARDS ===== */
+        /* ===== SLEEK VEHICLE CARDS & SUB TICKETS ===== */
         .vehicle-card { background: var(--bg-card); border: 1px solid transparent; border-left: 3px solid transparent; border-radius: var(--radius-md); padding: 1rem; margin-bottom: 0.8rem; display: flex; flex-direction: column; transition: all var(--transition); cursor: pointer; overflow: hidden; }
         .vehicle-card:hover { background: var(--bg-card-hover); transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.3); border-color: #333;}
         .vehicle-card.dragging { opacity: 0.4; border: 1px dashed #666; transform: scale(0.95); }
@@ -133,10 +133,8 @@
         .vehicle-card.inspect-crit { border-color: rgba(239, 68, 68, 0.8); box-shadow: 0 4px 20px rgba(239, 68, 68, 0.3); }
         .vehicle-card.inspect-crit:hover { border-color: rgba(239, 68, 68, 1); box-shadow: 0 6px 25px rgba(239, 68, 68, 0.4); }
 
-        /* Multi-Select Styles */
         .vehicle-card.selectable { cursor: crosshair; }
         .vehicle-card.selected { border-color: var(--c-shop); background: rgba(96,165,250,0.08); box-shadow: 0 0 0 2px var(--c-shop); transform: translateY(0); }
-        .vehicle-card.selected .card-title { color: var(--c-shop); }
 
         .card-header-main { font-size: 1.15rem; font-weight: 600; display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 0.5rem; pointer-events: none;}
         .card-req-by { font-size: .95rem; font-weight: 600; color:var(--text-main); display: flex; justify-content: space-between; align-items: center; flex: 1;}
@@ -150,8 +148,8 @@
         .card-body-wrapper { display: grid; grid-template-rows: 1fr; transition: grid-template-rows var(--transition); pointer-events: none;}
         .vehicle-card.collapsed .card-body-wrapper { grid-template-rows: 0fr; }
 
-        .card-body { overflow: hidden; display: flex; flex-direction: column; gap: 0.8rem; opacity: 1; padding-top: 0.8rem; transition: opacity 0.2s ease, padding-top var(--transition); }
-        .vehicle-card.collapsed .card-body { opacity: 0; padding-top: 0; }
+        .card-body { overflow: hidden; display: flex; flex-direction: column; gap: 0.8rem; opacity: 1; padding-top: 0.8rem; transition: opacity 0.2s ease, padding-top var(--transition); pointer-events: auto;}
+        .vehicle-card.collapsed .card-body { opacity: 0; padding-top: 0; pointer-events: none; }
 
         .card-title { font-size: 0.9rem; font-weight: 600; color: var(--text-muted); line-height: 1.4; }
         .card-footer-row { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; margin-bottom: 0.5rem; }
@@ -162,7 +160,7 @@
         .progress-seg.active { background: var(--accent); box-shadow: 0 0 5px var(--accent); }
         .progress-seg.active-warn { background: var(--c-parts); }
 
-        /* SUB TICKETS */
+        /* Sub Tickets */
         .sub-ticket { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.03); border-left: 3px solid var(--border); padding: 0.6rem; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s; pointer-events: auto;}
         .sub-ticket:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
         .sub-ticket.st-urgent { border-left-color: var(--c-urgent); }
@@ -804,10 +802,14 @@
         // --- DATA ---
         function loadData() {
             db.collection('vehicles').onSnapshot(snap => {
-                fleetData = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
-                renderSidebarLocations();
-                updateDatalist();
-                renderCurrentView();
+                try {
+                    fleetData = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
+                    renderSidebarLocations();
+                    updateDatalist();
+                    renderCurrentView();
+                } catch (e) {
+                    console.error("Board rendering paused: waiting for data sync.");
+                }
             });
         }
 
@@ -820,7 +822,7 @@
 
         document.getElementById('vID').addEventListener('input', function(e) {
             if(document.getElementById('mode').value === 'add') {
-                const existing = fleetData.find(v => String(v.id||'').toLowerCase() === String(e.target.value).toLowerCase());
+                const existing = fleetData.find(v => String(v.id||'').toLowerCase() === String(e.target.value).toLowerCase() && !v.isTicket);
                 if(existing) {
                     if(existing.vehicleType) document.getElementById('vType').value = existing.vehicleType;
                     if(existing.homeLocation) document.getElementById('vHomeLocation').value = existing.homeLocation;
@@ -943,7 +945,6 @@
             let updateCount = 0, skipCount = 0, createdCount = 0, noMeterCount = 0, updatePromises = [];
 
             try {
-                // 1. SYNC VEHICLES & MILEAGE
                 const vehResponse = await fetch('https://secure.fleetio.com/api/v1/vehicles?per_page=100', {
                     method: 'GET', headers: { 'Authorization': `Token token="${FLEETIO_API_KEY}"`, 'Account-Token': FLEETIO_ACCOUNT_TOKEN, 'Content-Type': 'application/json', 'Accept': 'application/json' }
                 });
@@ -980,7 +981,6 @@
                     }
                 });
                 
-                // 2. SYNC ISSUES
                 btn.innerHTML = "⏳ Syncing Issues...";
                 const issueResponse = await fetch('https://secure.fleetio.com/api/v1/issues?per_page=100', {
                     method: 'GET', headers: { 'Authorization': `Token token="${FLEETIO_API_KEY}"`, 'Account-Token': FLEETIO_ACCOUNT_TOKEN, 'Content-Type': 'application/json', 'Accept': 'application/json' }
@@ -990,15 +990,13 @@
                 const fleetioIssueRes = await issueResponse.json();
                 let fleetioIssues = Array.isArray(fleetioIssueRes) ? fleetioIssueRes : (fleetioIssueRes.records || fleetioIssueRes.data || []);
                 
-                // Filter only open/reported issues
                 fleetioIssues = fleetioIssues.filter(i => String(i.state).toLowerCase() === 'open' || !i.resolved_at);
-                
                 logbook.push(`\n📡 Fetched ${fleetioIssues.length} open issues from Fleetio API.`);
 
                 fleetioIssues.forEach(fIssue => {
                     const existingTicket = fleetData.find(v => v.fleetioIssueId == fIssue.id);
-                    const vehicleName = String(fIssue.vehicle_name || '').replace(/[^0-9]/g, '') || fIssue.vehicle_name;
-                    const issueText = fIssue.title + (fIssue.description ? ` - ${fIssue.description}` : '');
+                    const vehicleName = String(fIssue.vehicle_name || '').replace(/[^0-9]/g, '') || String(fIssue.vehicle_name || '');
+                    const issueText = String(fIssue.title || '') + (fIssue.description ? ` - ${fIssue.description}` : '');
                     
                     let prio = "Normal";
                     if(fIssue.priority) {
@@ -1103,17 +1101,33 @@
             });
         }
 
+        function getClosestCard(container, y) {
+            const draggableElements = [...container.querySelectorAll('.vehicle-card:not(.dragging)')];
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+
         function getAgeTags(v) {
             let tags = [];
             const today = new Date();
             today.setHours(0,0,0,0);
             
             if (v.date && !v.onTheRoad && v.shopStatus !== 'Database Only' && v.shopStatus !== 'Complete') {
-                const inDate = new Date(v.date);
-                const totalDays = Math.max(0, Math.floor((today - inDate) / 864e5));
-                const statusDate = new Date(v.statusUpdatedAt || v.lastUpdated || v.date || Date.now());
-                const colDays = Math.max(0, Math.floor((today - statusDate) / 864e5));
-                tags.push(`⏳ ${totalDays}d total • ${colDays}d here`);
+                const inDate = new Date(v.date).getTime();
+                if(!isNaN(inDate)) {
+                    const totalDays = Math.max(0, Math.floor((today.getTime() - inDate) / 864e5));
+                    const statusDateRaw = new Date(v.statusUpdatedAt || v.lastUpdated || v.date || Date.now()).getTime();
+                    const statusDate = isNaN(statusDateRaw) ? inDate : statusDateRaw;
+                    const colDays = Math.max(0, Math.floor((today.getTime() - statusDate) / 864e5));
+                    tags.push(`⏳ ${totalDays}d total • ${colDays}d here`);
+                }
             }
             return tags.length ? `<span class="card-meta-tag">${tags.join('')}</span>` : '';
         }
@@ -1122,7 +1136,7 @@
             ['road', 'complaints', 'ready', 'progress'].forEach(c => { const el = document.getElementById(`col-${c}`); if(el) el.innerHTML = ''; const countEl = document.getElementById(`count-${c}`); if(countEl) countEl.innerText = '0'; });
             const search = String(document.getElementById('searchInput').value).toLowerCase();
             
-            const groupsRaw = { road: {}, complaints: {}, ready: {}, progress: {} };
+            const columnsRaw = { road: {}, complaints: {}, ready: {}, progress: {} };
             
             fleetData.forEach(v => {
                 if (locationFilter && v.homeLocation !== locationFilter) return;
@@ -1137,21 +1151,21 @@
                 if (colId) {
                     if (v.isTicket !== false) {
                         const vid = String(v.baseVehicleId || v.id || 'Unknown').toUpperCase();
-                        if (!groupsRaw[colId][vid]) groupsRaw[colId][vid] = [];
-                        groupsRaw[colId][vid].push(v);
+                        if (!columnsRaw[colId][vid]) columnsRaw[colId][vid] = [];
+                        columnsRaw[colId][vid].push(v);
                     } else if (v.isTicket === false && v.shopStatus !== 'Database Only') {
                         const vid = String(v.id || 'Unknown').toUpperCase();
-                        if (!groupsRaw[colId][vid]) groupsRaw[colId][vid] = [];
-                        groupsRaw[colId][vid].push(v);
+                        if (!columnsRaw[colId][vid]) columnsRaw[colId][vid] = [];
+                        columnsRaw[colId][vid].push(v);
                     }
                 }
             });
 
-            const groups = { road: [], complaints: [], ready: [], progress: [] };
-
-            Object.keys(groupsRaw).forEach(colId => {
-                Object.keys(groupsRaw[colId]).forEach(vid => {
-                    const tickets = groupsRaw[colId][vid];
+            const columns = { road: [], complaints: [], ready: [], progress: [] };
+            
+            Object.keys(columnsRaw).forEach(colId => {
+                Object.keys(columnsRaw[colId]).forEach(vid => {
+                    const tickets = columnsRaw[colId][vid];
                     
                     let highestPrio = 'Normal';
                     let latestDate = 0;
@@ -1162,28 +1176,29 @@
                         const pLevels = { 'Urgent': 4, 'High': 3, 'Oil Change / Bulb Replacement': 2, 'Normal': 1 };
                         if ((pLevels[t.priority] || 1) > (pLevels[highestPrio] || 1)) highestPrio = t.priority;
                         const tDate = new Date(t.lastUpdated || 0).getTime();
-                        if (tDate > latestDate) latestDate = tDate;
+                        if (!isNaN(tDate) && tDate > latestDate) latestDate = tDate;
                         if (t.inspectionDate) {
                             const insD = new Date(t.inspectionDate).getTime();
-                            if (insD < minInsp) minInsp = insD;
+                            if (!isNaN(insD) && insD < minInsp) minInsp = insD;
                         }
-                        if (t.sortOrder > maxOrder) maxOrder = t.sortOrder;
+                        const order = parseFloat(t.sortOrder) || 0;
+                        if (order > maxOrder) maxOrder = order;
                     });
 
-                    groups[colId].push({
+                    columns[colId].push({
                         vid, displayTickets: tickets, highestPrio, latestDate, minInsp, maxOrder,
-                        vehicleType: tickets[0].vehicleType, homeLocation: tickets[0].homeLocation,
-                        mileage: tickets[0].mileage, shopStatus: tickets[0].shopStatus, requestedBy: tickets[0].requestedBy,
+                        vehicleType: tickets[0].vehicleType || '', homeLocation: tickets[0].homeLocation || '',
+                        mileage: tickets[0].mileage || '', shopStatus: tickets[0].shopStatus || 'Reported', requestedBy: tickets[0].requestedBy || 'U',
                         inspectionDate: minInsp !== 9999999999999 ? new Date(minInsp).toISOString() : null
                     });
                 });
             });
 
-            Object.keys(groups).forEach(colId => {
-                groups[colId].sort((a, b) => {
+            Object.keys(columns).forEach(colId => {
+                columns[colId].sort((a, b) => {
                     if (colId === 'road' && activeSort !== 'freeform') return a.minInsp - b.minInsp;
                     else {
-                        if (activeSort === 'id') return a.vid.localeCompare(b.vid, undefined, {numeric: true, sensitivity: 'base'});
+                        if (activeSort === 'id') return String(a.vid).localeCompare(String(b.vid), undefined, {numeric: true, sensitivity: 'base'});
                         if (activeSort === 'freeform') return a.maxOrder - b.maxOrder;
                         if (activeSort === 'priority') {
                             const pL = { 'Urgent': 4, 'High': 3, 'Oil Change / Bulb Replacement': 2, 'Normal': 1 };
@@ -1197,8 +1212,8 @@
 
             const CHEV_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
 
-            Object.keys(groups).forEach(colId => {
-                groups[colId].forEach(g => {
+            Object.keys(columns).forEach(colId => {
+                columns[colId].forEach(g => {
                     const { vid, displayTickets, highestPrio, minInsp, vehicleType, homeLocation, mileage, shopStatus, requestedBy, inspectionDate } = g;
                     
                     const isCollapsed = collapsedCards.has(vid) ? 'collapsed' : '';
@@ -1318,27 +1333,8 @@
                     const targetCol = document.getElementById(`col-${colId}`);
                     if(targetCol) targetCol.appendChild(card);
                 });
-                if (document.getElementById(`count-${colId}`)) document.getElementById(`count-${colId}`).innerText = groups[colId].length;
+                if (document.getElementById(`count-${colId}`)) document.getElementById(`count-${colId}`).innerText = columns[colId].length;
             });
-        }
-
-        function getClosestCard(container, y) {
-            const draggableElements = [...container.querySelectorAll('.vehicle-card:not(.dragging)')];
-            return draggableElements.reduce((closest, child) => {
-                const box = child.getBoundingClientRect();
-                const offset = y - box.top - box.height / 2;
-                if (offset < 0 && offset > closest.offset) {
-                    return { offset: offset, element: child };
-                } else {
-                    return closest;
-                }
-            }, { offset: Number.NEGATIVE_INFINITY }).element;
-        }
-
-        let currentIndicator = null;
-        function clearDragIndicator() {
-            if(currentIndicator) { currentIndicator.remove(); currentIndicator = null; }
-            document.querySelectorAll('.drag-over-column').forEach(el => el.classList.remove('drag-over-column'));
         }
 
         function setupDragAndDrop() {
@@ -1463,9 +1459,11 @@
                 if(v.priority === 'Urgent') urgentCount++;
                 
                 if(v.date && !v.onTheRoad) {
-                    const dIn = new Date(v.date);
-                    const days = Math.floor((today - dIn) / 864e5);
-                    if(days >= 0) { totalRepairDays += days; activeRepairsCount++; }
+                    const inDate = new Date(v.date).getTime();
+                    if(!isNaN(inDate)) {
+                        const days = Math.floor((today.getTime() - inDate) / 864e5);
+                        if(days >= 0) { totalRepairDays += days; activeRepairsCount++; }
+                    }
                 }
 
                 if(v.inspectionDate) {
@@ -1500,7 +1498,7 @@
             const tbody = document.getElementById('dbTableBody');
             if(!tbody) return;
             tbody.innerHTML = '';
-            const search = document.getElementById('searchInput').value.toLowerCase();
+            const search = String(document.getElementById('searchInput').value).toLowerCase();
             
             const vehicleMap = {};
             
@@ -1664,7 +1662,7 @@
                     if(oldData.notes !== data.notes && String(data.notes).length > String(oldData.notes||'').length) histArr.push(createLogEntry('Note', 'Note added/updated'));
                 }
                 
-                if (data.id !== docId) {
+                if (oldData && oldData.isTicket === false && data.id !== docId) {
                     histArr.push(createLogEntry('ID Changed', `Changed ID from ${docId} to ${data.id}`));
                     data.history = JSON.stringify(histArr);
                     const newData = { ...(oldData || {}), ...data };
@@ -1672,6 +1670,7 @@
                     request = db.collection('vehicles').doc(data.id).set(newData).then(() => db.collection('vehicles').doc(docId).delete());
                 } else {
                     data.history = JSON.stringify(histArr);
+                    if(data.isTicket) data.baseVehicleId = data.id;
                     request = db.collection('vehicles').doc(docId).update(data);
                 }
             }
