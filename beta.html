@@ -133,6 +133,7 @@
         .vehicle-card.inspect-crit { border-color: rgba(239, 68, 68, 0.8); box-shadow: 0 4px 20px rgba(239, 68, 68, 0.3); }
         .vehicle-card.inspect-crit:hover { border-color: rgba(239, 68, 68, 1); box-shadow: 0 6px 25px rgba(239, 68, 68, 0.4); }
 
+        /* Multi-Select Styles */
         .vehicle-card.selectable { cursor: crosshair; }
         .vehicle-card.selected { border-color: var(--c-shop); background: rgba(96,165,250,0.08); box-shadow: 0 0 0 2px var(--c-shop); transform: translateY(0); }
 
@@ -448,11 +449,6 @@
                 <input type="hidden" id="vHistory">
                 <input type="hidden" id="vStatusUpdatedAt">
                 
-                <div class="form-group" style="background: rgba(255,255,255,0.03); padding: 0.8rem; border-radius: 6px;">
-                    <label style="color: var(--text-main);">Who are you? (For Logs)</label>
-                    <input type="text" id="currentUser" placeholder="Enter your name..." required>
-                </div>
-
                 <div class="form-row">
                     <div class="form-group">
                         <label>Vehicle ID</label>
@@ -1337,6 +1333,13 @@
             });
         }
 
+        // --- SECURE DRAG ENGINE ---
+        let currentIndicator = null;
+        function clearDragIndicator() {
+            if(currentIndicator) { currentIndicator.remove(); currentIndicator = null; }
+            document.querySelectorAll('.drag-over-column').forEach(el => el.classList.remove('drag-over-column'));
+        }
+
         function setupDragAndDrop() {
             document.querySelectorAll('.kanban-column').forEach(col => {
                 const content = col.querySelector('.column-content');
@@ -1428,6 +1431,7 @@
                         } else if (nextOrder !== null) {
                             newOrder = nextOrder - 10000;
                         }
+                        
                         changes.sortOrder = newOrder;
                     }
 
@@ -1498,7 +1502,7 @@
             const tbody = document.getElementById('dbTableBody');
             if(!tbody) return;
             tbody.innerHTML = '';
-            const search = String(document.getElementById('searchInput').value).toLowerCase();
+            const search = document.getElementById('searchInput').value.toLowerCase();
             
             const vehicleMap = {};
             
@@ -1550,7 +1554,7 @@
         function togglePartsFields() { document.getElementById('partsSection').style.display = (document.getElementById('vShopStatus').value === "Awaiting part order") ? "block" : "none"; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
         
-        function getUsername() { return document.getElementById('currentUser') ? document.getElementById('currentUser').value.trim() || "User" : "User"; }
+        function getUsername() { return auth.currentUser ? auth.currentUser.email.split('@')[0] : "System"; }
         function createLogEntry(action, desc) { return { ts: Date.now(), user: getUsername(), action, desc }; }
         function parseHistory(j) { try { return j ? JSON.parse(j) : []; } catch(e) { return []; } }
         function renderHistoryLog(arr) {
