@@ -313,17 +313,55 @@
         .card-layout-zone + .card-layout-zone { border-left: 1px solid var(--border); }
 
         .zone-label-strip {
-            writing-mode: horizontal-tb; padding: 0.4rem 0.6rem;
-            font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
-            letter-spacing: 0.5px; color: #555; background: rgba(0,0,0,0.25);
-            border-right: 1px solid var(--border); display: flex;
-            align-items: center; justify-content: center; min-width: 80px; flex-shrink: 0;
+            padding: 0.5rem 0.6rem; background: rgba(0,0,0,0.25);
+            border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; align-items: flex-start;
+            justify-content: flex-start; min-width: 120px; flex-shrink: 0; gap: 0.4rem;
         }
+        .zone-strip-name {
+            font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.5px; color: #555; white-space: nowrap;
+        }
+        .zone-flex-controls { display: flex; flex-direction: column; gap: 3px; width: 100%; }
+        .zone-flex-row { display: flex; gap: 2px; flex-wrap: wrap; }
+        .zone-ctrl {
+            font-size: 0.68rem; padding: 2px 5px; background: transparent;
+            border: 1px solid var(--border); border-radius: 3px; color: var(--text-muted);
+            cursor: pointer; transition: all 0.1s; line-height: 1.3; font-family: 'JetBrains Mono', monospace;
+        }
+        .zone-ctrl:hover { color: var(--text-main); border-color: #555; background: rgba(255,255,255,0.05); }
+        .zone-ctrl.active { background: var(--accent); color: #000 !important; border-color: var(--accent); font-weight: 700; }
+
         .zone-drop-hint {
             font-size: 0.7rem; color: #444; pointer-events: none;
             position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
             white-space: nowrap;
         }
+
+        /* Chip in zone — extended with font config row */
+        .layout-field-chip.in-zone {
+            flex-direction: column; align-items: stretch; padding: 0; gap: 0;
+            white-space: normal; cursor: default;
+        }
+        .in-zone .chip-top {
+            display: flex; align-items: center; gap: 0.5rem;
+            padding: 0.4rem 0.6rem; cursor: grab;
+        }
+        .in-zone .chip-top:active { cursor: grabbing; }
+        .chip-cfg-row {
+            display: flex; align-items: center; gap: 4px; padding: 0.3rem 0.6rem;
+            background: rgba(0,0,0,0.2); border-top: 1px solid var(--border); flex-wrap: wrap;
+        }
+        .chip-cfg-group { display: flex; gap: 2px; }
+        .chip-cfg-sep { width: 1px; height: 14px; background: var(--border); margin: 0 2px; flex-shrink: 0; }
+        .chip-cfg-btn {
+            font-size: 0.6rem; padding: 2px 5px; background: transparent;
+            border: 1px solid var(--border); border-radius: 3px;
+            color: var(--text-muted); cursor: pointer; transition: all 0.1s;
+            font-family: 'JetBrains Mono', monospace; font-weight: 600; line-height: 1.3;
+        }
+        .chip-cfg-btn:hover { color: var(--text-main); border-color: #555; }
+        .chip-cfg-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
     </style>
 </head>
 <body>
@@ -717,12 +755,12 @@
 
                         <!-- HEADER ROW: splits into left + right -->
                         <div class="card-zone-section">
-                            <div class="zone-label-strip">Header Left</div>
+                            <div class="zone-label-strip" id="cls-header-left">Header Left</div>
                             <div class="card-layout-zone" id="clz-header-left" data-zone="header-left"
                                  ondragover="cleDragOver(event,this)" ondragleave="cleDragLeave(event,this)" ondrop="cleDropToZone(event,'header-left')">
                                 <span class="zone-drop-hint">vehicle #, type…</span>
                             </div>
-                            <div class="zone-label-strip" style="border-left:1px solid var(--border); border-right:none;">Header Right</div>
+                            <div class="zone-label-strip" id="cls-header-right" style="border-left:1px solid var(--border); border-right:none;">Header Right</div>
                             <div class="card-layout-zone" id="clz-header-right" data-zone="header-right"
                                  ondragover="cleDragOver(event,this)" ondragleave="cleDragLeave(event,this)" ondrop="cleDropToZone(event,'header-right')">
                                 <span class="zone-drop-hint">avatar, badge…</span>
@@ -731,7 +769,7 @@
 
                         <!-- ROW 1 -->
                         <div class="card-zone-section">
-                            <div class="zone-label-strip">Row 1</div>
+                            <div class="zone-label-strip" id="cls-row-1">Row 1</div>
                             <div class="card-layout-zone" id="clz-row-1" data-zone="row-1"
                                  ondragover="cleDragOver(event,this)" ondragleave="cleDragLeave(event,this)" ondrop="cleDropToZone(event,'row-1')">
                                 <span class="zone-drop-hint">location, mileage…</span>
@@ -740,7 +778,7 @@
 
                         <!-- ROW 2 -->
                         <div class="card-zone-section">
-                            <div class="zone-label-strip">Row 2</div>
+                            <div class="zone-label-strip" id="cls-row-2">Row 2</div>
                             <div class="card-layout-zone" id="clz-row-2" data-zone="row-2"
                                  ondragover="cleDragOver(event,this)" ondragleave="cleDragLeave(event,this)" ondrop="cleDropToZone(event,'row-2')">
                                 <span class="zone-drop-hint">inspection, status…</span>
@@ -749,7 +787,7 @@
 
                         <!-- TICKETS ZONE -->
                         <div class="card-zone-section">
-                            <div class="zone-label-strip">Tickets</div>
+                            <div class="zone-label-strip" id="cls-tickets">Tickets</div>
                             <div class="card-layout-zone" id="clz-tickets" data-zone="tickets"
                                  style="min-height:64px;"
                                  ondragover="cleDragOver(event,this)" ondragleave="cleDragLeave(event,this)" ondrop="cleDropToZone(event,'tickets')">
@@ -759,7 +797,7 @@
 
                         <!-- FOOTER -->
                         <div class="card-zone-section" style="border-bottom:none;">
-                            <div class="zone-label-strip">Footer</div>
+                            <div class="zone-label-strip" id="cls-footer">Footer</div>
                             <div class="card-layout-zone" id="clz-footer" data-zone="footer"
                                  ondragover="cleDragOver(event,this)" ondragleave="cleDragLeave(event,this)" ondrop="cleDropToZone(event,'footer')">
                                 <span class="zone-drop-hint">progress bar…</span>
@@ -1150,22 +1188,139 @@
         // ===== CARD LAYOUT EDITOR =====
 
         // Render a field chip element (draggable tag shown in palette or zones)
-        function cleCreateChip(fieldId) {
+        // Get current field config (fontSize key, fontWeight key)
+        function cleGetFieldCfg(fieldId) {
+            const layout = userPrefs.cardLayout || {};
+            const saved = (layout.fieldConfig || {})[fieldId];
+            const dflt  = DEFAULT_FIELD_CONFIG[fieldId] || { fontSize: 'md', fontWeight: 'normal' };
+            return Object.assign({}, dflt, saved);
+        }
+
+        // Get current zone flex config
+        function cleGetZoneCfg(zoneId) {
+            const layout = userPrefs.cardLayout || {};
+            const saved  = (layout.zoneConfig || {})[zoneId];
+            const dflt   = DEFAULT_ZONE_CONFIG[zoneId] || { flexDir: 'row', justify: 'flex-start', align: 'center', wrap: 'wrap' };
+            return Object.assign({}, dflt, saved);
+        }
+
+        // Build a chip — palette chips are simple; zone chips include the font-config row
+        function cleCreateChip(fieldId, inZone = false) {
             const field = CARD_FIELD_REGISTRY[fieldId];
             if (!field) return null;
+
             const chip = document.createElement('div');
-            chip.className = 'layout-field-chip';
+            chip.className = 'layout-field-chip' + (inZone ? ' in-zone' : '');
             chip.draggable = true;
             chip.dataset.fieldId = fieldId;
-            chip.innerHTML = `<span class="chip-icon">${field.icon}</span><span>${field.label}</span><span class="chip-remove" title="Remove" onclick="cleRemoveChip(event,'${fieldId}')">✕</span>`;
-            chip.ondragstart = (e) => {
-                e.dataTransfer.setData('cle-fieldId', fieldId);
-                const zone = chip.closest('.card-layout-zone');
-                e.dataTransfer.setData('cle-source', zone ? zone.dataset.zone : 'palette');
-                setTimeout(() => chip.classList.add('dragging'), 0);
-            };
+
+            if (inZone) {
+                const cfg = cleGetFieldCfg(fieldId);
+                const sizes = ['xs','sm','md','lg','xl'];
+                const weights = ['normal','semibold','bold'];
+                const szBtns = sizes.map(s =>
+                    `<button class="chip-cfg-btn${cfg.fontSize===s?' active':''}" onclick="cleSetFieldProp(event,'${fieldId}','fontSize','${s}')">${s.toUpperCase()}</button>`
+                ).join('');
+                const wtBtns = weights.map(w =>
+                    `<button class="chip-cfg-btn${cfg.fontWeight===w?' active':''}" onclick="cleSetFieldProp(event,'${fieldId}','fontWeight','${w}')">${w==='normal'?'N':w==='semibold'?'SB':'B'}</button>`
+                ).join('');
+
+                chip.innerHTML = `
+                    <div class="chip-top">
+                        <span class="chip-icon">${field.icon}</span>
+                        <span style="flex:1; font-size:0.8rem;">${field.label}</span>
+                        <span class="chip-remove" title="Remove to palette" onclick="cleRemoveChip(event,'${fieldId}')">✕</span>
+                    </div>
+                    <div class="chip-cfg-row">
+                        <div class="chip-cfg-group">${szBtns}</div>
+                        <div class="chip-cfg-sep"></div>
+                        <div class="chip-cfg-group">${wtBtns}</div>
+                    </div>`;
+
+                // Only the chip-top row initiates drag
+                chip.querySelector('.chip-top').ondragstart = (e) => {
+                    e.stopPropagation();
+                    e.dataTransfer.setData('cle-fieldId', fieldId);
+                    const zone = chip.closest('.card-layout-zone');
+                    e.dataTransfer.setData('cle-source', zone ? zone.dataset.zone : 'palette');
+                    setTimeout(() => chip.classList.add('dragging'), 0);
+                };
+                chip.draggable = false; // disable on wrapper; enable only on chip-top
+                chip.querySelector('.chip-top').draggable = true;
+            } else {
+                chip.innerHTML = `<span class="chip-icon">${field.icon}</span><span style="font-size:0.8rem;">${field.label}</span><span class="chip-remove" title="Remove" onclick="cleRemoveChip(event,'${fieldId}')">✕</span>`;
+                chip.ondragstart = (e) => {
+                    e.dataTransfer.setData('cle-fieldId', fieldId);
+                    e.dataTransfer.setData('cle-source', 'palette');
+                    setTimeout(() => chip.classList.add('dragging'), 0);
+                };
+            }
+
             chip.ondragend = () => chip.classList.remove('dragging');
             return chip;
+        }
+
+        // Update a field's fontSize or fontWeight, refresh chip buttons
+        function cleSetFieldProp(event, fieldId, prop, val) {
+            event.stopPropagation();
+            if (!userPrefs.cardLayout) userPrefs.cardLayout = JSON.parse(JSON.stringify(DEFAULT_CARD_LAYOUT));
+            if (!userPrefs.cardLayout.fieldConfig) userPrefs.cardLayout.fieldConfig = {};
+            if (!userPrefs.cardLayout.fieldConfig[fieldId]) userPrefs.cardLayout.fieldConfig[fieldId] = cleGetFieldCfg(fieldId);
+            userPrefs.cardLayout.fieldConfig[fieldId][prop] = val;
+
+            // Refresh only the buttons in this chip
+            const chip = event.target.closest('.layout-field-chip');
+            if (!chip) return;
+            chip.querySelectorAll('.chip-cfg-btn').forEach(btn => {
+                const btnProp = btn.closest('.chip-cfg-group') === btn.closest('.chip-cfg-row').querySelector('.chip-cfg-group:first-child') ? 'fontSize' : 'fontWeight';
+                const btnVal  = btn.textContent === 'N' ? 'normal' : btn.textContent === 'SB' ? 'semibold' : btn.textContent === 'B' ? 'bold' : btn.textContent.toLowerCase();
+                btn.classList.toggle('active', btnProp === prop ? btnVal === val : btnVal === cleGetFieldCfg(fieldId)[btnProp]);
+            });
+        }
+
+        // Update a zone's flex prop (flexDir, justify, align, wrap), refresh its zone-strip buttons
+        function cleSetZoneProp(event, zoneId, prop, val) {
+            event.stopPropagation();
+            if (!userPrefs.cardLayout) userPrefs.cardLayout = JSON.parse(JSON.stringify(DEFAULT_CARD_LAYOUT));
+            if (!userPrefs.cardLayout.zoneConfig) userPrefs.cardLayout.zoneConfig = {};
+            if (!userPrefs.cardLayout.zoneConfig[zoneId]) userPrefs.cardLayout.zoneConfig[zoneId] = cleGetZoneCfg(zoneId);
+            userPrefs.cardLayout.zoneConfig[zoneId][prop] = val;
+            cleRefreshZoneStrip(zoneId);
+        }
+
+        // Rebuild zone-label-strip contents for one zone (name + flex control buttons with active states)
+        function cleRefreshZoneStrip(zoneId) {
+            const strip = document.getElementById(`cls-${zoneId}`);
+            if (!strip) return;
+            const cfg = cleGetZoneCfg(zoneId);
+            const zoneName = { 'header-left':'Header Left','header-right':'Header Right','row-1':'Row 1','row-2':'Row 2','tickets':'Tickets','footer':'Footer' }[zoneId] || zoneId;
+
+            const dir = [
+                `<button class="zone-ctrl${cfg.flexDir==='row'?' active':''}" onclick="cleSetZoneProp(event,'${zoneId}','flexDir','row')" title="Row (→)">⇄</button>`,
+                `<button class="zone-ctrl${cfg.flexDir==='column'?' active':''}" onclick="cleSetZoneProp(event,'${zoneId}','flexDir','column')" title="Column (↓)">⇅</button>`
+            ].join('');
+
+            const just = [
+                {v:'flex-start', l:'⊣', t:'Start'},{v:'center', l:'⊡', t:'Center'},
+                {v:'flex-end', l:'⊢', t:'End'},{v:'space-between', l:'⟺', t:'Spread'}
+            ].map(o => `<button class="zone-ctrl${cfg.justify===o.v?' active':''}" onclick="cleSetZoneProp(event,'${zoneId}','justify','${o.v}')" title="${o.t}">${o.l}</button>`).join('');
+
+            const aln = [
+                {v:'flex-start', l:'⌅', t:'Align start'},{v:'center', l:'⊕', t:'Align center'},
+                {v:'flex-end', l:'⌆', t:'Align end'},{v:'stretch', l:'⟷', t:'Stretch'}
+            ].map(o => `<button class="zone-ctrl${cfg.align===o.v?' active':''}" onclick="cleSetZoneProp(event,'${zoneId}','align','${o.v}')" title="${o.t}">${o.l}</button>`).join('');
+
+            const wrp = `<button class="zone-ctrl${cfg.wrap==='wrap'?' active':''}" onclick="cleSetZoneProp(event,'${zoneId}','wrap','wrap')" title="Wrap">↵</button>` +
+                        `<button class="zone-ctrl${cfg.wrap==='nowrap'?' active':''}" onclick="cleSetZoneProp(event,'${zoneId}','wrap','nowrap')" title="No wrap">—</button>`;
+
+            strip.innerHTML = `
+                <span class="zone-strip-name">${zoneName}</span>
+                <div class="zone-flex-controls">
+                    <div class="zone-flex-row">${dir}</div>
+                    <div class="zone-flex-row">${just}</div>
+                    <div class="zone-flex-row">${aln}</div>
+                    <div class="zone-flex-row">${wrp}</div>
+                </div>`;
         }
 
         // Remove a chip from a zone (sends it back to palette)
@@ -1213,12 +1368,12 @@
                 if (srcEl) { const old = srcEl.querySelector(`[data-field-id="${fieldId}"]`); if (old) old.remove(); }
             }
 
-            // Add new chip to target zone
-            if (zoneEl) zoneEl.appendChild(cleCreateChip(fieldId));
+            // Add new chip to target zone (with in-zone config row)
+            if (zoneEl) zoneEl.appendChild(cleCreateChip(fieldId, true));
             cleRefreshPaletteHint();
         }
 
-        // Drop back to palette
+        // Drop back to palette (palette chips are simple — no config row)
         function cleDropToPalette(e) {
             e.preventDefault();
             const palette = document.getElementById('cardFieldPalette');
@@ -1232,7 +1387,7 @@
             if (srcEl) { const old = srcEl.querySelector(`[data-field-id="${fieldId}"]`); if (old) old.remove(); }
 
             if (!palette.querySelector(`[data-field-id="${fieldId}"]`)) {
-                palette.appendChild(cleCreateChip(fieldId));
+                palette.appendChild(cleCreateChip(fieldId, false));
             }
             cleRefreshPaletteHint();
         }
@@ -1251,31 +1406,35 @@
         const CLE_ZONES = ['header-left', 'header-right', 'row-1', 'row-2', 'tickets', 'footer'];
 
         function openCardLayoutEditor() {
-            const layout = userPrefs.cardLayout || DEFAULT_CARD_LAYOUT;
+            // Ensure userPrefs.cardLayout exists
+            if (!userPrefs.cardLayout) userPrefs.cardLayout = JSON.parse(JSON.stringify(DEFAULT_CARD_LAYOUT));
+            const layout = userPrefs.cardLayout;
 
-            // Clear all zones
-            CLE_ZONES.forEach(z => { const el = document.getElementById(`clz-${z}`); if (el) el.innerHTML = ''; });
+            // Inject zone flex controls into each label strip and clear zones
+            CLE_ZONES.forEach(z => {
+                cleRefreshZoneStrip(z);
+                const el = document.getElementById(`clz-${z}`);
+                if (el) el.innerHTML = '';
+            });
 
-            // Track placed fields
+            // Populate zones with in-zone chips (with config rows)
             const placed = new Set();
-
-            // Populate zones
             CLE_ZONES.forEach(z => {
                 const el = document.getElementById(`clz-${z}`);
                 const fieldIds = (layout.zones && layout.zones[z]) || [];
                 fieldIds.forEach(fId => {
                     if (CARD_FIELD_REGISTRY[fId] && el) {
-                        el.appendChild(cleCreateChip(fId));
+                        el.appendChild(cleCreateChip(fId, true));
                         placed.add(fId);
                     }
                 });
             });
 
-            // Populate palette with unplaced fields
+            // Populate palette with unplaced fields (simple chips)
             const palette = document.getElementById('cardFieldPalette');
             palette.innerHTML = '';
             Object.keys(CARD_FIELD_REGISTRY).forEach(fId => {
-                if (!placed.has(fId)) palette.appendChild(cleCreateChip(fId));
+                if (!placed.has(fId)) palette.appendChild(cleCreateChip(fId, false));
             });
             cleRefreshPaletteHint();
 
@@ -1284,43 +1443,66 @@
 
         function resetCardLayout() {
             userPrefs.cardLayout = JSON.parse(JSON.stringify(DEFAULT_CARD_LAYOUT));
+            userPrefs.cardLayout.fieldConfig = JSON.parse(JSON.stringify(DEFAULT_FIELD_CONFIG));
+            userPrefs.cardLayout.zoneConfig  = JSON.parse(JSON.stringify(DEFAULT_ZONE_CONFIG));
             openCardLayoutEditor();
             showToast('↺ Layout reset to defaults');
         }
 
         function saveCardLayout() {
-            const layout = { zones: {} };
+            if (!userPrefs.cardLayout) userPrefs.cardLayout = {};
+
+            // Collect zone field order
+            const zones = {};
             CLE_ZONES.forEach(z => {
                 const el = document.getElementById(`clz-${z}`);
-                if (el) {
-                    layout.zones[z] = Array.from(el.querySelectorAll('.layout-field-chip')).map(c => c.dataset.fieldId);
-                }
+                if (el) zones[z] = Array.from(el.querySelectorAll('.layout-field-chip')).map(c => c.dataset.fieldId);
             });
-            userPrefs.cardLayout = layout;
+            userPrefs.cardLayout.zones = zones;
+
+            // fieldConfig and zoneConfig are already live in userPrefs.cardLayout
+            // (updated immediately by cleSetFieldProp / cleSetZoneProp)
             if (currentUserId) localStorage.setItem(`dlx_prefs_${currentUserId}`, JSON.stringify(userPrefs));
             closeModal('cardLayoutModal');
             renderCurrentView();
             showToast('✓ Card Layout Saved');
         }
 
-        // Render a single card's HTML using the user's custom zone layout
+        // Render a single card's HTML using the user's custom zone layout, font sizes, and flex config
         function renderCardFromLayout(groupData, colId) {
-            const layout = userPrefs.cardLayout || DEFAULT_CARD_LAYOUT;
-            const zones = layout.zones || DEFAULT_CARD_LAYOUT.zones;
+            const layout    = userPrefs.cardLayout || DEFAULT_CARD_LAYOUT;
+            const zones     = layout.zones      || DEFAULT_CARD_LAYOUT.zones;
+            const fieldCfgs = layout.fieldConfig || {};
+            const zoneCfgs  = layout.zoneConfig  || {};
 
-            // Override inspectionDate color logic based on column
-            const gWithCol = Object.assign({}, groupData, { _colId: colId });
+            const g = Object.assign({}, groupData, { _colId: colId });
 
-            const renderZone = (zoneId) => {
-                const fieldIds = zones[zoneId] || [];
-                return fieldIds.map(fId => {
-                    const field = CARD_FIELD_REGISTRY[fId];
-                    if (!field) return '';
-                    try { return field.render(gWithCol) || ''; } catch(e) { return ''; }
-                }).join('');
+            // Render one field, wrapping it in a span with its font size and weight applied
+            const renderField = (fId) => {
+                const field = CARD_FIELD_REGISTRY[fId];
+                if (!field) return '';
+                let html;
+                try { html = field.render(g) || ''; } catch(e) { html = ''; }
+                if (!html) return '';
+
+                const dflt = DEFAULT_FIELD_CONFIG[fId] || { fontSize: 'md', fontWeight: 'normal' };
+                const cfg  = Object.assign({}, dflt, fieldCfgs[fId] || {});
+                const fs   = CLE_FONT_SIZES[cfg.fontSize]   || CLE_FONT_SIZES.md;
+                const fw   = CLE_FONT_WEIGHTS[cfg.fontWeight] || '400';
+                return `<span style="font-size:${fs}; font-weight:${fw}; display:contents;">${html}</span>`;
             };
 
-            const CHEV_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;flex-shrink:0;"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
+            // Build inline flex style for a zone from its config
+            const zoneStyle = (zoneId, extra = '') => {
+                const dflt = DEFAULT_ZONE_CONFIG[zoneId] || {};
+                const cfg  = Object.assign({}, dflt, zoneCfgs[zoneId] || {});
+                return `display:flex; flex-direction:${cfg.flexDir||'row'}; justify-content:${cfg.justify||'flex-start'}; align-items:${cfg.align||'center'}; flex-wrap:${cfg.wrap||'wrap'}; gap:0.5rem; ${extra}`;
+            };
+
+            // Render all fields in a zone
+            const renderZone = (zoneId) => (zones[zoneId] || []).map(renderField).join('');
+
+            const CHEV = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;flex-shrink:0;"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
 
             const hl = renderZone('header-left');
             const hr = renderZone('header-right');
@@ -1331,15 +1513,15 @@
 
             return `
                 <div class="card-header-main">
-                    <div class="card-req-by" style="gap:0.5rem; flex-wrap:wrap; min-width:0;">${hl || `<span style="color:var(--text-muted);font-size:0.75rem;">—</span>`}</div>
-                    <div style="display:flex; align-items:center; gap:0.4rem; flex-shrink:0;">${hr}<div class="collapse-indicator">${CHEV_ICON}</div></div>
+                    <div style="${zoneStyle('header-left','min-width:0; flex:1;')}">${hl || `<span style="color:var(--text-muted);font-size:0.75rem;">—</span>`}</div>
+                    <div style="display:flex; align-items:center; gap:0.4rem; flex-shrink:0;">${hr}<div class="collapse-indicator">${CHEV}</div></div>
                 </div>
                 <div class="card-body-wrapper">
                     <div class="card-body">
-                        ${r1 ? `<div class="card-footer-row">${r1}</div>` : ''}
-                        ${r2 ? `<div class="card-footer-row" style="margin-top:-0.2rem;">${r2}</div>` : ''}
-                        ${tk ? `<div style="display:flex; flex-direction:column; gap:0.4rem; margin:0.4rem 0;">${tk}</div>` : ''}
-                        ${ft ? `<div style="padding:0.4rem 0 0.2rem;">${ft}</div>` : ''}
+                        ${r1 ? `<div style="${zoneStyle('row-1')}">${r1}</div>` : ''}
+                        ${r2 ? `<div style="${zoneStyle('row-2','margin-top:-0.2rem;')}">${r2}</div>` : ''}
+                        ${tk ? `<div style="${zoneStyle('tickets','margin:0.4rem 0;')}">${tk}</div>` : ''}
+                        ${ft ? `<div style="${zoneStyle('footer','padding:0.4rem 0 0.2rem;')}">${ft}</div>` : ''}
                     </div>
                 </div>`;
         }
@@ -1464,6 +1646,36 @@
                 'tickets':      ['issueDescription', 'daysInShop', 'shopStatus'],
                 'footer':       ['progressBar']
             }
+        };
+
+        // Font size and weight lookup maps
+        const CLE_FONT_SIZES   = { xs: '0.65rem', sm: '0.75rem', md: '0.85rem', lg: '1rem', xl: '1.2rem' };
+        const CLE_FONT_WEIGHTS = { normal: '400', semibold: '600', bold: '800' };
+
+        // Default per-field config (fontSize key, fontWeight key)
+        const DEFAULT_FIELD_CONFIG = {
+            vehicleId:        { fontSize: 'lg',  fontWeight: 'bold'    },
+            vehicleType:      { fontSize: 'sm',  fontWeight: 'normal'  },
+            assignedUser:     { fontSize: 'md',  fontWeight: 'normal'  },
+            homeLocation:     { fontSize: 'sm',  fontWeight: 'normal'  },
+            shopStatus:       { fontSize: 'xs',  fontWeight: 'normal'  },
+            mileage:          { fontSize: 'sm',  fontWeight: 'normal'  },
+            issueDescription: { fontSize: 'sm',  fontWeight: 'semibold'},
+            daysInShop:       { fontSize: 'xs',  fontWeight: 'normal'  },
+            inspectionDate:   { fontSize: 'sm',  fontWeight: 'normal'  },
+            progressBar:      { fontSize: 'sm',  fontWeight: 'normal'  },
+            priorityBadge:    { fontSize: 'sm',  fontWeight: 'semibold'},
+            lastUpdated:      { fontSize: 'xs',  fontWeight: 'normal'  }
+        };
+
+        // Default per-zone flex config
+        const DEFAULT_ZONE_CONFIG = {
+            'header-left':  { flexDir: 'row',    justify: 'flex-start',   align: 'center',  wrap: 'wrap'   },
+            'header-right': { flexDir: 'row',    justify: 'flex-end',     align: 'center',  wrap: 'nowrap' },
+            'row-1':        { flexDir: 'row',    justify: 'flex-start',   align: 'center',  wrap: 'wrap'   },
+            'row-2':        { flexDir: 'row',    justify: 'flex-start',   align: 'center',  wrap: 'wrap'   },
+            'tickets':      { flexDir: 'column', justify: 'flex-start',   align: 'stretch', wrap: 'nowrap' },
+            'footer':       { flexDir: 'row',    justify: 'flex-start',   align: 'center',  wrap: 'wrap'   }
         };
 
         // --- PREFERENCES ---
