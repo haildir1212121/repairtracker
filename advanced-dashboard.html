@@ -265,6 +265,65 @@
         @media (max-width: 1400px) { .grid-board.cols-4 { grid-template-columns: repeat(3, 1fr); } }
         @media (max-width: 900px) { .grid-board { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 320px; } }
         @media (max-width: 600px) { .grid-board { grid-template-columns: 1fr; grid-auto-rows: 280px; } }
+
+        /* ===== CARD LAYOUT EDITOR ===== */
+        .card-layout-editor-wrap { display: grid; grid-template-columns: 220px 1fr; gap: 2rem; overflow: hidden; }
+
+        /* Field palette — the sidebar of available fields */
+        .card-layout-palette {
+            display: flex; flex-direction: column; gap: 0.5rem; padding: 0.75rem;
+            background: rgba(0,0,0,0.3); border: 1px solid var(--border);
+            border-radius: var(--radius-md); min-height: 180px;
+            transition: background 0.2s;
+        }
+        .card-layout-palette.drag-over { background: rgba(74,222,128,0.08); border-color: var(--accent); }
+        .palette-empty { font-size: 0.75rem; color: var(--text-muted); text-align: center; padding: 1rem; }
+
+        /* Draggable field chips */
+        .layout-field-chip {
+            display: flex; align-items: center; gap: 0.5rem;
+            padding: 0.45rem 0.75rem; background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); cursor: grab; font-size: 0.8rem; color: var(--text-main);
+            user-select: none; transition: all 0.15s; white-space: nowrap;
+        }
+        .layout-field-chip:hover { background: var(--bg-card-hover); border-color: #555; }
+        .layout-field-chip.dragging { opacity: 0.4; cursor: grabbing; }
+        .layout-field-chip .chip-icon { font-size: 1rem; flex-shrink: 0; }
+        .layout-field-chip .chip-remove { margin-left: auto; opacity: 0; font-size: 0.9rem; cursor: pointer; color: var(--text-muted); transition: opacity 0.2s; }
+        .layout-field-chip:hover .chip-remove { opacity: 0.7; }
+        .layout-field-chip .chip-remove:hover { color: var(--c-urgent); opacity: 1; }
+
+        /* The card preview with zones */
+        .card-layout-preview {
+            border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden;
+            background: var(--bg-card); display: flex; flex-direction: column;
+        }
+
+        /* Individual drop zones */
+        .card-zone-section { display: flex; gap: 0; border-bottom: 1px solid var(--border); }
+        .card-zone-section:last-child { border-bottom: none; }
+
+        .card-layout-zone {
+            flex: 1; min-height: 52px; padding: 0.5rem 0.75rem;
+            display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center;
+            transition: background 0.2s, border-color 0.2s;
+            position: relative;
+        }
+        .card-layout-zone.drag-over { background: rgba(74,222,128,0.08); }
+        .card-layout-zone + .card-layout-zone { border-left: 1px solid var(--border); }
+
+        .zone-label-strip {
+            writing-mode: horizontal-tb; padding: 0.4rem 0.6rem;
+            font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.5px; color: #555; background: rgba(0,0,0,0.25);
+            border-right: 1px solid var(--border); display: flex;
+            align-items: center; justify-content: center; min-width: 80px; flex-shrink: 0;
+        }
+        .zone-drop-hint {
+            font-size: 0.7rem; color: #444; pointer-events: none;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+            white-space: nowrap;
+        }
     </style>
 </head>
 <body>
@@ -356,6 +415,7 @@
                     <div style="width: 1px; height: 20px; background: var(--border); margin: 0 0.2rem;" id="bulk-divider"></div>
                     <button class="filter-btn" id="btn-collapse-all" onclick="toggleGlobalCollapse()">⊟ Collapse All</button>
                     <button class="filter-btn" onclick="openPreferences()">👁 Display Prefs</button>
+                    <button class="filter-btn" onclick="openCardLayoutEditor()" title="Customize what data appears on each card">🎛 Card Layout</button>
                     <div style="width: 1px; height: 20px; background: var(--border); margin: 0 0.2rem;"></div>
                     <button class="filter-btn" id="btn-sort-date" onclick="setSort('date')">🗓 Date</button>
                     <button class="filter-btn active" id="btn-sort-priority" onclick="setSort('priority')">⚠ Priority</button>
@@ -621,6 +681,97 @@
             <div style="display:flex; justify-content:flex-end; gap:1rem;">
                 <button class="btn-outline" onclick="closeModal('preferencesModal')">Cancel</button>
                 <button class="btn-primary" onclick="savePreferences()">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== CARD LAYOUT EDITOR MODAL ===== -->
+    <div id="cardLayoutModal" class="modal-overlay" onclick="if(event.target===this)closeModal('cardLayoutModal')">
+        <div class="modal-content" style="max-width:960px; max-height:90vh; overflow:hidden; display:flex; flex-direction:column;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.5rem; flex-shrink:0;">
+                <div>
+                    <h2>CARD LAYOUT EDITOR</h2>
+                    <p style="color:var(--text-muted); font-size:0.8rem; margin-top:0.5rem;">
+                        Drag fields from the palette into any zone on the card. Remove them by clicking ✕. Changes apply to all cards.
+                    </p>
+                </div>
+                <button class="btn-outline" style="flex-shrink:0; margin-left:2rem;" onclick="resetCardLayout()">↺ Reset Defaults</button>
+            </div>
+
+            <div class="card-layout-editor-wrap" style="flex:1; overflow:hidden; min-height:0;">
+
+                <!-- LEFT: Field Palette -->
+                <div style="display:flex; flex-direction:column; overflow:hidden;">
+                    <div class="pref-section-title" style="margin-top:0;">Available Fields</div>
+                    <p style="font-size:0.72rem; color:var(--text-muted); margin-bottom:0.75rem;">Drag onto the card →</p>
+                    <div id="cardFieldPalette" class="card-layout-palette"
+                         ondragover="cleDragOver(event,this)" ondragleave="cleDragLeave(event,this)" ondrop="cleDropToPalette(event)">
+                        <span class="palette-empty">All fields are placed on the card</span>
+                    </div>
+                </div>
+
+                <!-- RIGHT: Card Preview with drop zones -->
+                <div style="display:flex; flex-direction:column; overflow:hidden; min-height:0;">
+                    <div class="pref-section-title" style="margin-top:0;">Card Preview — Drop Fields Here</div>
+                    <div class="card-layout-preview" style="flex:1; overflow-y:auto;">
+
+                        <!-- HEADER ROW: splits into left + right -->
+                        <div class="card-zone-section">
+                            <div class="zone-label-strip">Header Left</div>
+                            <div class="card-layout-zone" id="clz-header-left" data-zone="header-left"
+                                 ondragover="cleDragOver(event,this)" ondragleave="cleDragLeave(event,this)" ondrop="cleDropToZone(event,'header-left')">
+                                <span class="zone-drop-hint">vehicle #, type…</span>
+                            </div>
+                            <div class="zone-label-strip" style="border-left:1px solid var(--border); border-right:none;">Header Right</div>
+                            <div class="card-layout-zone" id="clz-header-right" data-zone="header-right"
+                                 ondragover="cleDragOver(event,this)" ondragleave="cleDragLeave(event,this)" ondrop="cleDropToZone(event,'header-right')">
+                                <span class="zone-drop-hint">avatar, badge…</span>
+                            </div>
+                        </div>
+
+                        <!-- ROW 1 -->
+                        <div class="card-zone-section">
+                            <div class="zone-label-strip">Row 1</div>
+                            <div class="card-layout-zone" id="clz-row-1" data-zone="row-1"
+                                 ondragover="cleDragOver(event,this)" ondragleave="cleDragLeave(event,this)" ondrop="cleDropToZone(event,'row-1')">
+                                <span class="zone-drop-hint">location, mileage…</span>
+                            </div>
+                        </div>
+
+                        <!-- ROW 2 -->
+                        <div class="card-zone-section">
+                            <div class="zone-label-strip">Row 2</div>
+                            <div class="card-layout-zone" id="clz-row-2" data-zone="row-2"
+                                 ondragover="cleDragOver(event,this)" ondragleave="cleDragLeave(event,this)" ondrop="cleDropToZone(event,'row-2')">
+                                <span class="zone-drop-hint">inspection, status…</span>
+                            </div>
+                        </div>
+
+                        <!-- TICKETS ZONE -->
+                        <div class="card-zone-section">
+                            <div class="zone-label-strip">Tickets</div>
+                            <div class="card-layout-zone" id="clz-tickets" data-zone="tickets"
+                                 style="min-height:64px;"
+                                 ondragover="cleDragOver(event,this)" ondragleave="cleDragLeave(event,this)" ondrop="cleDropToZone(event,'tickets')">
+                                <span class="zone-drop-hint">issue, days, status…</span>
+                            </div>
+                        </div>
+
+                        <!-- FOOTER -->
+                        <div class="card-zone-section" style="border-bottom:none;">
+                            <div class="zone-label-strip">Footer</div>
+                            <div class="card-layout-zone" id="clz-footer" data-zone="footer"
+                                 ondragover="cleDragOver(event,this)" ondragleave="cleDragLeave(event,this)" ondrop="cleDropToZone(event,'footer')">
+                                <span class="zone-drop-hint">progress bar…</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; gap:1rem; margin-top:1.5rem; flex-shrink:0;">
+                <button class="btn-outline" onclick="closeModal('cardLayoutModal')">Cancel</button>
+                <button class="btn-primary" onclick="saveCardLayout()">Save Layout</button>
             </div>
         </div>
     </div>
@@ -996,6 +1147,205 @@
 
         // ===== END SERVICE LAYER =====
 
+        // ===== CARD LAYOUT EDITOR =====
+
+        // Render a field chip element (draggable tag shown in palette or zones)
+        function cleCreateChip(fieldId) {
+            const field = CARD_FIELD_REGISTRY[fieldId];
+            if (!field) return null;
+            const chip = document.createElement('div');
+            chip.className = 'layout-field-chip';
+            chip.draggable = true;
+            chip.dataset.fieldId = fieldId;
+            chip.innerHTML = `<span class="chip-icon">${field.icon}</span><span>${field.label}</span><span class="chip-remove" title="Remove" onclick="cleRemoveChip(event,'${fieldId}')">✕</span>`;
+            chip.ondragstart = (e) => {
+                e.dataTransfer.setData('cle-fieldId', fieldId);
+                const zone = chip.closest('.card-layout-zone');
+                e.dataTransfer.setData('cle-source', zone ? zone.dataset.zone : 'palette');
+                setTimeout(() => chip.classList.add('dragging'), 0);
+            };
+            chip.ondragend = () => chip.classList.remove('dragging');
+            return chip;
+        }
+
+        // Remove a chip from a zone (sends it back to palette)
+        function cleRemoveChip(event, fieldId) {
+            event.stopPropagation();
+            const chip = event.target.closest('.layout-field-chip');
+            if (chip) chip.remove();
+            // Re-add to palette if not already there
+            const palette = document.getElementById('cardFieldPalette');
+            if (!palette.querySelector(`[data-field-id="${fieldId}"]`)) {
+                palette.appendChild(cleCreateChip(fieldId));
+            }
+            cleRefreshPaletteHint();
+        }
+
+        // Drag-over visual feedback
+        function cleDragOver(e, el) {
+            e.preventDefault();
+            el.classList.add('drag-over');
+        }
+        function cleDragLeave(e, el) {
+            if (!el.contains(e.relatedTarget)) el.classList.remove('drag-over');
+        }
+
+        // Drop onto a card zone
+        function cleDropToZone(e, targetZone) {
+            e.preventDefault();
+            const zoneEl = document.getElementById(`clz-${targetZone}`);
+            if (zoneEl) zoneEl.classList.remove('drag-over');
+
+            const fieldId = e.dataTransfer.getData('cle-fieldId');
+            const sourceZone = e.dataTransfer.getData('cle-source');
+            if (!fieldId) return;
+
+            // If field is already in this zone, do nothing
+            const existing = zoneEl && zoneEl.querySelector(`[data-field-id="${fieldId}"]`);
+            if (existing) return;
+
+            // Remove from source
+            if (sourceZone === 'palette') {
+                const old = document.querySelector(`#cardFieldPalette [data-field-id="${fieldId}"]`);
+                if (old) old.remove();
+            } else {
+                const srcEl = document.getElementById(`clz-${sourceZone}`);
+                if (srcEl) { const old = srcEl.querySelector(`[data-field-id="${fieldId}"]`); if (old) old.remove(); }
+            }
+
+            // Add new chip to target zone
+            if (zoneEl) zoneEl.appendChild(cleCreateChip(fieldId));
+            cleRefreshPaletteHint();
+        }
+
+        // Drop back to palette
+        function cleDropToPalette(e) {
+            e.preventDefault();
+            const palette = document.getElementById('cardFieldPalette');
+            palette.classList.remove('drag-over');
+
+            const fieldId = e.dataTransfer.getData('cle-fieldId');
+            const sourceZone = e.dataTransfer.getData('cle-source');
+            if (!fieldId || sourceZone === 'palette') return;
+
+            const srcEl = document.getElementById(`clz-${sourceZone}`);
+            if (srcEl) { const old = srcEl.querySelector(`[data-field-id="${fieldId}"]`); if (old) old.remove(); }
+
+            if (!palette.querySelector(`[data-field-id="${fieldId}"]`)) {
+                palette.appendChild(cleCreateChip(fieldId));
+            }
+            cleRefreshPaletteHint();
+        }
+
+        // Show/hide the "all fields placed" hint in palette
+        function cleRefreshPaletteHint() {
+            const palette = document.getElementById('cardFieldPalette');
+            if (!palette) return;
+            const chips = palette.querySelectorAll('.layout-field-chip');
+            let hint = palette.querySelector('.palette-empty');
+            if (chips.length === 0) {
+                if (!hint) { hint = document.createElement('span'); hint.className = 'palette-empty'; hint.textContent = 'All fields placed on card'; palette.appendChild(hint); }
+            } else if (hint) { hint.remove(); }
+        }
+
+        const CLE_ZONES = ['header-left', 'header-right', 'row-1', 'row-2', 'tickets', 'footer'];
+
+        function openCardLayoutEditor() {
+            const layout = userPrefs.cardLayout || DEFAULT_CARD_LAYOUT;
+
+            // Clear all zones
+            CLE_ZONES.forEach(z => { const el = document.getElementById(`clz-${z}`); if (el) el.innerHTML = ''; });
+
+            // Track placed fields
+            const placed = new Set();
+
+            // Populate zones
+            CLE_ZONES.forEach(z => {
+                const el = document.getElementById(`clz-${z}`);
+                const fieldIds = (layout.zones && layout.zones[z]) || [];
+                fieldIds.forEach(fId => {
+                    if (CARD_FIELD_REGISTRY[fId] && el) {
+                        el.appendChild(cleCreateChip(fId));
+                        placed.add(fId);
+                    }
+                });
+            });
+
+            // Populate palette with unplaced fields
+            const palette = document.getElementById('cardFieldPalette');
+            palette.innerHTML = '';
+            Object.keys(CARD_FIELD_REGISTRY).forEach(fId => {
+                if (!placed.has(fId)) palette.appendChild(cleCreateChip(fId));
+            });
+            cleRefreshPaletteHint();
+
+            document.getElementById('cardLayoutModal').style.display = 'flex';
+        }
+
+        function resetCardLayout() {
+            userPrefs.cardLayout = JSON.parse(JSON.stringify(DEFAULT_CARD_LAYOUT));
+            openCardLayoutEditor();
+            showToast('↺ Layout reset to defaults');
+        }
+
+        function saveCardLayout() {
+            const layout = { zones: {} };
+            CLE_ZONES.forEach(z => {
+                const el = document.getElementById(`clz-${z}`);
+                if (el) {
+                    layout.zones[z] = Array.from(el.querySelectorAll('.layout-field-chip')).map(c => c.dataset.fieldId);
+                }
+            });
+            userPrefs.cardLayout = layout;
+            if (currentUserId) localStorage.setItem(`dlx_prefs_${currentUserId}`, JSON.stringify(userPrefs));
+            closeModal('cardLayoutModal');
+            renderCurrentView();
+            showToast('✓ Card Layout Saved');
+        }
+
+        // Render a single card's HTML using the user's custom zone layout
+        function renderCardFromLayout(groupData, colId) {
+            const layout = userPrefs.cardLayout || DEFAULT_CARD_LAYOUT;
+            const zones = layout.zones || DEFAULT_CARD_LAYOUT.zones;
+
+            // Override inspectionDate color logic based on column
+            const gWithCol = Object.assign({}, groupData, { _colId: colId });
+
+            const renderZone = (zoneId) => {
+                const fieldIds = zones[zoneId] || [];
+                return fieldIds.map(fId => {
+                    const field = CARD_FIELD_REGISTRY[fId];
+                    if (!field) return '';
+                    try { return field.render(gWithCol) || ''; } catch(e) { return ''; }
+                }).join('');
+            };
+
+            const CHEV_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;flex-shrink:0;"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
+
+            const hl = renderZone('header-left');
+            const hr = renderZone('header-right');
+            const r1 = renderZone('row-1');
+            const r2 = renderZone('row-2');
+            const tk = renderZone('tickets');
+            const ft = renderZone('footer');
+
+            return `
+                <div class="card-header-main">
+                    <div class="card-req-by" style="gap:0.5rem; flex-wrap:wrap; min-width:0;">${hl || `<span style="color:var(--text-muted);font-size:0.75rem;">—</span>`}</div>
+                    <div style="display:flex; align-items:center; gap:0.4rem; flex-shrink:0;">${hr}<div class="collapse-indicator">${CHEV_ICON}</div></div>
+                </div>
+                <div class="card-body-wrapper">
+                    <div class="card-body">
+                        ${r1 ? `<div class="card-footer-row">${r1}</div>` : ''}
+                        ${r2 ? `<div class="card-footer-row" style="margin-top:-0.2rem;">${r2}</div>` : ''}
+                        ${tk ? `<div style="display:flex; flex-direction:column; gap:0.4rem; margin:0.4rem 0;">${tk}</div>` : ''}
+                        ${ft ? `<div style="padding:0.4rem 0 0.2rem;">${ft}</div>` : ''}
+                    </div>
+                </div>`;
+        }
+
+        // ===== END CARD LAYOUT EDITOR =====
+
         let fleetData = [];
         let systemUsers = [];
         let locationFilter = null;
@@ -1026,6 +1376,94 @@
         const PROGRESS_LEVELS = {
             "Reported": 1, "Ready for Pickup": 2, "Received": 3, "Assessment": 3, "Awaiting part order": 3,
             "Parts Received": 4, "Repair in Progress": 4, "Awaiting delivery": 4, "Complete": 5
+        };
+
+        // ===== CARD FIELD REGISTRY =====
+        // Each field has: label, icon, and a render(groupData) function returning HTML string
+        const CARD_FIELD_REGISTRY = {
+            vehicleId: {
+                label: 'Vehicle #', icon: '🔢',
+                render: (g) => `<strong style="font-size:0.95rem; font-family:'JetBrains Mono',monospace; letter-spacing:-0.5px;">${g.vid}</strong>`
+            },
+            vehicleType: {
+                label: 'Vehicle Type', icon: '🚗',
+                render: (g) => g.vehicleType ? `<span class="card-meta-tag" style="margin:0;">${g.vehicleType}</span>` : ''
+            },
+            assignedUser: {
+                label: 'Requester / Tech', icon: '👤',
+                render: (g) => `<div class="card-avatar" title="${g.requestedBy || ''}">${String(g.requestedBy||'U').charAt(0).toUpperCase()}</div>`
+            },
+            homeLocation: {
+                label: 'Home Location', icon: '🏠',
+                render: (g) => g.homeLocation ? `<span class="card-meta-tag">🏠 ${g.homeLocation}</span>` : ''
+            },
+            shopStatus: {
+                label: 'Shop Status', icon: '🔧',
+                render: (g) => `<span class="card-meta-tag" style="font-family:'JetBrains Mono',monospace; font-size:0.68rem;">${g.shopStatus || 'Reported'}</span>`
+            },
+            mileage: {
+                label: 'Mileage', icon: '🛣️',
+                render: (g) => g.mileage ? `<span class="card-meta-tag">🛣️ ${Number(g.mileage).toLocaleString()} mi</span>` : ''
+            },
+            issueDescription: {
+                label: 'Issue Description', icon: '📝',
+                render: (g) => g.displayTickets.map(t => {
+                    const pClass = t.priority === 'Urgent' ? 'st-urgent' : t.priority === 'High' ? 'st-high' : t.priority === 'Oil Change / Bulb Replacement' ? 'st-maint' : '';
+                    const selClass = t._isSelected ? 'selected' : '';
+                    return `<div class="sub-ticket ${pClass} ${selClass}" data-doc-id="${t.docId}"><div style="font-size:0.85rem;font-weight:600;color:var(--text-main);">${t.issue || 'No issue provided'}</div></div>`;
+                }).join('')
+            },
+            daysInShop: {
+                label: 'Days in Shop', icon: '⏳',
+                render: (g) => g.displayTickets.map(t => getAgeTags(t)).filter(Boolean).join('')
+            },
+            inspectionDate: {
+                label: 'Inspection Date', icon: '🔍',
+                render: (g) => {
+                    if (!g.inspectionDate) return '';
+                    const diffDays = Math.ceil((new Date(g.inspectionDate).getTime() - new Date().setHours(0,0,0,0)) / 864e5);
+                    if (diffDays <= 7) return `<span class="card-meta-tag tag-danger">🔍 Insp: ${formatDate(g.inspectionDate)} (${diffDays < 0 ? Math.abs(diffDays)+'d past due' : diffDays+'d left'})</span>`;
+                    if (diffDays <= 30) return `<span class="card-meta-tag tag-warn">🔍 Insp: ${formatDate(g.inspectionDate)} (${diffDays}d left)</span>`;
+                    return `<span class="card-meta-tag">🔍 Insp: ${formatDate(g.inspectionDate)}</span>`;
+                }
+            },
+            progressBar: {
+                label: 'Progress Bar', icon: '📊',
+                render: (g) => {
+                    let maxP = 1;
+                    g.displayTickets.forEach(t => { const p = PROGRESS_LEVELS[t.shopStatus]||1; if(p>maxP) maxP=p; });
+                    let segs = '';
+                    for (let i=1; i<=5; i++) {
+                        const cls = i <= maxP ? (g.highestPrio === 'Urgent' ? 'active-warn' : 'active') : '';
+                        segs += `<div class="progress-seg ${cls}"></div>`;
+                    }
+                    return `<div class="card-progress-container">${segs}</div>`;
+                }
+            },
+            priorityBadge: {
+                label: 'Priority Badge', icon: '⚠️',
+                render: (g) => {
+                    const map = {'Urgent':'🔴 Urgent','High':'⚠️ High','Oil Change / Bulb Replacement':'🔧 Maint','Normal':'Normal'};
+                    const color = g.highestPrio === 'Urgent' ? 'var(--c-urgent)' : g.highestPrio === 'High' ? 'var(--c-high)' : g.highestPrio === 'Oil Change / Bulb Replacement' ? 'var(--c-maint)' : 'var(--text-muted)';
+                    return `<span class="card-meta-tag" style="color:${color};">${map[g.highestPrio]||'Normal'}</span>`;
+                }
+            },
+            lastUpdated: {
+                label: 'Last Updated', icon: '🕐',
+                render: (g) => g.latestDate ? `<span class="card-meta-tag">🕐 ${new Date(g.latestDate).toLocaleDateString()}</span>` : ''
+            }
+        };
+
+        // Default layout — what shows in each zone before customization
+        const DEFAULT_CARD_LAYOUT = {
+            zones: {
+                'header-left':  ['vehicleId', 'vehicleType'],
+                'header-right': ['assignedUser'],
+                'row-1':        ['homeLocation', 'mileage'],
+                'row-2':        ['inspectionDate'],
+                'tickets':      ['issueDescription', 'daysInShop', 'shopStatus'],
+                'footer':       ['progressBar']
+            }
         };
 
         // --- PREFERENCES ---
@@ -1719,66 +2157,14 @@
                         else openModal('edit', displayTickets[0].docId);
                     };
 
-                    let maxPLevel = 1;
+                    // Mark sub-tickets that are selected (for multi-select highlight)
                     displayTickets.forEach(t => {
-                        const p = PROGRESS_LEVELS[t.shopStatus] || 1;
-                        if(p > maxPLevel) maxPLevel = p;
+                        if (selectedCards.has(t.docId)) t._isSelected = true;
+                        else delete t._isSelected;
                     });
-                    
-                    let segs = '';
-                    for(let i=1; i<=5; i++) {
-                        let activeClass = (i <= maxPLevel) ? 'active' : '';
-                        if(i <= maxPLevel && highestPrio === 'Urgent') activeClass = 'active-warn';
-                        segs += `<div class="progress-seg ${activeClass}"></div>`;
-                    }
 
-                    const subTicketsHtml = displayTickets.map(t => {
-                        const pClass = t.priority === 'Urgent' ? 'st-urgent' : t.priority === 'High' ? 'st-high' : t.priority === 'Oil Change / Bulb Replacement' ? 'st-maint' : '';
-                        const issueHtml = userPrefs.cards.issue ? `<div style="font-size:0.85rem; font-weight:600; color:var(--text-main); margin-bottom:0.4rem;">${t.issue || 'No issue provided'}</div>` : '';
-                        const ageHtml = userPrefs.cards.age ? getAgeTags(t) : '';
-                        const statusHtml = userPrefs.cards.status ? `<span style="font-size:0.65rem; color:var(--text-muted); font-family:'JetBrains Mono', monospace;">${t.shopStatus || 'Reported'}</span>` : '';
-                        const isSubSelected = selectedCards.has(t.docId) ? 'selected' : '';
-                        
-                        return `
-                            <div class="sub-ticket ${pClass} ${isSubSelected}" data-doc-id="${t.docId}">
-                                ${issueHtml}
-                                <div style="display:flex; justify-content:space-between; align-items:center;">
-                                    ${statusHtml}
-                                    ${ageHtml}
-                                </div>
-                            </div>
-                        `;
-                    }).join('');
-
-                    let row1 = [];
-                    if (userPrefs.cards.location && homeLocation) row1.push(`<span class="card-meta-tag">🏠 ${homeLocation}</span>`);
-                    if (userPrefs.cards.mileage && mileage) row1.push(`<span class="card-meta-tag">🛣️ ${Number(mileage).toLocaleString()} mi</span>`);
-                    const row1Html = row1.length ? `<div class="card-footer-row">${row1.join('')}</div>` : '';
-
-                    let row2 = [];
-                    if (userPrefs.cards.inspection && inspectTag) row2.push(inspectTag);
-                    const row2Html = row2.length ? `<div class="card-footer-row" style="margin-top:-0.2rem;">${row2.join('')}</div>` : '';
-
-                    const progressHtml = userPrefs.cards.progress ? `<div class="card-progress-container">${segs}</div>` : '';
-
-                    const avatar = requestedBy ? String(requestedBy).charAt(0).toUpperCase() : 'U';
-                    
-                    card.innerHTML = `
-                        <div class="card-header-main">
-                            <div class="card-req-by"><span>${vid} • ${vehicleType || 'Unit'}</span><div class="card-avatar">${avatar}</div></div>
-                            <div class="collapse-indicator">${CHEV_ICON}</div>
-                        </div>
-                        <div class="card-body-wrapper">
-                            <div class="card-body">
-                                ${row1Html}
-                                ${row2Html}
-                                <div style="display:flex; flex-direction:column; gap:0.4rem; margin:0.4rem 0;">
-                                    ${subTicketsHtml}
-                                </div>
-                                ${progressHtml}
-                            </div>
-                        </div>
-                    `;
+                    // Use the user's custom card layout to render content
+                    card.innerHTML = renderCardFromLayout(g, colId);
                     const targetCol = document.getElementById(`col-${colId}`);
                     if(targetCol) targetCol.appendChild(card);
                 });
@@ -1823,7 +2209,7 @@
                 }
             });
 
-            // Create grid cards from grouped data
+            // Create grid cards using the shared custom layout renderer
             Object.keys(columnsRaw).forEach(colId => {
                 Object.keys(columnsRaw[colId]).forEach(vid => {
                     const displayTickets = columnsRaw[colId][vid];
@@ -1831,51 +2217,34 @@
 
                     visibleCount++;
 
-                    let highestPrio = 'Normal';
+                    let highestPrio = 'Normal', latestDate = 0, minInsp = 9999999999999;
                     displayTickets.forEach(t => {
                         const pLevels = { 'Urgent': 4, 'High': 3, 'Oil Change / Bulb Replacement': 2, 'Normal': 1 };
                         if ((pLevels[t.priority] || 1) > (pLevels[highestPrio] || 1)) highestPrio = t.priority;
+                        const tDate = new Date(t.lastUpdated || 0).getTime();
+                        if (!isNaN(tDate) && tDate > latestDate) latestDate = tDate;
+                        if (t.inspectionDate) { const d = new Date(t.inspectionDate).getTime(); if (!isNaN(d) && d < minInsp) minInsp = d; }
                     });
 
-                    const prioClass = highestPrio === 'Urgent' ? 'prio-Urgent' : highestPrio === 'High' ? 'prio-High' : highestPrio === 'Oil Change / Bulb Replacement' ? 'prio-Maint' : 'prio-Normal';
+                    const groupData = {
+                        vid, displayTickets, highestPrio, latestDate,
+                        inspectionDate: minInsp !== 9999999999999 ? new Date(minInsp).toISOString() : null,
+                        vehicleType: displayTickets[0].vehicleType || '',
+                        homeLocation: displayTickets[0].homeLocation || '',
+                        mileage: displayTickets[0].mileage || '',
+                        shopStatus: displayTickets[0].shopStatus || 'Reported',
+                        requestedBy: displayTickets[0].requestedBy || 'U'
+                    };
 
+                    const prioClass = highestPrio === 'Urgent' ? 'prio-Urgent' : highestPrio === 'High' ? 'prio-High' : highestPrio === 'Oil Change / Bulb Replacement' ? 'prio-Maint' : 'prio-Normal';
                     const card = document.createElement('div');
                     card.className = `vehicle-card ${prioClass} in-grid`;
                     card.style.cursor = 'pointer';
-
-                    // Generate sub-tickets HTML
-                    const subTicketsHtml = displayTickets.map(t => {
-                        const pClass = t.priority === 'Urgent' ? 'st-urgent' : t.priority === 'High' ? 'st-high' : t.priority === 'Oil Change / Bulb Replacement' ? 'st-maint' : '';
-                        const issueHtml = userPrefs.cards.issue ? `<div style="font-size:0.85rem; font-weight:600; color:var(--text-main); margin-bottom:0.4rem;">${t.issue || 'No issue provided'}</div>` : '';
-                        return `<div class="sub-ticket ${pClass}" data-doc-id="${t.docId}">${issueHtml}</div>`;
-                    }).join('');
-
-                    const homeLocation = displayTickets[0].homeLocation || '';
-                    const mileage = displayTickets[0].mileage || '';
-                    let row1 = [];
-                    if (userPrefs.cards.location && homeLocation) row1.push(`<span class="card-meta-tag">🏠 ${homeLocation}</span>`);
-                    if (userPrefs.cards.mileage && mileage) row1.push(`<span class="card-meta-tag">🛣️ ${Number(mileage).toLocaleString()} mi</span>`);
-                    const row1Html = row1.length ? `<div class="card-footer-row">${row1.join('')}</div>` : '';
-
-                    const vehicleType = displayTickets[0].vehicleType || 'Unit';
-                    const requestedBy = displayTickets[0].requestedBy || 'U';
-                    const avatar = String(requestedBy).charAt(0).toUpperCase();
-
-                    card.innerHTML = `
-                        <div class="card-header-main">
-                            <div class="card-req-by"><span>${vid} • ${vehicleType}</span><div class="card-avatar">${avatar}</div></div>
-                        </div>
-                        <div class="card-body-wrapper">
-                            <div class="card-body">
-                                ${row1Html}
-                                <div style="display:flex; flex-direction:column; gap:0.4rem; margin:0.4rem 0;">
-                                    ${subTicketsHtml}
-                                </div>
-                            </div>
-                        </div>
-                    `;
-
-                    card.onclick = () => openModal('edit', displayTickets[0].docId);
+                    card.innerHTML = renderCardFromLayout(groupData, colId);
+                    card.onclick = (e) => {
+                        const sub = e.target.closest('.sub-ticket');
+                        openModal('edit', sub ? sub.dataset.docId : displayTickets[0].docId);
+                    };
                     gridBoard.appendChild(card);
                 });
             });
